@@ -1850,8 +1850,8 @@ class Component extends DCLogic {
     return T('Sustituye réplicas de forma gradual manteniendo la capacidad. Cero downtime, pero v1 y v2 conviven durante la transición.','Replaces replicas gradually while keeping capacity. Zero downtime, but v1 and v2 coexist during the transition.');
   }
   setDeployStrategy(s){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState({ deploy:{ strategy:s, step:0, playing:false, rolled:false } }); }
-  deployNext(){ this.setState(st=>{ const n=this.deployFrames(st.deploy.strategy).length; return { deploy:{ ...st.deploy, rolled:false, step:Math.min(n-1, st.deploy.step+1) } }; }); }
-  deployPrev(){ this.setState(st=>({ deploy:{ ...st.deploy, rolled:false, step:Math.max(0, st.deploy.step-1) } })); }
+  deployNext(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>{ const n=this.deployFrames(st.deploy.strategy).length; return { deploy:{ ...st.deploy, rolled:false, playing:false, step:Math.min(n-1, st.deploy.step+1) } }; }); }
+  deployPrev(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>({ deploy:{ ...st.deploy, rolled:false, playing:false, step:Math.max(0, st.deploy.step-1) } })); }
   deployReset(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>({ deploy:{ ...st.deploy, step:0, playing:false, rolled:false } })); }
   deployRollback(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>({ deploy:{ ...st.deploy, playing:false, rolled:true } })); }
   deployPlay(){
@@ -2741,7 +2741,7 @@ class Component extends DCLogic {
     const W=100, H=30, mx=max||Math.max.apply(null,arr.concat(1)), n=arr.length;
     return arr.map((v,i)=>{ const x=(i/(n-1||1))*W, y=H-Math.max(0,Math.min(1,v/mx))*H; return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }).join(' ');
   }
-  componentWillUnmount(){ if(this._metT) clearInterval(this._metT); if(this._flowT) clearTimeout(this._flowT); try{ if(this._onKey) document.removeEventListener('keydown', this._onKey); }catch(e){} }
+  componentWillUnmount(){ if(this._metT) clearInterval(this._metT); if(this._depT) clearInterval(this._depT); if(this._flowT) clearTimeout(this._flowT); if(this._toastT) clearTimeout(this._toastT); if(this._copyT) clearTimeout(this._copyT); try{ if(this._onKey) document.removeEventListener('keydown', this._onKey); }catch(e){} }
 
   // ---- mode: physical map ----
   effectivePlaced(){
