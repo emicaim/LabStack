@@ -1,0 +1,117 @@
+# LabStack · Taller visual de infraestructura — Estado y Roadmap
+
+> Documento vivo. Resume **lo que ya tiene** el taller y **los pasos a seguir** para mejorarlo.
+> Para la documentación técnica de cómo está construido, ver [CLAUDE.md](CLAUDE.md).
+
+---
+
+## 1. Qué es
+
+Un laboratorio educativo **de un solo archivo** (`Laboratorio.dc.html`) que enseña la infraestructura de sistemas de forma visual e interactiva: el alumno arrastra tecnologías, monta su stack, y la app le explica el *porqué*, valida su arquitectura y le deja experimentar. Bilingüe (ES/EN), tema claro/oscuro, sin backend.
+
+**Público:** estudiantes de Ingeniería en Sistemas / DevOps / infraestructura, y docentes.
+
+---
+
+## 2. Lo que YA tenemos ✅
+
+### Modos (6)
+| Modo | Qué hace |
+|---|---|
+| **Libre** | Sandbox: arrastra piezas al árbol por capas, con feedback y corrección. |
+| **Misión** | 11 retos con objetivos, niveles de dificultad y evaluación del stack. |
+| **Quiz** | Preguntas de recuerdo activo, **adaptativo** (insiste donde fallas). |
+| **Mapa** | Datacenter físico navegable (pan/zoom), con flujo animado y modo avería. |
+| **Terminal** | Shell simulado con **148 comandos** y filesystem virtual. |
+| **Métricas** | Dashboard en vivo (CPU/RAM/req-s/latencia) con sparklines SVG. |
+
+### Contenido
+- **15 categorías** en **6 familias de color** (física, plataforma, aplicación, datos, nube, operación).
+- **~60 piezas** (router, k8s, postgres, terraform… + marcos **COSO / ISO 27001 / COBIT**).
+- Cada pieza con ficha completa: descripción, ideas clave, **en una frase**, **cuándo usarla**, **alternativas**, coste/CPU/RAM, y (algunas) terminal simulada.
+- Cada capa con: por qué existe, qué pasa si falta, analogía.
+
+### Rigor y análisis
+- **Linter de arquitectura**: nota de robustez 0–100, detecta dependencias rotas y anti-patrones (SPOF, datos sin persistencia, sin TLS/firewall/monitorización).
+- **Dimensionado**: coste €/mes, vCPU y RAM del stack; misión con **restricción de presupuesto**.
+- **Modo avería / chaos**: tira una pieza y mide la resiliencia (cascada por dependencias).
+
+### Mapa físico
+- Zonas (perímetro → sala → almacenamiento/datos/nube → operación), iconos por pieza, leyenda.
+- **Dependencias** dibujadas como curvas con **tráfico animado**.
+- **Avisos del linter** anclados a las piezas/zonas.
+- **Flujo de petición** animado salto a salto.
+
+### Aprendizaje y progreso
+- **11 misiones** con niveles (Básico/Intermedio/Avanzado) y objetivo de **redundancia (×2)**.
+- **Quiz adaptativo** con repetición espaciada (persistente).
+- **11 logros** persistentes + **confeti** al desbloquear (canvas-confetti desde CDN).
+
+### Uso y persistencia
+- **Autoguardado** en `localStorage` (stack, idioma, tema, logros, progreso de quiz).
+- **Compartir por enlace** (`#s=…`) — el compañero abre y ve tu montaje.
+- **Tour guiado** (recorrido por las capas) y **exportar** (hoja de resumen imprimible / PDF).
+
+### Terminal (simulador casi real)
+- **148 comandos**: filesystem (`ls/cd/cat/tree/grep…`), red (`ping/curl/nmap/dig/tcpdump…`), Kubernetes (`kubectl …`, `helm`), Docker (`docker …`, `compose`), Git, Terraform, Ansible, nube (`aws/gcloud/az`), bases de datos (`psql/redis-cli/mongosh/mysql`), utilidades (`stat/seq/expr/base64/htop…`) y extras (`neofetch/cowsay…`).
+- **Consciente del stack**: cada comando responde según lo montado (o da el error real).
+- Historial (↑/↓), autocompletado (Tab), `man`, prompt con ruta.
+
+### Base técnica
+- Formato `.dc.html` (runtime React vía `support.js`). Toda la lógica en un `class Component`.
+- `renderVals()` precomputa todo (el motor de plantillas no admite ternarios/aritmética).
+- **Verificación**: smoke tests en Node (instanciar `Component` con stubs) para validar sin navegador.
+
+---
+
+## 3. Pasos a seguir 🚧 (backlog priorizado)
+
+Marcado con ⭐ lo que más recomiendo.
+
+### Corto plazo (alto valor, bajo esfuerzo)
+- ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
+- ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.
+- **Tooltips enriquecidos al pasar el ratón** (mini-ficha sin clic) en paleta y mapa.
+- **Undo / redo** al montar el stack.
+- **Más misiones**: migración a la nube, big data / analítica, IoT-edge, recuperación ante desastres (DR).
+- **Rutas de aprendizaje**: encadenar misiones + teoría en un currículum con progreso.
+
+### Medio plazo (mejoras de producto)
+- ⭐ **Modo profesor**: crear/editar misiones propias y **exportar/importar stacks como archivo** `.json`.
+- **Minimapa** y **niveles de detalle (LOD)** en el mapa al hacer zoom (agrupar al alejar).
+- **Pipes y redirección** en la terminal (`ls | grep`, `echo x > file`) — sube el realismo.
+- **Comparador de arquitecturas** lado a lado (on-prem vs cloud) con sus notas del linter.
+- **Simulador de costes más fino**: región, reservado vs on-demand, egress.
+- **Accesibilidad**: navegación por teclado, roles ARIA, modo alto contraste, foco visible.
+- **Responsive / móvil**: la app está pensada para escritorio; pulir tablets/móvil.
+
+### Largo plazo (requiere backend o esfuerzo grande)
+- **Backend opcional** para guardar/compartir sin depender del archivo local, y **progreso de alumnos** para el docente.
+- **Multiusuario / salas** (un profe reparte un reto, ve resultados en vivo).
+- **Modo examen / certificación** con puntuación global y diploma.
+- **Modelo de rendimiento realista** (cuellos de botella reales, no aditivo) para el dashboard.
+- **Escenarios de incidente guiados** (runbooks: "el servicio cae, diagnostica y arregla").
+
+### Deuda técnica / mantenimiento
+- Convertir los **smoke tests en una suite** ejecutable (`npm test`) reproducible.
+- **Versionado del formato de guardado** en `localStorage` (migraciones si cambia el esquema).
+- **Rendimiento**: revisar el re-render en cada tecleo de inputs (buscador, terminal) — memoizar si hace falta.
+- El archivo crece mucho; valorar **partir contenido/lógica** (ligado a "externalizar a JSON").
+
+---
+
+## 4. Ideas que creo que le faltan (mi recomendación)
+
+1. **Contenido en datos, no en código** — es el desbloqueador nº 1: permite crecer sin miedo y abre la puerta al "modo profesor".
+2. **Rutas de aprendizaje** — hoy hay piezas sueltas y misiones; falta el hilo pedagógico que lleve al alumno de 0 a experto en orden.
+3. **Glosario** — un sitio único donde buscar cualquier término y saltar a su ficha.
+4. **Exportar/importar stacks como archivo** — más robusto que la URL para el aula, y sin backend.
+5. **Accesibilidad y móvil** — para que sea usable por todos y en cualquier dispositivo.
+
+---
+
+## 5. Restricciones a tener presentes
+- **Sin backend** hoy: todo es client-side. Compartir por URL es pleno solo si la app está **hospedada** (GitHub Pages, etc.), no en `file://`.
+- **Requiere internet** para cargar React (y el confeti) desde CDN.
+- El **runtime no admite ternarios/operadores** dentro de `{{ }}`: todo estilo/valor se precomputa en `renderVals()`.
+- Los simuladores (terminal, métricas, chaos) son **modelos educativos**, no ejecución/medición real.
