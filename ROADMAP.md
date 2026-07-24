@@ -15,7 +15,7 @@ Un laboratorio educativo **de un solo archivo** (`Laboratorio.dc.html`) que ense
 
 ## 2. Lo que YA tenemos ✅
 
-### Modos (6)
+### Modos (9)
 | Modo | Qué hace |
 |---|---|
 | **Libre** | Sandbox: arrastra piezas al árbol por capas, con feedback y corrección. |
@@ -24,10 +24,13 @@ Un laboratorio educativo **de un solo archivo** (`Laboratorio.dc.html`) que ense
 | **Mapa** | Datacenter físico navegable (pan/zoom), con flujo animado y modo avería. |
 | **Terminal** | Shell simulado con **148 comandos** y filesystem virtual. |
 | **Métricas** | Dashboard en vivo (CPU/RAM/req-s/latencia) con sparklines SVG. |
+| **Petición** | Waterfall de una petición HTTP salto a salto por tu stack; simula caídas por salto (5xx/timeout). |
+| **Despliegue** | Simulador rolling / blue-green / canary con reparto de tráfico animado y rollback. |
+| **Incidente** | Runbook de troubleshooting: síntoma → investigar → diagnosticar → arreglar, con 3 escenarios. |
 
 ### Contenido
-- **15 categorías** en **6 familias de color** (física, plataforma, aplicación, datos, nube, operación).
-- **~60 piezas** (router, k8s, postgres, terraform… + marcos **COSO / ISO 27001 / COBIT**).
+- **16 categorías** en **6 familias de color** (física, plataforma, aplicación, datos, nube, operación).
+- **~69 piezas** (router, k8s, postgres, terraform, **Kafka/RabbitMQ/NATS**, Istio, Kong, Vault, Elasticsearch… + marcos **COSO / ISO 27001 / COBIT**).
 - Cada pieza con ficha completa: descripción, ideas clave, **en una frase**, **cuándo usarla**, **alternativas**, coste/CPU/RAM, y (algunas) terminal simulada.
 - Cada capa con: por qué existe, qué pasa si falta, analogía.
 
@@ -90,7 +93,7 @@ Marcado con ⭐ lo que más recomiendo.
 - **Multiusuario / salas** (un profe reparte un reto, ve resultados en vivo).
 - **Modo examen / certificación** con puntuación global y diploma.
 - **Modelo de rendimiento realista** (cuellos de botella reales, no aditivo) para el dashboard.
-- **Escenarios de incidente guiados** (runbooks: "el servicio cae, diagnostica y arregla").
+- ✅ HECHO **Escenarios de incidente guiados** (runbooks: "el servicio cae, diagnostica y arregla") — modo **Incidente** con 3 escenarios. Ampliable con más casos.
 
 ### Deuda técnica / mantenimiento
 - Convertir los **smoke tests en una suite** ejecutable (`npm test`) reproducible.

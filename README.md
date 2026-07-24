@@ -10,10 +10,11 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 
 ## Qué incluye
 
-- **6 modos**: Libre · Misión · Quiz · Mapa físico · Terminal · Métricas.
-- **~60 tecnologías** en 15 categorías (6 familias de color) con fichas educativas + marcos de gobierno (COSO / ISO 27001 / COBIT).
+- **9 modos**: Libre · Misión · Quiz · Mapa físico · Terminal · Métricas · **Petición (waterfall)** · **Despliegue** · **Incidente**.
+- **~69 tecnologías** en 16 categorías (6 familias de color) con fichas educativas + mensajería (Kafka/RabbitMQ/NATS) + marcos de gobierno (COSO / ISO 27001 / COBIT).
 - **Linter de arquitectura** (robustez, anti-patrones), **dimensionado** (coste/CPU/RAM) y **modo avería** (resiliencia).
 - **11 misiones** con niveles, **quiz adaptativo**, **ruta de aprendizaje** guiada, **logros** y **glosario** buscable.
+- **Simuladores**: petición HTTP salto a salto, despliegue rolling/blue-green/canary, e incidentes de troubleshooting guiados.
 - **Terminal simulada** (~148 comandos, filesystem virtual) y **dashboard de métricas** en vivo.
 - **Modo profesor** (contenido en JSON importable/exportable) y **exportar/importar stacks**.
 - Accesibilidad (foco visible, Escape, `prefers-reduced-motion`) y responsive.

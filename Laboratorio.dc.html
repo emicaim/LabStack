@@ -107,6 +107,18 @@
         <button onClick="{{ setMetricsMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m5Bg }}; color:{{ m5Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeMetrics }}</button>
       </div>
 
+      <div style="position:relative; flex:0 0 auto;">
+        <button onClick="{{ toggleSims }}" title="{{ t.simGroup }}" style="display:flex; align-items:center; gap:6px; border:1px solid {{ simBorder }}; background:{{ simBg }}; color:{{ simColor }}; padding:7px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; white-space:nowrap;" style-hover="border-color:var(--accent-b);"><span style="font-size:14px; line-height:1;">⚙</span>{{ t.simGroup }}<span style="font-size:10px; opacity:0.7;">▾</span></button>
+        <sc-if value="{{ showSims }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeSims }}" style="position:fixed; inset:0; z-index:40;"></div>
+          <div style="position:absolute; top:calc(100% + 6px); right:0; z-index:41; min-width:210px; background:var(--panel); border:1px solid var(--border-strong); border-radius:12px; box-shadow:var(--card-shadow); padding:6px; display:flex; flex-direction:column; gap:2px; animation:fadeUp .15s ease both;">
+            <button onClick="{{ setHttpMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m6Bg }}; color:{{ m6MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚦</span>{{ t.modeHttp }}</button>
+            <button onClick="{{ setDeployMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m7Bg }}; color:{{ m7MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚀</span>{{ t.modeDeploy }}</button>
+            <button onClick="{{ setIncidentMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m8Bg }}; color:{{ m8MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚑</span>{{ t.modeIncident }}</button>
+          </div>
+        </sc-if>
+      </div>
+
       <div style="display:flex; flex:0 0 auto; border:1px solid var(--border-strong); border-radius:9px; overflow:hidden; font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;">
         <button onClick="{{ setEs }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ esBg }}; color:{{ esColor }}; font-family:inherit; font-size:inherit;">ES</button>
         <button onClick="{{ setEn }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ enBg }}; color:{{ enColor }}; font-family:inherit; font-size:inherit;">EN</button>
@@ -452,6 +464,220 @@
                   <div style="display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:4px;"><span style="color:#f97316; flex:0 0 auto; font-weight:700;">!</span><span>{{ al.t }}</span></div>
                 </sc-for>
               </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showHttp }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+          <div style="max-width:860px; margin:0 auto;">
+            <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.httpTitle }}</div>
+            <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">{{ t.httpHint }}</div>
+            <sc-if value="{{ waterfall.isDemo }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:11px; border:1px dashed var(--border-strong); background:var(--panel-2); padding:9px 13px; margin-bottom:14px; font-size:12px; color:var(--text-muted);">{{ t.mapDemo }}</div>
+            </sc-if>
+            <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:16px; margin-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--text);">{{ waterfall.method }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; color:{{ waterfall.statusColor }}; background:{{ waterfall.statusBg }}; border:1px solid {{ waterfall.statusBorder }};">{{ waterfall.statusLabel }}</span>
+                <span style="flex:1 1 auto;"></span>
+                <button onClick="{{ relaunchRequest }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:9px; padding:7px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;">↻ {{ t.httpRelaunch }}</button>
+              </div>
+              <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:14px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">{{ t.httpTotal }}</span>
+                <span style="font-family:'Inter',sans-serif; font-weight:800; font-size:22px; letter-spacing:-0.02em; color:{{ waterfall.statusColor }};">{{ waterfall.totalLabel }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:7px;">
+                <sc-for list="{{ waterfall.hops }}" as="hop" hint-placeholder-count="5">
+                  <div onClick="{{ hop.onClick }}" style="cursor:pointer; border-radius:9px; padding:6px 8px; background:{{ hop.rowBg }}; opacity:{{ hop.opacity }};" style-hover="background:var(--panel-2);">
+                    <div style="display:flex; align-items:center; gap:9px; margin-bottom:4px;">
+                      <span style="width:9px; height:9px; border-radius:3px; flex:0 0 auto; background:{{ hop.dotColor }};"></span>
+                      <span style="font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ hop.label }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-muted); flex:0 0 auto;">{{ hop.msLabel }}</span>
+                    </div>
+                    <div style="position:relative; height:9px; border-radius:5px; background:var(--panel-2); overflow:hidden;">
+                      <div style="position:absolute; top:0; height:100%; border-radius:5px; left:{{ hop.offsetPct }}; width:{{ hop.widthPct }}; background:{{ hop.barColor }};"></div>
+                    </div>
+                    <sc-if value="{{ hop.hasNote }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:11px; color:{{ hop.noteColor }}; margin:4px 0 0 18px;">{{ hop.note }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+              <span>{{ t.httpTapHint }}</span>
+              <sc-if value="{{ waterfall.hasFail }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ clearReqFail }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:8px; padding:4px 10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600;">✕ {{ t.httpClearFail }}</button>
+              </sc-if>
+            </div>
+            <sc-if value="{{ waterfall.hasNotes }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:13px; border:1px solid var(--warm-border); background:var(--warm); padding:12px 14px;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:#f97316; margin-bottom:7px;">{{ t.httpNotesLabel }}</div>
+                <sc-for list="{{ waterfall.notes }}" as="nt" hint-placeholder-count="1">
+                  <div style="display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:4px;"><span style="color:#f97316; flex:0 0 auto; font-weight:700;">!</span><span>{{ nt }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showDeploy }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+          <div style="max-width:860px; margin:0 auto;">
+            <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.depTitle }}</div>
+            <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">{{ t.depHint }}</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+              <sc-for list="{{ deploy.strategies }}" as="st" hint-placeholder-count="3">
+                <button onClick="{{ st.onClick }}" style="border:1px solid {{ st.border }}; background:{{ st.bg }}; color:{{ st.color }}; border-radius:9px; padding:7px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:600;">{{ st.name }}</button>
+              </sc-for>
+            </div>
+            <div style="font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:16px; border-left:3px solid var(--accent); padding:2px 0 2px 11px;">{{ deploy.why }}</div>
+            <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:16px;">
+              <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">{{ t.depStep }} {{ deploy.stepLabel }}</span>
+                <span style="display:inline-flex; align-items:baseline; gap:5px; font-family:'JetBrains Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">{{ t.depDowntime }}<span style="color:#22c55e; font-weight:700;">{{ deploy.downtime }}</span></span>
+                <sc-if value="{{ deploy.done }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; color:#22c55e; background:rgba(34,197,94,0.14); border:1px solid rgba(34,197,94,0.5);">✓ {{ t.depDoneTag }}</span>
+                </sc-if>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+                <sc-for list="{{ deploy.groups }}" as="g" hint-placeholder-count="1">
+                  <div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">{{ g.label }}</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                      <sc-for list="{{ g.boxes }}" as="b" hint-placeholder-count="6">
+                        <div style="width:64px; height:52px; border-radius:10px; border:1px solid {{ b.border }}; background:{{ b.bg }}; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; animation:{{ b.anim }};">
+                          <span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:800; color:{{ b.color }};">{{ b.verLabel }}</span>
+                          <span style="font-size:8.5px; text-transform:uppercase; letter-spacing:0.03em; color:{{ b.color }};">{{ b.tag }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;">{{ t.depTraffic }}</div>
+              <div style="display:flex; height:22px; border-radius:7px; overflow:hidden; border:1px solid var(--border); margin-bottom:6px;">
+                <div style="width:{{ deploy.splitV1W }}; background:{{ deploy.colV1 }}; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#fff; transition:width .5s ease;">{{ deploy.splitV1 }}</div>
+                <div style="width:{{ deploy.splitV2W }}; background:{{ deploy.colV2 }}; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#fff; transition:width .5s ease;">{{ deploy.splitV2 }}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px;">
+                <button onClick="{{ deploy.onReset }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:9px; padding:7px 12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;">⟲ {{ t.depReset }}</button>
+                <button onClick="{{ deploy.onPrev }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:9px; padding:7px 12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;">‹ {{ t.depPrev }}</button>
+                <button onClick="{{ deploy.onPlay }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:9px; padding:7px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:700;">{{ deploy.playIcon }} {{ deploy.playLabel }}</button>
+                <button onClick="{{ deploy.onNext }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:9px; padding:7px 12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;">{{ t.depNext }} ›</button>
+                <span style="flex:1 1 auto;"></span>
+                <button onClick="{{ deploy.onRollback }}" style="border:1px solid rgba(239,68,68,0.5); background:rgba(239,68,68,0.10); color:#ef4444; border-radius:9px; padding:7px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;">⤺ {{ t.depRollback }}</button>
+              </div>
+            </div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:14px; font-size:11.5px; color:var(--text-muted);">
+              <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:11px; height:11px; border-radius:3px; background:{{ deploy.colV1 }};"></span>{{ t.depV1 }}</span>
+              <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:11px; height:11px; border-radius:3px; background:{{ deploy.colV2 }};"></span>{{ t.depV2 }}</span>
+              <span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:11px; height:11px; border-radius:3px; background:{{ deploy.colUpd }};"></span>{{ t.depUpd }}</span>
+            </div>
+            <div style="font-family:'Inter',sans-serif; font-size:13px; color:var(--text); line-height:1.6; margin-top:16px; border-radius:12px; border:1px solid var(--border); background:var(--panel); padding:13px 15px;">{{ deploy.caption }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showIncident }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+          <div style="max-width:820px; margin:0 auto;">
+            <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.incTitle }}</div>
+            <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">{{ t.incHint }}</div>
+
+            <sc-if value="{{ !incident.hasActive }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:10px;">{{ t.incPickHint }}</div>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ incident.picker }}" as="it" hint-placeholder-count="3">
+                  <div onClick="{{ it.onClick }}" style="cursor:pointer; border-radius:13px; border:1px solid var(--border-strong); background:var(--panel); padding:14px 16px;" style-hover="border-color:var(--accent); background:var(--panel-2);">
+                    <div style="display:flex; align-items:center; gap:9px; margin-bottom:5px;">
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; color:{{ it.levelColor }}; border:1px solid {{ it.levelColor }};">{{ it.levelLabel }}</span>
+                      <span style="font-family:'Inter',sans-serif; font-size:14.5px; font-weight:700;">{{ it.title }}</span>
+                    </div>
+                    <div style="font-size:12.5px; color:var(--text-muted); line-height:1.5;">{{ it.symptom }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ incident.hasActive }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:12px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; color:{{ incident.levelColor }}; border:1px solid {{ incident.levelColor }};">{{ incident.levelLabel }}</span>
+                <span style="font-family:'Inter',sans-serif; font-size:15px; font-weight:700;">{{ incident.title }}</span>
+                <span style="flex:1 1 auto;"></span>
+                <button onClick="{{ incident.onExit }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:8px; padding:5px 12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12px; font-weight:600;">✕ {{ t.incExit }}</button>
+              </div>
+              <div style="border-radius:12px; border:1px solid var(--warm-border); background:var(--warm); padding:12px 14px; margin-bottom:16px;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:#f97316; margin-bottom:5px;">{{ t.incSymptom }}</div>
+                <div style="font-size:13px; color:var(--text); line-height:1.5;">{{ incident.symptom }}</div>
+              </div>
+
+              <sc-if value="{{ incident.showBrief }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ incident.onInvestigate }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:10px; padding:10px 18px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700;">🔍 {{ t.incStartBtn }}</button>
+              </sc-if>
+
+              <sc-if value="{{ incident.showInvestigate }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'Inter',sans-serif; font-size:14px; font-weight:700; margin-bottom:4px;">{{ t.incChecks }}</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:11px;">{{ incident.checksHint }}</div>
+                <div style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
+                  <sc-for list="{{ incident.checks }}" as="ck" hint-placeholder-count="4">
+                    <div style="border-radius:11px; border:1px solid {{ ck.rowBorder }}; background:{{ ck.rowBg }}; overflow:hidden;">
+                      <div onClick="{{ ck.onClick }}" style="cursor:pointer; padding:9px 13px; font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--text); display:flex; align-items:center; gap:8px;" style-hover="background:var(--panel-2);"><span style="color:var(--accent); font-weight:700;">$</span>{{ ck.label }}</div>
+                      <sc-if value="{{ ck.revealed }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:9px 13px; border-top:1px dashed var(--border-strong); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted); line-height:1.5; white-space:pre-wrap;">{{ ck.output }}</div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ incident.onToDiagnose }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:10px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:700;">{{ t.incToDiagnose }}</button>
+              </sc-if>
+
+              <sc-if value="{{ incident.showDiagnose }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'Inter',sans-serif; font-size:14px; font-weight:700; margin-bottom:11px;">{{ t.incDiagnoseTitle }}</div>
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                  <sc-for list="{{ incident.causes }}" as="ca" hint-placeholder-count="4">
+                    <div onClick="{{ ca.onClick }}" style="cursor:pointer; border-radius:10px; border:1px solid {{ ca.border }}; background:{{ ca.bg }}; color:{{ ca.color }}; padding:11px 14px; font-size:13px; line-height:1.45;">{{ ca.text }}</div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ incident.causeMsgShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px; color:#ef4444; margin-bottom:12px;">{{ incident.causeMsg }}</div>
+                </sc-if>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button onClick="{{ incident.onConfirmCause }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:10px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:700;">{{ t.incConfirmCause }}</button>
+                  <button onClick="{{ incident.onBackInvestigate }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:10px; padding:9px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:600;">{{ t.incBackInvestigate }}</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ incident.showFix }}" hint-placeholder-val="{{ false }}">
+                <div style="font-family:'Inter',sans-serif; font-size:14px; font-weight:700; margin-bottom:11px;">{{ t.incFixTitle }}</div>
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                  <sc-for list="{{ incident.fixes }}" as="fx" hint-placeholder-count="3">
+                    <div onClick="{{ fx.onClick }}" style="cursor:pointer; border-radius:10px; border:1px solid {{ fx.border }}; background:{{ fx.bg }}; color:{{ fx.color }}; padding:11px 14px; font-size:13px; line-height:1.45;">{{ fx.text }}</div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ incident.fixMsgShow }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px; color:#ef4444; margin-bottom:12px;">{{ incident.fixMsg }}</div>
+                </sc-if>
+                <button onClick="{{ incident.onApplyFix }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:10px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:700;">🔧 {{ t.incApplyFix }}</button>
+              </sc-if>
+
+              <sc-if value="{{ incident.showDone }}" hint-placeholder-val="{{ false }}">
+                <div style="border-radius:13px; border:1px solid rgba(34,197,94,0.5); background:rgba(34,197,94,0.10); padding:14px 16px; margin-bottom:14px;">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#22c55e; margin-bottom:6px;">✓ {{ t.incResolvedTag }}</div>
+                  <div style="font-size:13px; color:var(--text); line-height:1.55;">{{ incident.resolvedMsg }}</div>
+                </div>
+                <div style="border-radius:13px; border:1px solid var(--border); background:var(--panel); padding:13px 15px; margin-bottom:16px;">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent); margin-bottom:6px;">💡 {{ t.incLearnLabel }}</div>
+                  <div style="font-size:13px; color:var(--text-muted); line-height:1.55;">{{ incident.learn }}</div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button onClick="{{ incident.onRestart }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:10px; padding:9px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:600;">↻ {{ t.incRetry }}</button>
+                  <button onClick="{{ incident.onExit }}" style="border:1px solid var(--accent); background:var(--accent-tint); color:var(--accent); border-radius:10px; padding:9px 16px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:700;">{{ t.incAnother }}</button>
+                </div>
+              </sc-if>
             </sc-if>
           </div>
         </div>
@@ -983,7 +1209,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'sandbox', placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] } };
+  state = { lang: 'es', theme: 'light', mode: 'sandbox', placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   catsBase() {
@@ -999,6 +1225,7 @@ class Component extends DCLogic {
       // Familia · Aplicación / runtime (ámbar)
       { id:'contenedores', color:'#f59e0b', fam:'app', name:{es:'Contenedores · Docker',en:'Containers · Docker'} },
       { id:'orquestacion', color:'#d97706', fam:'app', name:{es:'Orquestación · K8s',en:'Orchestration · K8s'} },
+      { id:'mensajeria', color:'#f97316', fam:'app', name:{es:'Mensajería · Eventos',en:'Messaging · Events'} },
       // Familia · Datos (rosa)
       { id:'datos', color:'#ec4899', fam:'data', name:{es:'Bases de datos',en:'Databases'} },
       // Familia · Nube (celeste)
@@ -1021,6 +1248,7 @@ class Component extends DCLogic {
       so:'M4 4h16v16H4zM7 9l3 3-3 3M13 15h4',
       contenedores:'M12 2 2 7v10l10 5 10-5V7L12 2zM2 7l10 5 10-5M12 12v10',
       orquestacion:'M12 2l8.5 5v10L12 22 3.5 17V7L12 2zM12 8l4.3 2.5v4L12 17l-4.3-2.5v-4L12 8z',
+      mensajeria:'M3 5h18v14H3zM3 5l9 7 9-7',
       datos:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6',
       nube:'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',
       seguridad:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
@@ -1047,6 +1275,8 @@ class Component extends DCLogic {
       terraform:'M9 4l6 3v6l-6-3V4zM15 7l6 3v6l-6-3V7zM9 11l6 3v6l-6-3v-6z', ansible:'M12 2l9 20H3L12 2zM12 8l4 9',
       prometheus:'M12 2a7 7 0 00-7 7c0 3 2 4 2 7h10c0-3 2-4 2-7a7 7 0 00-7-7zM9 19h6M10 22h4', grafana:'M3 3v18h18M7 15l3-4 3 2 4-6', alerts:'M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 004 0', logs:'M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-3M8 8h8M8 12h8M8 16h5', tracing:'M4 6a2 2 0 100-4 2 2 0 000 4zM4 6v6a2 2 0 002 2h6M12 18a2 2 0 100 4 2 2 0 000-4zM12 14v4M20 6a2 2 0 100-4 2 2 0 000 4zM20 6v4a2 2 0 01-2 2h-2',
       coso:'M12 3l8 4v10l-8 4-8-4V7l8-4zM4 7l8 4 8-4M12 11v10', iso27001:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4', cobit:'M12 2a10 10 0 100 20 10 10 0 000-20zM12 8a4 4 0 100 8 4 4 0 000-8zM12 11h.01',
+      kafka:'M5 3v18M5 12h5M12 6a2 2 0 100 4 2 2 0 000-4zM12 8H10M12 14a2 2 0 100 4 2 2 0 000-4zM12 16H10M18 9a2 2 0 100 4 2 2 0 000-4zM18 11h-6', rabbitmq:'M4 10h4V4h4v6h4V7h4v13H4zM11 15h2', nats:'M4 6h16v12H4zM7 9l5 4 5-4', elasticsearch:'M11 4a7 7 0 100 14 7 7 0 000-14zM16 16l4 4M8 11h6', cassandra:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+      istio:'M12 3l7 15H5zM12 3v15M8 14h8', kong:'M4 12h6M14 8l-4 4 4 4M20 5v14M14 8l6-3M14 16l6 3', vault:'M4 4h16v16H4zM12 9a3 3 0 100 6 3 3 0 000-6zM12 15v3M8 8h.01M16 8h.01', argocd:'M12 2a10 10 0 100 20 10 10 0 000-20zM12 7v5l3 2M16 4l1 3-3-1',
     };
   }
   pieceIcon(b){ if(!b) return ''; const P=this.pieceIcons(); return P[b.id] || this.icons()[b.cat] || ''; }
@@ -1114,6 +1344,15 @@ class Component extends DCLogic {
       coso:{ one:F('Estructura para el control interno y el riesgo.','Structure for internal control and risk.'), use:F('Para dar fiabilidad y control a los procesos del negocio.','To give reliability and control to business processes.'), alt:'COSO ERM, ISO 31000' },
       iso27001:{ one:F('Sistema certificable de seguridad de la información.','Certifiable information-security system.'), use:F('Para demostrar que gestionas la seguridad con rigor.','To prove you manage security rigorously.'), alt:'SOC 2, NIST CSF, ENS' },
       cobit:{ one:F('Gobierno de TI alineado con el negocio.','IT governance aligned with the business.'), use:F('Para dirigir y controlar la TI de forma estratégica.','To direct and control IT strategically.'), alt:'ITIL, ISO/IEC 38500, TOGAF' },
+      kafka:{ one:F('Bus de eventos distribuido de alto rendimiento.','High-throughput distributed event bus.'), use:F('Para desacoplar servicios y procesar flujos de eventos.','To decouple services and process event streams.'), alt:'RabbitMQ, Pulsar, AWS Kinesis, Redpanda' },
+      rabbitmq:{ one:F('Broker de colas con enrutado flexible.','Queue broker with flexible routing.'), use:F('Para tareas en cola y trabajo asíncrono entre servicios.','For queued tasks and async work between services.'), alt:'Kafka, NATS, ActiveMQ, AWS SQS' },
+      nats:{ one:F('Mensajería pub/sub minimalista y rapidísima.','Minimalist, blazing-fast pub/sub messaging.'), use:F('Para comunicación ligera y de baja latencia entre microservicios.','For lightweight, low-latency comms between microservices.'), alt:'Kafka, RabbitMQ, MQTT, Redis Pub/Sub' },
+      elasticsearch:{ one:F('Búsqueda full-text y análisis en milisegundos.','Full-text search and analytics in milliseconds.'), use:F('Para buscar texto, logs o datos a gran escala.','To search text, logs or data at scale.'), alt:'OpenSearch, Solr, Meilisearch, Typesense' },
+      cassandra:{ one:F('BD distribuida para escritura masiva sin SPOF.','Distributed DB for massive writes with no SPOF.'), use:F('Para escala global con muchísima escritura y alta disponibilidad.','For global scale with heavy writes and high availability.'), alt:'ScyllaDB, DynamoDB, Bigtable, HBase' },
+      istio:{ one:F('Service mesh: tráfico seguro entre microservicios.','Service mesh: secure traffic between microservices.'), use:F('Para mTLS, reintentos y despliegues canario sin tocar el código.','For mTLS, retries and canary rollouts without code changes.'), alt:'Linkerd, Consul, Cilium, Kuma' },
+      kong:{ one:F('API Gateway: puerta única de entrada a tus APIs.','API Gateway: single entry point to your APIs.'), use:F('Para centralizar auth, rate-limit y enrutado de APIs.','To centralize auth, rate-limiting and API routing.'), alt:'NGINX, Traefik, AWS API Gateway, Apigee' },
+      vault:{ one:F('Bóveda central de secretos y credenciales.','Central vault for secrets and credentials.'), use:F('Para no dejar contraseñas ni claves en el código.','To keep passwords and keys out of your code.'), alt:'AWS Secrets Manager, SOPS, Sealed Secrets' },
+      argocd:{ one:F('GitOps: el clúster sigue lo declarado en Git.','GitOps: the cluster follows what Git declares.'), use:F('Para desplegar en Kubernetes de forma declarativa y auditable.','To deploy to Kubernetes declaratively and auditably.'), alt:'Flux, Jenkins X, Spinnaker' },
     };
   }
   layerMeta() {
@@ -1194,6 +1433,11 @@ class Component extends DCLogic {
         miss:F('Vuelas a ciegas: los fallos se descubren cuando ya afectan a los usuarios.','You fly blind: failures are discovered only once they already affect users.'),
         anal:F('Como el cuadro de mandos de un coche: velocidad, gasolina y alertas de un vistazo.','Like a car\u2019s dashboard: speed, fuel and warnings at a glance.'),
         flow:F('Cada paso de la petición emite métricas y logs para vigilar la salud del sistema.','Each step of the request emits metrics and logs to watch the system\u2019s health.')},
+      mensajeria:{badge:'MSG',hint:F('Transversal: transporta eventos y mensajes entre servicios.','Cross-cutting: carries events and messages between services.'),
+        why:F('Acoplar servicios con llamadas directas los hace fr\u00e1giles: la mensajer\u00eda los desacopla enviando eventos que cada servicio consume a su ritmo.','Coupling services with direct calls makes them fragile: messaging decouples them by sending events each service consumes at its own pace.'),
+        miss:F('Los servicios dependen unos de otros en tiempo real: si uno cae o se satura, arrastra a los dem\u00e1s.','Services depend on each other in real time: if one fails or overloads, it drags the rest down.'),
+        anal:F('Como la centralita de correo de una empresa: dejas la carta en el buz\u00f3n y el destinatario la recoge cuando puede, sin esperar cara a cara.','Like a company mailroom: you drop the letter in the box and the recipient picks it up when they can, with no face-to-face wait.'),
+        flow:F('El servicio publica un evento en el bus y otros lo consumen de forma as\u00edncrona, sin bloquear la petici\u00f3n.','The service publishes an event on the bus and others consume it asynchronously, without blocking the request.')},
     };
   }
   blocksBase() {
@@ -1274,6 +1518,21 @@ class Component extends DCLogic {
       {id:'tls',cat:'seguridad',code:'TLS',name:F('TLS / Certificados','TLS / Certificates'),why:F('Cifra el tráfico en tránsito y verifica la identidad del servidor.','Encrypts traffic in transit and verifies the server identity.'),desc:F('El certificado, firmado por una CA, habilita HTTPS y evita que un tercero lea o altere los datos.','The CA-signed certificate enables HTTPS and stops third parties from reading or altering data.'),facts:[F('HTTPS = HTTP sobre TLS.','HTTPS = HTTP over TLS.'),F('Los certificados caducan y se renuevan (Let\u0027s Encrypt).','Certificates expire and are renewed (Let\u0027s Encrypt).')],steps:[F('El cliente y el servidor negocian claves (handshake).','Client and server negotiate keys (handshake).'),F('Se valida el certificado contra una CA de confianza.','The certificate is validated against a trusted CA.'),F('El resto de la sesión viaja cifrada.','The rest of the session travels encrypted.')]},
       {id:'vpn',cat:'seguridad',code:'VPN',name:F('VPN','VPN'),why:F('Crea un túnel cifrado entre redes o usuarios remotos.','Creates an encrypted tunnel between networks or remote users.'),desc:F('Conecta con seguridad una oficina, un usuario o una nube a través de Internet como si fuera una red privada.','Securely connects an office, a user or a cloud over the Internet as if on a private network.'),facts:[F('Protocolos: WireGuard, IPsec, OpenVPN.','Protocols: WireGuard, IPsec, OpenVPN.'),F('Site-to-site o de acceso remoto.','Site-to-site or remote access.')]},
       {id:'encryption',cat:'seguridad',code:'ENC',name:F('Cifrado en reposo','Encryption at rest'),why:F('Protege los datos almacenados para que sean ilegibles si se roban los discos.','Protects stored data so it is unreadable if disks are stolen.'),desc:F('Cifra volúmenes, backups y objetos con claves gestionadas; complemento del cifrado en tránsito (TLS).','Encrypts volumes, backups and objects with managed keys; complements in-transit encryption (TLS).'),facts:[F('Claves gestionadas por un KMS.','Keys managed by a KMS.'),F('Requisito habitual de cumplimiento normativo.','A common compliance requirement.')]},
+      // MENSAJERIA · EVENTOS
+      {id:'kafka',cat:'mensajeria',code:'KFK',name:F('Apache Kafka','Apache Kafka'),why:F('Bus de eventos distribuido de alto rendimiento para conectar servicios.','High-throughput distributed event bus that connects services.'),desc:F('Es un log distribuido y particionado: los productores publican eventos en topics y los consumidores los leen a su ritmo, desacoplando los servicios.','It is a distributed, partitioned log: producers publish events to topics and consumers read them at their own pace, decoupling services.'),facts:[F('Retiene los eventos: se pueden reprocesar (replay).','Retains events: they can be reprocessed (replay).'),F('Escala por particiones y réplicas.','Scales by partitions and replicas.')],term:[['$','kafka-topics --create --topic pedidos --partitions 3'],['','Created topic pedidos.'],['$','kafka-console-producer --topic pedidos'],['','> {"id":42,"total":19.9}']]},
+      {id:'rabbitmq',cat:'mensajeria',code:'RMQ',name:F('RabbitMQ','RabbitMQ'),why:F('Broker de mensajes con colas y enrutado flexible.','Message broker with queues and flexible routing.'),desc:F('Implementa AMQP: enruta mensajes desde exchanges hacia colas, con confirmaciones (ack) y reintentos; ideal para tareas y trabajo en cola.','Implements AMQP: routes messages from exchanges into queues, with acknowledgements and retries; ideal for tasks and work queues.'),facts:[F('Colas con confirmación (ack) y reintentos.','Queues with acknowledgements and retries.'),F('Patrones: pub/sub, work queues, RPC.','Patterns: pub/sub, work queues, RPC.')]},
+      {id:'nats',cat:'mensajeria',code:'NATS',name:F('NATS','NATS'),why:F('Mensajería ligera y ultrarrápida para microservicios.','Lightweight, ultra-fast messaging for microservices.'),desc:F('Pub/sub minimalista de muy baja latencia; con JetStream añade persistencia y colas duraderas.','Minimalist, very low-latency pub/sub; JetStream adds persistence and durable queues.'),facts:[F('Muy simple y rapidísimo (millones de msg/s).','Very simple and blazing fast (millions of msgs/s).'),F('Soporta pub/sub y request/reply.','Supports pub/sub and request/reply.')]},
+      // DATOS (ampliación)
+      {id:'elasticsearch',cat:'datos',code:'ES',name:F('Elasticsearch','Elasticsearch'),why:F('Motor de búsqueda y análisis sobre grandes volúmenes de texto.','Search and analytics engine over large volumes of text.'),desc:F('Indexa documentos JSON y responde búsquedas full-text y agregaciones en milisegundos; es el núcleo del stack ELK de logs.','Indexes JSON documents and answers full-text searches and aggregations in milliseconds; the core of the ELK logging stack.'),facts:[F('Usa un índice invertido para buscar texto rápido.','Uses an inverted index for fast text search.'),F('Escala por shards y réplicas.','Scales by shards and replicas.')]},
+      {id:'cassandra',cat:'datos',code:'CAS',name:F('Cassandra','Cassandra'),why:F('Base de datos distribuida para escritura masiva y alta disponibilidad.','Distributed database for massive writes and high availability.'),desc:F('Modelo de columnas ancho, sin punto único de fallo: replica entre nodos y regiones con consistencia ajustable.','Wide-column model with no single point of failure: replicates across nodes and regions with tunable consistency.'),facts:[F('Escala lineal: escribes en cualquier nodo.','Linear scale: you write to any node.'),F('Prioriza disponibilidad (AP en el teorema CAP).','Favors availability (AP in the CAP theorem).')]},
+      // ORQUESTACION (ampliación)
+      {id:'istio',cat:'orquestacion',code:'IST',name:F('Istio (Service Mesh)','Istio (Service Mesh)'),why:F('Gestiona el tráfico entre microservicios sin tocar su código.','Manages traffic between microservices without touching their code.'),desc:F('Inyecta proxies sidecar (Envoy) junto a cada pod que aportan mTLS, reintentos, balanceo, tráfico canario y observabilidad.','Injects sidecar proxies (Envoy) next to each pod, adding mTLS, retries, load balancing, canary traffic and observability.'),facts:[F('Un sidecar Envoy por pod intercepta el tráfico.','An Envoy sidecar per pod intercepts traffic.'),F('mTLS y despliegues canario sin cambiar la app.','mTLS and canary rollouts with no app changes.')]},
+      // RED (ampliación)
+      {id:'kong',cat:'red',code:'KNG',name:F('Kong (API Gateway)','Kong (API Gateway)'),why:F('Centraliza la entrada a tus APIs en un único punto controlado.','Centralizes entry to your APIs in a single controlled point.'),desc:F('Punto único de entrada ante los servicios backend: aplica autenticación, límites de tasa (rate-limit), enrutado y plugins.','Single entry point in front of backend services: applies authentication, rate-limiting, routing and plugins.'),facts:[F('Plugins: auth, rate-limit, logging, transformaciones.','Plugins: auth, rate-limit, logging, transforms.'),F('Construido sobre NGINX/Envoy.','Built on top of NGINX/Envoy.')]},
+      // SEGURIDAD (ampliación)
+      {id:'vault',cat:'seguridad',code:'VLT',name:F('HashiCorp Vault','HashiCorp Vault'),why:F('Gestiona secretos, claves y credenciales de forma centralizada.','Centrally manages secrets, keys and credentials.'),desc:F('Almacena y entrega secretos con acceso auditado, rotación automática y credenciales dinámicas de corta vida en lugar de contraseñas fijas en el código.','Stores and delivers secrets with audited access, automatic rotation and short-lived dynamic credentials instead of hardcoded passwords.'),facts:[F('Secretos dinámicos y de corta vida.','Short-lived, dynamic secrets.'),F('Cifrado como servicio y acceso auditado.','Encryption-as-a-service and audited access.')]},
+      // CI/CD (ampliación)
+      {id:'argocd',cat:'cicd',code:'ARGO',name:F('Argo CD','Argo CD'),why:F('Despliegue GitOps declarativo para Kubernetes.','Declarative GitOps deployment for Kubernetes.'),desc:F('Sincroniza el clúster con el estado declarado en Git: detecta desviaciones (drift) y revierte automáticamente a lo definido en el repositorio.','Syncs the cluster with the state declared in Git: detects drift and automatically reverts to what the repo defines.'),facts:[F('La fuente de verdad es Git.','The source of truth is Git.'),F('Auto-sync, detección de drift y rollback.','Auto-sync, drift detection and rollback.')]},
     ];
   }
 
@@ -1297,7 +1556,10 @@ class Component extends DCLogic {
       missionMet:'cumplidos', missionDoneT:'¡Reto superado!', missionPartialT:'Casi… revisa lo que falta', missionMissLabel:'Te falta:',
       quizTitle:'Pon a prueba lo que sabes', quizQ:'¿A qué capa pertenece esta pieza?', quizNext:'Siguiente', quizResult:'Ver resultado',
       quizScore:'Aciertos', quizRestart:'Repetir quiz', quizRight:'¡Correcto!', quizWrong:'No exactamente', quizDoneT:'Quiz completado', quizStart:'Empezar quiz', quizQuestion:'Pregunta',
-      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha', mapDemo:'Ejemplo — monta tu stack en «Libre» para ver el tuyo', mapPieces:'piezas',
+      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', modeHttp:'Petición', simGroup:'Simuladores', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha', mapDemo:'Ejemplo — monta tu stack en «Libre» para ver el tuyo', mapPieces:'piezas',
+      httpTitle:'Petición HTTP — recorrido', httpHint:'Sigue una petición salto a salto por tu stack y mira dónde se va el tiempo (modelo didáctico, no medición real).', httpRelaunch:'Relanzar petición', httpTotal:'Tiempo total', httpTapHint:'Toca un salto para simular su caída y ver cómo falla la petición.', httpNotesLabel:'Avisos', httpHopsLabel:'saltos', httpClearFail:'Quitar caída simulada',
+      modeDeploy:'Despliegue', depTitle:'Simulador de despliegue', depHint:'Compara estrategias para publicar una versión nueva (v1 → v2) y observa cómo cambia el tráfico, sin cortar el servicio.', depTraffic:'Reparto de tráfico', depDowntime:'Downtime', depStep:'Paso', depReset:'Reiniciar', depRollback:'Rollback', depNext:'Siguiente', depPrev:'Anterior', depDoneTag:'Completo', depV1:'v1 (actual)', depV2:'v2 (nueva)', depUpd:'actualizando',
+      modeIncident:'Incidente', incTitle:'Sala de incidentes', incHint:'Diagnostica una avería real: reúne pistas, identifica la causa raíz y aplica el arreglo correcto.', incPickHint:'Elige un incidente para resolver:', incSymptom:'Síntoma', incStartBtn:'Empezar a investigar', incChecks:'Comprobaciones', incChecksHint:'Toca una comprobación para ver su salida.', incToDiagnose:'Ya tengo una hipótesis →', incDiagnoseTitle:'¿Cuál es la causa raíz?', incConfirmCause:'Confirmar causa', incBackInvestigate:'← Volver a investigar', incFixTitle:'¿Cómo lo arreglas?', incApplyFix:'Aplicar arreglo', incResolvedTag:'Incidente resuelto', incLearnLabel:'Aprendizaje', incAnother:'Elegir otro incidente', incRetry:'Reintentar', incPhInvestigate:'Investigar', incPhDiagnose:'Diagnosticar', incPhFix:'Arreglar', incExit:'Salir',
       quizAdaptive:'Adaptativo: las categorías donde fallas volverán a aparecer más.', quizWeak:'A reforzar', quizMastered:'Dominadas',
       chaosStart:'Simular avería', chaosOn:'Toca una pieza…', chaosResil:'Resiliencia', chaosSpof:'puntos únicos de fallo', chaosHint:'Modo avería: toca una pieza para tirarla y ver el impacto.',
       analysisTitle:'Análisis de arquitectura', analysisRobust:'Robustez', mapLegend:'Leyenda',
@@ -1331,7 +1593,10 @@ class Component extends DCLogic {
       missionMet:'met', missionDoneT:'Challenge complete!', missionPartialT:'Almost… check what is missing', missionMissLabel:'Still missing:',
       quizTitle:'Test what you know', quizQ:'Which layer does this piece belong to?', quizNext:'Next', quizResult:'See result',
       quizScore:'Score', quizRestart:'Retry quiz', quizRight:'Correct!', quizWrong:'Not quite', quizDoneT:'Quiz complete', quizStart:'Start quiz', quizQuestion:'Question',
-      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details', mapDemo:'Example — build your stack in “Free” to see yours', mapPieces:'pieces',
+      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', modeHttp:'Request', simGroup:'Simulators', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details', mapDemo:'Example — build your stack in “Free” to see yours', mapPieces:'pieces',
+      httpTitle:'HTTP request — waterfall', httpHint:'Follow a request hop by hop across your stack and see where the time goes (a didactic model, not real measurement).', httpRelaunch:'Relaunch request', httpTotal:'Total time', httpTapHint:'Tap a hop to simulate its failure and see how the request breaks.', httpNotesLabel:'Warnings', httpHopsLabel:'hops', httpClearFail:'Clear simulated failure',
+      modeDeploy:'Deploy', depTitle:'Deployment simulator', depHint:'Compare strategies to ship a new version (v1 → v2) and watch traffic shift, with no service interruption.', depTraffic:'Traffic split', depDowntime:'Downtime', depStep:'Step', depReset:'Reset', depRollback:'Rollback', depNext:'Next', depPrev:'Previous', depDoneTag:'Done', depV1:'v1 (current)', depV2:'v2 (new)', depUpd:'updating',
+      modeIncident:'Incident', incTitle:'Incident room', incHint:'Diagnose a real outage: gather clues, identify the root cause and apply the right fix.', incPickHint:'Pick an incident to resolve:', incSymptom:'Symptom', incStartBtn:'Start investigating', incChecks:'Checks', incChecksHint:'Tap a check to see its output.', incToDiagnose:'I have a hypothesis →', incDiagnoseTitle:'What is the root cause?', incConfirmCause:'Confirm cause', incBackInvestigate:'← Back to investigating', incFixTitle:'How do you fix it?', incApplyFix:'Apply fix', incResolvedTag:'Incident resolved', incLearnLabel:'Takeaway', incAnother:'Pick another incident', incRetry:'Retry', incPhInvestigate:'Investigate', incPhDiagnose:'Diagnose', incPhFix:'Fix', incExit:'Exit',
       quizAdaptive:'Adaptive: the categories you miss will show up more often.', quizWeak:'To review', quizMastered:'Mastered',
       chaosStart:'Simulate failure', chaosOn:'Tap a piece…', chaosResil:'Resilience', chaosSpof:'single points of failure', chaosHint:'Failure mode: tap a piece to drop it and see the impact.',
       analysisTitle:'Architecture analysis', analysisRobust:'Robustness', mapLegend:'Legend',
@@ -1444,6 +1709,282 @@ class Component extends DCLogic {
     const tick=()=>{ i++; if(i<steps.length){ this.setState({flowStep:i}); this._flowT=setTimeout(tick,dur); } else { this._flowT=setTimeout(()=>this.setState({flowing:false, flowStep:-1}), dur); } };
     this._flowT=setTimeout(tick,dur);
   }
+  // ---- HTTP request waterfall (modelo didáctico) ----
+  buildRequest(placed, failKey){
+    placed = placed || {};
+    const es = this.state.lang==='es';
+    const T=(a,b)=>es?a:b;
+    const has=(c)=>((placed[c]||[]).length>0);
+    const hasB=(c,b)=>((placed[c]||[]).indexOf(b)>=0);
+    const load=(this.state.metrics&&this.state.metrics.load)||0;
+    const lf=1+load/220;
+    const rnd=(base,jit)=>Math.max(1, Math.round((base + (Math.random()*2-1)*jit)*lf));
+    const dbBlocks=['postgres','mysql','mongodb','cassandra'];
+    const hasDB=dbBlocks.some(b=>hasB('datos',b));
+    const hasCache=hasB('datos','redis');
+    const compute = has('orquestacion')||has('contenedores')||has('computo')||has('virtualizacion')||has('hci')||has('nube');
+    // saltos candidatos, en orden de la petición
+    const cand=[];
+    const push=(key,cat,label,base,jit,note)=>cand.push({key,cat,label,base,jit,note:note||''});
+    if(hasB('red','dns')) push('dns','red',T('Resolución DNS','DNS lookup'),22,16);
+    if(hasB('nube','cdn')) push('cdn','nube',T('CDN (borde)','CDN (edge)'),12,8,T('Cache MISS → va al origen','Cache MISS → to origin'));
+    if(hasB('seguridad','tls')) push('tls','seguridad',T('Handshake TLS','TLS handshake'),34,16);
+    if(hasB('seguridad','firewall')) push('fw','seguridad',T('Firewall (filtrado)','Firewall (filter)'),3,3);
+    if(hasB('red','lb')) push('lb','red',T('Balanceador','Load balancer'),4,3);
+    if(hasB('red','kong')||hasB('orquestacion','ingress')||hasB('orquestacion','istio')) push('gw','orquestacion',T('API Gateway / Ingress','API Gateway / Ingress'),7,6);
+    push('app','orquestacion',T('Servicio (app)','Service (app)'),46,38);
+    if(hasCache) push('cache','datos',T('Caché (Redis)','Cache (Redis)'),3,4,T('Cache HIT — ahorra ir a la BD','Cache HIT — skips the DB'));
+    if(hasDB) push('db','datos',T('Base de datos','Database'),32,26);
+    if(hasDB && has('almacenamiento')) push('io','almacenamiento',T('Almacenamiento (I/O)','Storage (I/O)'),12,10);
+    // estados de fallo por salto (null = no crítico)
+    const STAT={
+      dns:{code:504,label:T('504 · DNS no resuelto','504 · DNS timeout')},
+      tls:{code:525,label:T('525 · Fallo de TLS','525 · TLS failed')},
+      fw:{code:403,label:T('403 · Bloqueado por firewall','403 · Blocked by firewall')},
+      lb:{code:502,label:'502 · Bad Gateway'}, gw:{code:502,label:'502 · Bad Gateway'},
+      app:{code:502,label:'502 · Bad Gateway'}, db:{code:500,label:T('500 · Error de BD','500 · DB error')},
+      io:{code:500,label:'500 · I/O error'}, cache:null, cdn:null,
+    };
+    const present=cand.map(h=>h.key);
+    let failAt = (failKey && present.indexOf(failKey)>=0) ? failKey : null;
+    // fallo implícito: sin cómputo, no hay dónde ejecutar la app
+    if(!compute && !failAt) failAt='app';
+    let off=0, total=0, fatal=null; const hops=[];
+    for(const h of cand){
+      if(fatal){ hops.push({key:h.key,cat:h.cat,label:h.label,ms:0,offset:off,state:'skip',note:''}); continue; }
+      const ms=rnd(h.base,h.jit);
+      let state='ok', note=h.note;
+      const forced = (h.key==='app' && !compute);
+      const st=STAT[h.key];
+      if((failAt===h.key || forced) && st){
+        state='fail'; note = forced ? T('No hay capa de cómputo: nada donde ejecutar la app.','No compute layer: nowhere to run the app.') : T('Caída simulada aquí.','Simulated failure here.');
+        hops.push({key:h.key,cat:h.cat,label:h.label,ms,offset:off,state,note}); off+=ms; total=off; fatal=st; continue;
+      }
+      if(failAt===h.key && !st){ state='warn'; note=T('Caída simulada (no crítica): se degrada.','Simulated failure (non-critical): degraded.'); }
+      hops.push({key:h.key,cat:h.cat,label:h.label,ms,offset:off,state,note}); off+=ms; total=off;
+    }
+    // avisos didácticos si la petición fue 200
+    const notes=[];
+    if(!fatal){
+      if(compute && !hasB('seguridad','tls')) notes.push(T('Sin TLS: el tráfico viaja sin cifrar.','No TLS: traffic travels unencrypted.'));
+      if(compute && !hasB('red','lb')) notes.push(T('Sin balanceador: punto único de fallo, sin alta disponibilidad.','No load balancer: single point of failure, no high availability.'));
+      if(compute && !hasDB) notes.push(T('La app no consulta ninguna base de datos.','The app queries no database.'));
+    }
+    const status = fatal ? { code:fatal.code, label:fatal.label, ok:false } : { code:200, label:'200 · OK', ok:true };
+    const okCount = hops.filter(h=>h.state==='ok'||h.state==='warn').length;
+    const runs=((this.state.request&&this.state.request.runs)||0)+1;
+    return { runs, status, total, failKey:failAt, hops, notes, okCount };
+  }
+  runRequest(){ this.setState({ request:this.buildRequest(this.effectivePlaced().placed, this.state.reqFail) }); this.unlock('flow'); }
+  toggleReqFail(key){ const nf = this.state.reqFail===key ? null : key; this.setState({ reqFail:nf, request:this.buildRequest(this.effectivePlaced().placed, nf) }); }
+  waterfallView(){
+    const S=this.state;
+    const eff=this.effectivePlaced(); const isDemo=eff.isDemo;
+    const r = S.request || this.buildRequest(eff.placed, S.reqFail);
+    const scale=Math.max(1, r.total), colFail='#ef4444', colWarn='#f59e0b';
+    const round1=(n)=>Math.round(n*10)/10;
+    const hops=r.hops.map(h=>{
+      const c=this.catById(h.cat); const base=c?c.color:'#64748b';
+      const skip=h.state==='skip', fail=h.state==='fail', warn=h.state==='warn';
+      const color=fail?colFail:(warn?colWarn:base);
+      return {
+        key:h.key, label:h.label, ms:h.ms, msLabel: skip?'—':(h.ms+' ms'), note:h.note, hasNote:!!h.note,
+        barColor:color, offsetPct: round1(h.offset/scale*100)+'%', widthPct: (skip?0:Math.max(1.5, round1(h.ms/scale*100)))+'%',
+        opacity: skip?0.4:1, active: S.reqFail===h.key,
+        rowBg: (S.reqFail===h.key)? this.hexA(colFail,0.08):'transparent',
+        dotColor: color, noteColor: fail?colFail:(warn?colWarn:'var(--text-muted)'),
+        onClick:()=>this.toggleReqFail(h.key),
+      };
+    });
+    const st=r.status;
+    return {
+      isDemo, hops, hopCount:hops.length,
+      statusCode:st.code+'', statusLabel:st.label, statusOk:st.ok,
+      statusColor: st.ok?'#22c55e':colFail, statusBg: st.ok?this.hexA('#22c55e',0.14):this.hexA(colFail,0.14), statusBorder: st.ok?'rgba(34,197,94,0.5)':this.hexA(colFail,0.5),
+      totalLabel:r.total+' ms', okCount:r.okCount,
+      hasNotes:!!(r.notes&&r.notes.length), notes:r.notes||[],
+      hasFail:!!r.failKey, method:'GET /api/pedido',
+    };
+  }
+  // ---- deployment simulator (rolling / blue-green / canary) ----
+  deployFrames(strategy){
+    const es=this.state.lang==='es', T=(a,b)=>es?a:b; const N=6;
+    const box=(ver,state)=>({ver,state});
+    const grp=(label,boxes)=>({label,boxes});
+    const split=(v2c)=>({v1:Math.round((N-v2c)/N*100), v2:Math.round(v2c/N*100)});
+    const repl=T('Réplicas','Replicas'); const frames=[];
+    if(strategy==='rolling'){
+      frames.push({caption:T('Estado inicial: 6 réplicas en v1 atendiendo el 100% del tráfico.','Initial state: 6 replicas on v1 serving 100% of traffic.'), groups:[grp(repl, Array.from({length:N},()=>box('v1','ready')))], split:split(0), downtime:'0 s'});
+      for(let k=1;k<=N;k++){
+        const boxes=Array.from({length:N},(_,i)=> i<k-1?box('v2','ready'):(i===k-1?box('v2','updating'):box('v1','ready')));
+        frames.push({caption:T('Rolling: sustituye la réplica '+k+' — crea v2, espera readiness y drena v1. Siempre queda capacidad.','Rolling: replacing replica '+k+' — create v2, await readiness, drain v1. Capacity is always kept.'), groups:[grp(repl,boxes)], split:split(k), downtime:'0 s'});
+      }
+      frames.push({caption:T('Despliegue completo: 6/6 en v2, sin caída de servicio.','Deployment complete: 6/6 on v2, zero downtime.'), groups:[grp(repl, Array.from({length:N},()=>box('v2','ready')))], split:split(N), downtime:'0 s', done:true});
+    } else if(strategy==='bluegreen'){
+      const blue=(st)=>grp(T('Azul · v1','Blue · v1'), Array.from({length:N},()=>box('v1',st)));
+      const green=(st)=>grp(T('Verde · v2','Green · v2'), Array.from({length:N},()=>box('v2',st)));
+      const greenEmpty=grp(T('Verde · v2','Green · v2'), Array.from({length:N},()=>box('','empty')));
+      const blueEmpty=grp(T('Azul · v1','Blue · v1'), Array.from({length:N},()=>box('','empty')));
+      frames.push({caption:T('El entorno azul (v1) atiende el 100%. El verde aún no existe.','Blue (v1) serves 100%. Green does not exist yet.'), groups:[blue('ready'), greenEmpty], split:split(0), downtime:'0 s'});
+      frames.push({caption:T('Levantamos el entorno verde (v2) en paralelo, sin tocar el azul.','Spin up the green (v2) environment in parallel, leaving blue untouched.'), groups:[blue('ready'), green('updating')], split:split(0), downtime:'0 s'});
+      frames.push({caption:T('Verde listo y probado; el azul sigue atendiendo todo el tráfico.','Green ready and tested; blue still serves all traffic.'), groups:[blue('ready'), green('ready')], split:split(0), downtime:'0 s'});
+      frames.push({caption:T('Cambiamos el tráfico al verde (v2) de golpe: corte instantáneo.','Switch all traffic to green (v2) at once: instant cutover.'), groups:[blue('ready'), green('ready')], split:split(N), downtime:'0 s'});
+      frames.push({caption:T('Retiramos el azul (v1). Despliegue completo; el rollback sería volver a azul.','Tear down blue (v1). Deployment complete; rollback would flip back to blue.'), groups:[blueEmpty, green('ready')], split:split(N), downtime:'0 s', done:true});
+    } else {
+      const mk=(v2c,upd)=>Array.from({length:N},(_,i)=> i<v2c? box('v2', (upd&&i===v2c-1)?'updating':'ready') : box('v1','ready'));
+      frames.push({caption:T('6 réplicas en v1 atendiendo el 100% del tráfico.','6 replicas on v1 serving 100% of traffic.'), groups:[grp(repl, Array.from({length:N},()=>box('v1','ready')))], split:split(0), downtime:'0 s'});
+      frames.push({caption:T('Desplegamos 1 canario en v2 y le enviamos ~17% del tráfico.','Deploy 1 canary on v2 and route it ~17% of traffic.'), groups:[grp(repl, mk(1,true))], split:split(1), downtime:'0 s'});
+      frames.push({caption:T('Vigilamos métricas y errores del canario antes de continuar.','Watch the canary metrics and errors before proceeding.'), groups:[grp(repl, mk(1,false))], split:split(1), downtime:'0 s'});
+      frames.push({caption:T('Métricas OK: subimos al 50% (3 réplicas en v2).','Metrics OK: ramp to 50% (3 replicas on v2).'), groups:[grp(repl, mk(3,true))], split:split(3), downtime:'0 s'});
+      frames.push({caption:T('Promovemos al 100%: todas en v2. Despliegue completo.','Promote to 100%: all on v2. Deployment complete.'), groups:[grp(repl, mk(6,false))], split:split(N), downtime:'0 s', done:true});
+    }
+    return frames;
+  }
+  deployWhy(strategy){ const es=this.state.lang==='es', T=(a,b)=>es?a:b;
+    if(strategy==='bluegreen') return T('Dos entornos completos en paralelo: el cambio de tráfico es instantáneo y el rollback trivial, a costa del doble de recursos.','Two full environments in parallel: instant traffic switch and trivial rollback, at the cost of double the resources.');
+    if(strategy==='canary') return T('Expone la versión nueva a una fracción del tráfico y sube solo si las métricas acompañan. Riesgo mínimo, despliegue más lento.','Exposes the new version to a fraction of traffic and ramps only if metrics hold. Minimal risk, slower rollout.');
+    return T('Sustituye réplicas de forma gradual manteniendo la capacidad. Cero downtime, pero v1 y v2 conviven durante la transición.','Replaces replicas gradually while keeping capacity. Zero downtime, but v1 and v2 coexist during the transition.');
+  }
+  setDeployStrategy(s){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState({ deploy:{ strategy:s, step:0, playing:false, rolled:false } }); }
+  deployNext(){ this.setState(st=>{ const n=this.deployFrames(st.deploy.strategy).length; return { deploy:{ ...st.deploy, rolled:false, step:Math.min(n-1, st.deploy.step+1) } }; }); }
+  deployPrev(){ this.setState(st=>({ deploy:{ ...st.deploy, rolled:false, step:Math.max(0, st.deploy.step-1) } })); }
+  deployReset(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>({ deploy:{ ...st.deploy, step:0, playing:false, rolled:false } })); }
+  deployRollback(){ if(this._depT){clearInterval(this._depT);this._depT=null;} this.setState(st=>({ deploy:{ ...st.deploy, playing:false, rolled:true } })); }
+  deployPlay(){
+    if(this._depT){ clearInterval(this._depT); this._depT=null; this.setState(st=>({ deploy:{ ...st.deploy, playing:false } })); return; }
+    this.setState(st=>{ const n=this.deployFrames(st.deploy.strategy).length; const step=(st.deploy.rolled||st.deploy.step>=n-1)?0:st.deploy.step; return { deploy:{ ...st.deploy, playing:true, rolled:false, step } }; });
+    this._depT=setInterval(()=>{ this.setState(st=>{ const n=this.deployFrames(st.deploy.strategy).length; if(st.deploy.step>=n-1){ if(this._depT){clearInterval(this._depT);this._depT=null;} return { deploy:{ ...st.deploy, playing:false } }; } return { deploy:{ ...st.deploy, step:st.deploy.step+1 } }; }); }, 1100);
+  }
+  deployView(){
+    const S=this.state, d=S.deploy||{strategy:'rolling',step:0,playing:false,rolled:false};
+    const es=S.lang==='es', T=(a,b)=>es?a:b;
+    const frames=this.deployFrames(d.strategy);
+    const rolledFrame={ caption:T('Rollback ejecutado: v1 restaurado al instante, 0 downtime.','Rollback done: v1 restored instantly, 0 downtime.'), groups:[{label:T('Réplicas','Replicas'),boxes:Array.from({length:6},()=>({ver:'v1',state:'ready'}))}], split:{v1:100,v2:0}, downtime:'0 s', done:true };
+    const total=frames.length, idx=Math.min(d.step, total-1);
+    const fr = d.rolled ? rolledFrame : frames[idx];
+    const colV1='#0ea5e9', colV2='#22c55e', colUpd='#f59e0b';
+    const groups=fr.groups.map(g=>({ label:g.label, boxes:g.boxes.map(b=>{
+      const empty=b.state==='empty', upd=b.state==='updating';
+      const color = (b.ver==='v2')?(upd?colUpd:colV2):(upd?colUpd:colV1);
+      return { verLabel: empty?'':b.ver, dashed:empty,
+        bg: empty?'var(--panel-2)':this.hexA(color,0.16), border: empty?'var(--border)':this.hexA(color,0.6),
+        color: empty?'var(--text-faint)':color, anim: upd?'suggestPulse 1.2s ease-in-out infinite':'none',
+        tag: upd?T('actualizando','updating'):'' };
+    }) }));
+    const strategies=[{id:'rolling',name:'Rolling'},{id:'bluegreen',name:'Blue-green'},{id:'canary',name:'Canary'}].map(x=>({
+      id:x.id, name:x.name, active:d.strategy===x.id, onClick:()=>this.setDeployStrategy(x.id),
+      bg:d.strategy===x.id?'var(--sel)':'var(--panel-2)', color:d.strategy===x.id?'var(--accent)':'var(--text-muted)', border:d.strategy===x.id?'var(--accent)':'var(--border-strong)' }));
+    return {
+      strategies, why:this.deployWhy(d.strategy), caption:fr.caption, stepLabel:(idx+1)+'/'+total, downtime:fr.downtime,
+      groups, multiGroup:groups.length>1, splitV1Pct:fr.split.v1, splitV2Pct:fr.split.v2, splitV1:fr.split.v1+'% v1', splitV2:fr.split.v2+'% v2',
+      splitV1W:fr.split.v1+'%', splitV2W:fr.split.v2+'%', colV1, colV2, colUpd,
+      playing:d.playing, playIcon:d.playing?'⏸':'▶', playLabel:d.playing?T('Pausar','Pause'):T('Reproducir','Play'),
+      onPlay:()=>this.deployPlay(), onNext:()=>this.deployNext(), onPrev:()=>this.deployPrev(), onReset:()=>this.deployReset(), onRollback:()=>this.deployRollback(),
+      atStart:idx===0 && !d.rolled, atEnd:idx>=total-1, rolled:!!d.rolled, done:!!fr.done, canRollback: (idx>0 || d.rolled),
+    };
+  }
+  // ---- incident / troubleshooting simulator ----
+  incidents(){
+    const F=(es,en)=>({es,en});
+    return [
+      { id:'crashloop', level:1, title:F('Errores 502 tras un despliegue','502 errors after a deploy'),
+        symptom:F('Los usuarios reciben 502/503 al entrar y el sitio no carga. Empezó justo tras el último despliegue.','Users get 502/503 and the site won’t load. It started right after the last deploy.'),
+        checks:[
+          { id:'pods', label:F('kubectl get pods','kubectl get pods'), output:F('web-7d9f  0/1  CrashLoopBackOff  6 reinicios (hace 2m)','web-7d9f  0/1  CrashLoopBackOff  6 restarts (2m ago)') },
+          { id:'logs', label:F('kubectl logs web-7d9f','kubectl logs web-7d9f'), output:F('Error: falta la variable DATABASE_URL … el proceso sale con código 1','Error: env DATABASE_URL is not set … process exits with code 1') },
+          { id:'metrics', label:F('Ver métricas (errores / req-s)','Check metrics (errors / req-s)'), output:F('5xx: 100% · req-s cayendo · CPU baja (los pods ni arrancan)','5xx: 100% · req-s dropping · CPU low (pods never start)') },
+          { id:'lb', label:F('Estado del balanceador','Load balancer status'), output:F('Backends sanos: 0/3 — sin endpoints listos a los que enviar tráfico','Healthy backends: 0/3 — no ready endpoints to route to') },
+        ],
+        causes:[
+          { id:'c1', text:F('Los pods no arrancan por una variable/config que falta','Pods fail to start due to a missing env/config'), correct:true },
+          { id:'c2', text:F('El balanceador está mal configurado','The load balancer is misconfigured') },
+          { id:'c3', text:F('La base de datos está caída','The database is down') },
+          { id:'c4', text:F('Falta capacidad de CPU en el clúster','The cluster is out of CPU') },
+        ],
+        fixes:[
+          { id:'f1', text:F('Corregir el ConfigMap/variables y volver a desplegar','Fix the ConfigMap/env and redeploy'), correct:true },
+          { id:'f2', text:F('Reiniciar el balanceador','Restart the load balancer') },
+          { id:'f3', text:F('Escalar a más réplicas','Scale to more replicas') },
+        ],
+        resolved:F('Corregiste la configuración y redeployaste: los pods pasan a Running 3/3 y el 502 desaparece.','You fixed the config and redeployed: pods go Running 3/3 and the 502 is gone.'),
+        learn:F('Un 502/503 casi siempre es el backend caído, no el balanceador. Empieza por «kubectl get pods» y los logs del pod.','A 502/503 is almost always the backend being down, not the LB. Start with “kubectl get pods” and the pod logs.') },
+      { id:'dbsat', level:2, title:F('La app va lentísima en horas punta','The app crawls at peak hours'),
+        symptom:F('La aplicación responde lentísima y algunas peticiones dan timeout. Empeora cuando hay más usuarios.','The app is very slow and some requests time out. It gets worse with more users.'),
+        checks:[
+          { id:'metrics', label:F('Ver métricas (latencia / CPU)','Check metrics (latency / CPU)'), output:F('Latencia p95: 4200 ms (normal 120) · CPU de la BD: 98%','p95 latency: 4200 ms (normal 120) · DB CPU: 98%') },
+          { id:'dblogs', label:F('kubectl logs db-0','kubectl logs db-0'), output:F('FATAL: no quedan slots de conexión — «too many clients already»','FATAL: remaining connection slots are reserved — “too many clients already”') },
+          { id:'cache', label:F('¿Hay caché desplegada?','Is a cache deployed?'), output:F('No hay Redis: cada petición golpea directamente la base de datos','No Redis: every request hits the database directly') },
+          { id:'pods', label:F('kubectl get pods','kubectl get pods'), output:F('Todo Running, sin reinicios — la app está sana','All Running, no restarts — the app itself is healthy') },
+        ],
+        causes:[
+          { id:'c1', text:F('La BD se satura: agota conexiones y no hay caché que la descargue','The DB saturates: it exhausts connections and no cache offloads it'), correct:true },
+          { id:'c2', text:F('Los pods de la app están caídos','The app pods are down') },
+          { id:'c3', text:F('El DNS resuelve lento','DNS resolves slowly') },
+        ],
+        fixes:[
+          { id:'f1', text:F('Añadir una caché (Redis) y acotar el pool de conexiones','Add a cache (Redis) and cap the connection pool'), correct:true },
+          { id:'f2', text:F('Reiniciar la base de datos','Restart the database') },
+          { id:'f3', text:F('Subir el timeout del cliente','Increase the client timeout') },
+        ],
+        resolved:F('Con Redis delante y un pool acotado, la latencia baja a ~130 ms y desaparecen los timeouts.','With Redis in front and a capped pool, latency drops to ~130 ms and the timeouts vanish.'),
+        learn:F('Ante latencia alta, mide antes de tocar. Una caché absorbe lecturas repetidas y protege la base de datos.','With high latency, measure before you touch. A cache absorbs repeated reads and protects the database.') },
+      { id:'tls', level:1, title:F('«La conexión no es privada»','“Your connection is not private”'),
+        symptom:F('El navegador avisa de que el sitio no es seguro y algunos clientes de API fallan el handshake TLS.','The browser warns the site is not secure and some API clients fail the TLS handshake.'),
+        checks:[
+          { id:'curl', label:F('curl https://app','curl https://app'), output:F('SSL certificate problem: certificate has expired','SSL certificate problem: certificate has expired') },
+          { id:'cert', label:F('openssl … -dates','openssl … -dates'), output:F('notAfter=2026-07-10 — hoy es 2026-07-24: CADUCADO hace 14 días','notAfter=2026-07-10 — today is 2026-07-24: EXPIRED 14 days ago') },
+          { id:'fw', label:F('Reglas de firewall (443)','Firewall rules (443)'), output:F('Puerto 443 abierto, sin cambios recientes','Port 443 open, no recent changes') },
+          { id:'dns', label:F('dig app','dig app'), output:F('Resuelve correctamente a la IP del balanceador','Resolves correctly to the load balancer IP') },
+        ],
+        causes:[
+          { id:'c1', text:F('El certificado TLS ha caducado','The TLS certificate has expired'), correct:true },
+          { id:'c2', text:F('El firewall bloquea el puerto 443','The firewall blocks port 443') },
+          { id:'c3', text:F('El DNS apunta a la IP equivocada','DNS points to the wrong IP') },
+        ],
+        fixes:[
+          { id:'f1', text:F('Renovar el certificado (cert-manager / Let’s Encrypt) y recargar','Renew the certificate (cert-manager / Let’s Encrypt) and reload'), correct:true },
+          { id:'f2', text:F('Abrir el puerto 443 en el firewall','Open port 443 on the firewall') },
+          { id:'f3', text:F('Desactivar HTTPS temporalmente','Disable HTTPS temporarily') },
+        ],
+        resolved:F('Renovado el certificado y recargado el proxy, vuelve el candado y el handshake funciona.','With the certificate renewed and the proxy reloaded, the padlock returns and the handshake works.'),
+        learn:F('Automatiza la renovación (cert-manager). Un certificado caducado tumba el HTTPS aunque todo lo demás esté bien.','Automate renewal (cert-manager). An expired certificate takes down HTTPS even when everything else is fine.') },
+    ];
+  }
+  incidentById(id){ return this.incidents().find(x=>x.id===id); }
+  incLevelLabel(l){ const es=this.state.lang==='es'; return l===1?(es?'Básico':'Basic'):(l===2?(es?'Intermedio':'Intermediate'):(es?'Avanzado':'Advanced')); }
+  incLevelColor(l){ return l===1?'#22c55e':(l===2?'#f59e0b':'#ef4444'); }
+  startIncident(id){ this.setState({ incident:{ id, phase:'brief', revealed:[], guessCause:null, guessFix:null, causeState:null, fixState:null, solved:false } }); }
+  exitIncident(){ this.setState({ incident:null }); }
+  incidentSetPhase(p){ this.setState(s=>({ incident:{ ...s.incident, phase:p } })); }
+  incidentReveal(cid){ this.setState(s=>{ const has=s.incident.revealed.indexOf(cid)>=0; const revealed=has?s.incident.revealed:[...s.incident.revealed,cid]; return { incident:{ ...s.incident, revealed } }; }); }
+  incidentGuessCause(cid){ this.setState(s=>({ incident:{ ...s.incident, guessCause:cid, causeState:null } })); }
+  incidentGuessFix(fid){ this.setState(s=>({ incident:{ ...s.incident, guessFix:fid, fixState:null } })); }
+  incidentConfirmCause(){ const s=this.state.incident; if(!s) return; if(!s.guessCause){ this.setState({ incident:{ ...s, causeState:'need' } }); return; } const sc=this.incidentById(s.id); const ok=sc.causes.some(c=>c.id===s.guessCause&&c.correct); this.setState({ incident:{ ...s, phase: ok?'fix':'diagnose', causeState: ok?null:'wrong' } }); }
+  incidentApplyFix(){ const s=this.state.incident; if(!s) return; if(!s.guessFix){ this.setState({ incident:{ ...s, fixState:'need' } }); return; } const sc=this.incidentById(s.id); const ok=sc.fixes.some(f=>f.id===s.guessFix&&f.correct); if(ok){ this.setState({ incident:{ ...s, phase:'done', solved:true, fixState:null } }); this.unlock('incident'); } else { this.setState({ incident:{ ...s, fixState:'wrong' } }); } }
+  incidentView(){
+    const S=this.state, es=S.lang==='es', T=(a,b)=>es?a:b; const inc=S.incident;
+    if(!inc){ return { hasActive:false, picker:this.incidents().map(x=>({ id:x.id, title:this.loc(x.title), symptom:this.loc(x.symptom), levelLabel:this.incLevelLabel(x.level), levelColor:this.incLevelColor(x.level), onClick:()=>this.startIncident(x.id) })) }; }
+    const sc=this.incidentById(inc.id), phase=inc.phase;
+    const checks=sc.checks.map(ck=>{ const rev=inc.revealed.indexOf(ck.id)>=0; return { id:ck.id, label:this.loc(ck.label), output:this.loc(ck.output), revealed:rev, onClick:()=>this.incidentReveal(ck.id), rowBg:rev?'var(--panel-2)':'var(--panel)', rowBorder:rev?'var(--accent)':'var(--border-strong)' }; });
+    const rc=inc.revealed.length;
+    const causes=sc.causes.map(cc=>({ id:cc.id, text:this.loc(cc.text), selected:inc.guessCause===cc.id, onClick:()=>this.incidentGuessCause(cc.id), bg:inc.guessCause===cc.id?'var(--accent-tint)':'var(--panel)', border:inc.guessCause===cc.id?'var(--accent)':'var(--border-strong)', color:inc.guessCause===cc.id?'var(--accent)':'var(--text)' }));
+    const fixes=sc.fixes.map(fx=>({ id:fx.id, text:this.loc(fx.text), selected:inc.guessFix===fx.id, onClick:()=>this.incidentGuessFix(fx.id), bg:inc.guessFix===fx.id?'var(--accent-tint)':'var(--panel)', border:inc.guessFix===fx.id?'var(--accent)':'var(--border-strong)', color:inc.guessFix===fx.id?'var(--accent)':'var(--text)' }));
+    const causeMsg = inc.causeState==='wrong'? T('Esa causa no encaja con las pistas. Sigue investigando o repasa los logs.','That cause doesn’t fit the clues. Keep investigating or re-check the logs.') : (inc.causeState==='need'? T('Elige primero una causa probable.','Pick a likely cause first.') : '');
+    const fixMsg = inc.fixState==='wrong'? T('Ese arreglo no ataca la causa raíz. Prueba otro.','That fix doesn’t address the root cause. Try another.') : (inc.fixState==='need'? T('Elige una acción de arreglo.','Pick a remediation first.') : '');
+    return {
+      hasActive:true, id:inc.id, title:this.loc(sc.title), symptom:this.loc(sc.symptom),
+      levelLabel:this.incLevelLabel(sc.level), levelColor:this.incLevelColor(sc.level),
+      showBrief:phase==='brief', showInvestigate:phase==='investigate', showDiagnose:phase==='diagnose', showFix:phase==='fix', showDone:phase==='done',
+      checks, revealedCount:rc, hasRevealed:rc>0,
+      checksHint:T('Ejecuta comprobaciones para reunir pistas ('+rc+' vistas). Con una hipótesis, pasa a diagnosticar.','Run checks to gather clues ('+rc+' seen). Once you have a hypothesis, move to diagnose.'),
+      causes, causeMsg, causeMsgShow:!!causeMsg,
+      fixes, fixMsg, fixMsgShow:!!fixMsg,
+      resolvedMsg:this.loc(sc.resolved), learn:this.loc(sc.learn),
+      onInvestigate:()=>this.incidentSetPhase('investigate'), onToDiagnose:()=>this.incidentSetPhase('diagnose'), onBackInvestigate:()=>this.incidentSetPhase('investigate'),
+      onConfirmCause:()=>this.incidentConfirmCause(), onApplyFix:()=>this.incidentApplyFix(),
+      onExit:()=>this.exitIncident(), onRestart:()=>this.startIncident(inc.id),
+    };
+  }
   // ---- guided tour + export ----
   tourList(){
     const order=['red','computo','almacenamiento','virtualizacion','hci','so','contenedores','orquestacion','datos','nube','seguridad','cicd','iac','monitorizacion','gobernanza'];
@@ -1509,6 +2050,7 @@ class Component extends DCLogic {
       { id:'budget', icon:'💰', name:F('Ajustado','On budget'), desc:F('Supera el reto de presupuesto','Beat the budget challenge') },
       { id:'quizace', icon:'🧠', name:F('Sobresaliente','Top marks'), desc:F('Quiz perfecto','Perfect quiz') },
       { id:'cartographer', icon:'🗺️', name:F('Cartógrafo','Cartographer'), desc:F('Explora el mapa físico','Explore the physical map') },
+      { id:'incident', icon:'🚑', name:F('Bombero','Firefighter'), desc:F('Resuelve un incidente','Resolve an incident') },
     ];
   }
   unlock(id){
@@ -1643,8 +2185,10 @@ class Component extends DCLogic {
   // ---- tools menu (agrupa utilidades para descongestionar la cabecera) ----
   toggleTools(){ this.setState(s=>({ showTools:!s.showTools })); }
   closeTools(){ this.setState({ showTools:false }); }
+  toggleSims(){ this.setState(s=>({ showSims:!s.showSims })); }
+  closeSims(){ this.setState({ showSims:false }); }
   onKeyDownGlobal(e){ if(e && e.key==='Escape') this.closeAllOverlays(); }
-  closeAllOverlays(){ const s=this.state; if(s.showTools||s.showGlossary||s.showCmdRef||s.showContent||s.showPaths||s.showAchievements){ this.setState({ showTools:false, showGlossary:false, showCmdRef:false, showContent:false, showPaths:false, showAchievements:false, achConfirm:false }); } if(s.tour && s.tour.active) this.endTour(); }
+  closeAllOverlays(){ const s=this.state; if(s.showTools||s.showSims||s.showGlossary||s.showCmdRef||s.showContent||s.showPaths||s.showAchievements){ this.setState({ showTools:false, showSims:false, showGlossary:false, showCmdRef:false, showContent:false, showPaths:false, showAchievements:false, achConfirm:false }); } if(s.tour && s.tour.active) this.endTour(); }
   toolGlossary(){ this.setState({ showTools:false }); this.toggleGlossary(); }
   toolPaths(){ this.setState({ showTools:false }); this.togglePaths(); }
   toolContent(){ this.setState({ showTools:false }); this.toggleContent(); }
@@ -1681,7 +2225,9 @@ class Component extends DCLogic {
       patch.term={ input:'', history:[ { t:(this.state.lang==='es'?'LabStack shell — escribe «help» y pulsa Enter. (↑/↓ historial · Tab autocompleta)':'LabStack shell — type “help” and hit Enter. (↑/↓ history · Tab autocompletes)'), c:'sys' } ], cmdHistory:[], histIdx:-1, cwd:'/home/labuser' };
     }
     if(this._metT){ clearInterval(this._metT); this._metT=null; }
+    if(this._depT){ clearInterval(this._depT); this._depT=null; patch.deploy={ ...(this.state.deploy||{strategy:'rolling'}), playing:false }; }
     if(m==='metrics'){ this._metT=setInterval(()=>this.tickMetrics(), 1200); }
+    if(m==='http'){ patch.reqFail=null; patch.request=this.buildRequest(this.effectivePlaced().placed, null); }
     this.setState(patch);
   }
   startMission(id){ this.setState({ mission:id, missionResult:null, placed:{}, selected:null, selectedLayer:null, armed:null, feedback:null }); }
@@ -2264,7 +2810,7 @@ class Component extends DCLogic {
     const T=(es,en)=>this.state.lang==='es'?es:en; const icons=this.icons();
     const rows=[
       [ {id:'perimeter', cats:['red','seguridad'], label:T('Perímetro de red','Network edge'), icon:'🌐'} ],
-      [ {id:'floor', cats:['computo','hci','virtualizacion','so','contenedores','orquestacion'], label:T('Sala de datacenter','Datacenter floor'), icon:'🖥️'} ],
+      [ {id:'floor', cats:['computo','hci','virtualizacion','so','contenedores','orquestacion','mensajeria'], label:T('Sala de datacenter','Datacenter floor'), icon:'🖥️'} ],
       [ {id:'storage', cats:['almacenamiento'], label:T('Almacenamiento','Storage'), icon:'💾'},
         {id:'data', cats:['datos'], label:T('Bases de datos','Databases'), icon:'🗄️'},
         {id:'cloud', cats:['nube'], label:T('Nube (proveedor)','Cloud (provider)'), icon:'☁️', dashed:true} ],
@@ -2388,7 +2934,7 @@ class Component extends DCLogic {
     return {
       red:{cost:40,cpu:1,ram:1}, computo:{cost:120,cpu:16,ram:64}, almacenamiento:{cost:60,cpu:0,ram:0},
       virtualizacion:{cost:25,cpu:2,ram:8}, hci:{cost:150,cpu:16,ram:64}, so:{cost:0,cpu:1,ram:2},
-      contenedores:{cost:10,cpu:1,ram:2}, orquestacion:{cost:35,cpu:2,ram:4}, datos:{cost:80,cpu:4,ram:16},
+      contenedores:{cost:10,cpu:1,ram:2}, orquestacion:{cost:35,cpu:2,ram:4}, mensajeria:{cost:30,cpu:2,ram:4}, datos:{cost:80,cpu:4,ram:16},
       nube:{cost:110,cpu:0,ram:0}, seguridad:{cost:25,cpu:1,ram:1}, cicd:{cost:15,cpu:1,ram:2},
       iac:{cost:5,cpu:0,ram:0}, monitorizacion:{cost:20,cpu:1,ram:2}, gobernanza:{cost:20,cpu:0,ram:0},
     };
@@ -2499,7 +3045,7 @@ class Component extends DCLogic {
     });
 
     // transversal rails (security, ci/cd, iac)
-    const transIds = ['seguridad','cicd','iac','monitorizacion','gobernanza'];
+    const transIds = ['seguridad','cicd','iac','mensajeria','monitorizacion','gobernanza'];
     const transversals = transIds.map(tid=>{
       const sc = this.catById(tid); const ids = S.placed[tid]||[]; const over=S.over===tid;
       const isTarget = !!(armedBlock && armedBlock.cat===tid);
@@ -2577,6 +3123,7 @@ class Component extends DCLogic {
 
     // ---- mode: mission ----
     const mode = S.mode;
+    const simActive = mode==='http'||mode==='deploy'||mode==='incident';
     let mission = { active:false, hasActive:false };
     if(mode==='mission'){
       if(S.mission){
@@ -2808,6 +3355,14 @@ class Component extends DCLogic {
       showTerminal: mode==='terminal', termInput:S.term.input, termPrompt:this.termPrompt(S.term.cwd), termLines:(S.term.history||[]).slice().reverse().map(l=>({ t:l.t, color:this.termColor(l.c) })), onTermInput:(e)=>this.onTermInput(e), onTermKey:(e)=>this.onTermKey(e),
       m5Bg: mode==='metrics'?'var(--sel)':'transparent', m5Color: mode==='metrics'?'var(--accent)':'var(--text-faint)', setMetricsMode:()=>this.setMode('metrics'),
       showMetrics: mode==='metrics', metricsTiles, metricsLoad:met.load, onMetricsLoad:(e)=>this.setMetricsLoad(e), metAlerts, metHasAlerts:metAlerts.length>0,
+      m6Bg: mode==='http'?'var(--sel)':'transparent', m6MenuColor: mode==='http'?'var(--accent)':'var(--text)', setHttpMode:()=>{ this.setState({ showSims:false }); this.setMode('http'); },
+      showHttp: mode==='http', waterfall: this.waterfallView(), relaunchRequest:()=>this.runRequest(), clearReqFail:()=>this.setState({ reqFail:null, request:this.buildRequest(this.effectivePlaced().placed, null) }),
+      m7Bg: mode==='deploy'?'var(--sel)':'transparent', m7MenuColor: mode==='deploy'?'var(--accent)':'var(--text)', setDeployMode:()=>{ this.setState({ showSims:false }); this.setMode('deploy'); },
+      showDeploy: mode==='deploy', deploy: this.deployView(),
+      m8Bg: mode==='incident'?'var(--sel)':'transparent', m8MenuColor: mode==='incident'?'var(--accent)':'var(--text)', setIncidentMode:()=>{ this.setState({ showSims:false }); this.setMode('incident'); },
+      showIncident: mode==='incident', incident: this.incidentView(),
+      showSims: S.showSims, toggleSims:()=>this.toggleSims(), closeSims:()=>this.closeSims(),
+      simBg: simActive?'var(--sel)':'var(--panel-alt)', simColor: simActive?'var(--accent)':'var(--text-muted)', simBorder: simActive?'var(--accent)':'var(--border-strong)',
       showTree: mode==='sandbox' || mode==='mission', showPresets: mode==='sandbox', showMissionBar: mode==='mission',
       showMissionPicker: mode==='mission' && !mission.hasActive, showMissionGoals: mode==='mission' && mission.hasActive,
       mission, quiz, showQuiz: mode==='quiz', map, showMap: mode==='map',
