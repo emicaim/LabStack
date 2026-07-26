@@ -31,4 +31,4 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 
 ## Créditos
 
-Powered by **FOKO SOFT** · © 2026 FOKO Games · Uso libre y gratuito · prohibida la redistribución o extracción del código.
+Powered by **FOKO SOFT** · © 2026 FOKO Games · Uso libre y gratuito ·
