@@ -979,17 +979,22 @@
           </div>
           </sc-if>
 
-          <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin:0 0 10px 2px;">{{ t.checklist }}</div>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="10">
-              <div style="display:flex; align-items:center; gap:10px; padding:8px 11px; border-radius:9px; border:1px solid {{ c.border }}; background:{{ c.bg }};">
-                <span style="width:16px; height:16px; flex:0 0 auto; border-radius:5px; display:grid; place-items:center; font-size:11px; font-weight:700; color:{{ c.checkColor }}; background:{{ c.checkBg }}; border:1px solid {{ c.checkBorder }};">{{ c.mark }}</span>
-                <span style="width:8px; height:8px; border-radius:2px; background:{{ c.color }};"></span>
-                <span style="font-size:12.5px; color:{{ c.textColor }}; font-weight:500;">{{ c.name }}</span>
-                <span style="flex:1 1 auto;"></span>
-                <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ c.count }}</span>
-              </div>
-            </sc-for>
+          <div style="border-radius:13px; border:1px solid var(--border); background:var(--panel-alt); padding:14px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:11px;">
+              <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px;">{{ t.checklist }}</div>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700; color:var(--text-muted);">{{ layersDoneShort }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="10">
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 11px; border-radius:9px; border:1px solid {{ c.border }}; background:{{ c.bg }};">
+                  <span style="width:16px; height:16px; flex:0 0 auto; border-radius:5px; display:grid; place-items:center; font-size:11px; font-weight:700; color:{{ c.checkColor }}; background:{{ c.checkBg }}; border:1px solid {{ c.checkBorder }};">{{ c.mark }}</span>
+                  <span style="width:8px; height:8px; border-radius:2px; background:{{ c.color }};"></span>
+                  <span style="font-size:12.5px; color:{{ c.textColor }}; font-weight:500;">{{ c.name }}</span>
+                  <span style="flex:1 1 auto;"></span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ c.count }}</span>
+                </div>
+              </sc-for>
+            </div>
           </div>
         </div>
       </sc-if>
@@ -3479,6 +3484,7 @@ class Component extends DCLogic {
       flowCursor: flowDisabled?'not-allowed':'pointer',
       flowHover: flowDisabled?'':'background:rgba(99,102,241,0.2); border-color:var(--accent);',
       layersDoneLabel: doneLayers+'/'+allIds.length+' '+t.done,
+      layersDoneShort: doneLayers+'/'+allIds.length,
       hasDetail, detail, feedback, placing,
       liveMsg: (feedback && feedback.show) ? (feedback.title+'. '+feedback.msg) : '',
       hasLayerDetail, layerDetail,
