@@ -181,23 +181,23 @@
 
       <sc-for list="{{ cats }}" as="cat" hint-placeholder-count="6">
         <div style="margin-bottom:16px;">
-          <div onClick="{{ cat.onToggle }}" style="display:flex; align-items:center; gap:8px; margin:0 4px 8px; cursor:pointer; user-select:none;">
+          <button type="button" onClick="{{ cat.onToggle }}" aria-expanded="{{ cat.expanded }}" aria-label="{{ cat.toggleAria }}" style="display:flex; align-items:center; gap:8px; width:100%; box-sizing:border-box; margin:0 0 8px; padding:2px 4px; cursor:pointer; user-select:none; background:transparent; border:none; font:inherit; text-align:left; color:inherit;">
             <span style="width:8px; height:8px; border-radius:3px; background:{{ cat.color }}; box-shadow:0 0 8px {{ cat.color }};"></span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:{{ cat.color }}; text-transform:uppercase; font-weight:700;">{{ cat.name }}</span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);">{{ cat.count }}</span>
             <span style="flex:1 1 auto;"></span>
             <span style="color:var(--text-faint); font-size:10px;">{{ cat.chevron }}</span>
-          </div>
+          </button>
           <div style="display:flex; flex-wrap:wrap; gap:7px;">
             <sc-for list="{{ cat.blocks }}" as="b" hint-placeholder-count="4">
-              <div draggable="{{ b.draggable }}" onDragStart="{{ b.onDragStart }}" onDragEnd="{{ onDragEnd }}" onClick="{{ b.onClick }}"
-                   title="{{ b.name }}"
-                   style="display:flex; align-items:center; gap:7px; padding:7px 10px 7px 12px; border-radius:9px; cursor:{{ b.cursor }}; user-select:none; border:1px solid {{ b.border }}; background:{{ b.bg }}; box-shadow:inset 3px 0 0 0 {{ b.accent }}; opacity:{{ b.opacity }}; transition:transform .12s, border-color .15s, background .15s;"
+              <button type="button" draggable="{{ b.draggable }}" onDragStart="{{ b.onDragStart }}" onDragEnd="{{ onDragEnd }}" onClick="{{ b.onClick }}"
+                   title="{{ b.name }}" aria-label="{{ b.aria }}" aria-pressed="{{ b.pressed }}"
+                   style="display:flex; align-items:center; gap:7px; padding:7px 10px 7px 12px; border-radius:9px; cursor:{{ b.cursor }}; user-select:none; border:1px solid {{ b.border }}; background:{{ b.bg }}; box-shadow:inset 3px 0 0 0 {{ b.accent }}; opacity:{{ b.opacity }}; font:inherit; text-align:left; appearance:none; transition:transform .12s, border-color .15s, background .15s;"
                    style-hover="{{ b.hoverStyle }}">
                 <span style="width:26px; height:26px; flex:0 0 auto; border-radius:7px; display:grid; place-items:center; color:{{ cat.color }}; background:{{ b.badgeBg }}; border:1px solid {{ b.badgeBorder }};"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ b.iconPath }}"></path></svg></span>
                 <span style="font-size:12.5px; color:{{ b.textColor }}; white-space:nowrap; font-weight:500;">{{ b.name }}</span>
                 <sc-if value="{{ b.placed }}" hint-placeholder-val="{{ false }}"><span style="color:#4ade80; font-size:13px; margin-left:1px;">✓</span></sc-if>
-              </div>
+              </button>
             </sc-for>
           </div>
         </div>
@@ -729,7 +729,7 @@
             </sc-if>
 
             <sc-for list="{{ layers }}" as="layer" hint-placeholder-count="9">
-              <div onDragOver="{{ layer.onDragOver }}" onDragLeave="{{ layer.onDragLeave }}" onDrop="{{ layer.onDrop }}" onClick="{{ layer.onClick }}"
+              <div role="button" tabindex="0" onKeyDown="{{ layer.onKey }}" aria-label="{{ layer.aria }}" onDragOver="{{ layer.onDragOver }}" onDragLeave="{{ layer.onDragLeave }}" onDrop="{{ layer.onDrop }}" onClick="{{ layer.onClick }}"
                 style="position:relative; border-radius:16px; padding:14px 16px; border:1px solid {{ layer.borderColor }}; background:{{ layer.bg }}; box-shadow:{{ layer.cardShadow }}; transition:border-color .18s, background .18s, transform .14s, box-shadow .18s; animation:{{ layer.anim }}; cursor:{{ layer.cursor }};"
                 style-hover="{{ layer.hoverStyle }}">
                 <sc-if value="{{ layer.showArrow }}" hint-placeholder-val="{{ false }}">
@@ -752,13 +752,13 @@
                 <sc-if value="{{ layer.hasBlocks }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; padding-left:57px;">
                     <sc-for list="{{ layer.placedBlocks }}" as="pb" hint-placeholder-count="2">
-                      <div onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}"
-                        style="display:flex; align-items:center; gap:6px; padding:5px 8px 5px 6px; border-radius:8px; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; font-size:11.5px; font-weight:500; animation:chipIn .25s ease both;"
+                      <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}"
+                        style="display:flex; align-items:center; gap:6px; padding:5px 8px 5px 6px; border-radius:8px; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; font-size:11.5px; font-weight:500; font-family:inherit; appearance:none; animation:chipIn .25s ease both;"
                         style-hover="filter:brightness(1.15);">
                         <span style="width:20px; height:20px; border-radius:6px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:600; background:var(--badge-inner); color:{{ pb.color }};">{{ pb.code }}</span>
                         {{ pb.name }}
                         <span style="opacity:0.55; margin-left:1px; font-family:'JetBrains Mono',monospace;">✕</span>
-                      </div>
+                      </button>
                     </sc-for>
                   </div>
                 </sc-if>
@@ -771,7 +771,7 @@
             <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); text-align:center; margin-bottom:2px;">{{ pillarsLabel }}</div>
             <div style="display:flex; gap:9px; align-items:stretch; flex:1 1 auto;">
               <sc-for list="{{ transversals }}" as="tr" hint-placeholder-count="4">
-                <div onDragOver="{{ tr.onDragOver }}" onDragLeave="{{ tr.onDragLeave }}" onDrop="{{ tr.onDrop }}" onClick="{{ tr.onClick }}"
+                <div role="button" tabindex="0" onKeyDown="{{ tr.onKey }}" aria-label="{{ tr.aria }}" onDragOver="{{ tr.onDragOver }}" onDragLeave="{{ tr.onDragLeave }}" onDrop="{{ tr.onDrop }}" onClick="{{ tr.onClick }}"
                   style="flex:0 0 82px; border-radius:15px; border:1px dashed {{ tr.borderColor }}; background:{{ tr.bg }}; box-shadow:var(--card-shadow); display:flex; flex-direction:column; align-items:center; padding:13px 6px; gap:9px; cursor:{{ tr.cursor }}; transition:all .16s; animation:{{ tr.anim }};"
                   style-hover="{{ tr.hoverStyle }}">
                   <div style="width:38px; height:38px; border-radius:11px; display:grid; place-items:center; color:{{ tr.color }}; background:{{ tr.numBg }};"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tr.iconPath }}"></path></svg></div>
@@ -779,7 +779,7 @@
                   <div style="flex:1 1 auto;"></div>
                   <div style="display:flex; flex-direction:column; gap:5px; width:100%; align-items:center;">
                     <sc-for list="{{ tr.placedBlocks }}" as="pb" hint-placeholder-count="0">
-                      <div onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" style="width:44px; height:32px; border-radius:9px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; animation:chipIn .25s ease both;" style-hover="filter:brightness(1.15);">{{ pb.code }}</div>
+                      <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}" style="width:44px; height:32px; border-radius:9px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; appearance:none; animation:chipIn .25s ease both;" style-hover="filter:brightness(1.15);">{{ pb.code }}</button>
                     </sc-for>
                   </div>
                 </div>
@@ -2984,12 +2984,17 @@ class Component extends DCLogic {
         const collapsed = !searching && !!S.collapsed[c.id];
         return {
           color:c.color, name:this.loc(c.name), count:matched.length,
-          collapsed, chevron: collapsed?'▸':'▾', onToggle:()=>this.toggleCollapse(c.id),
+          collapsed, expanded:!collapsed, chevron: collapsed?'▸':'▾', onToggle:()=>this.toggleCollapse(c.id),
+          toggleAria: (collapsed?(S.lang==='es'?'Mostrar ':'Show '):(S.lang==='es'?'Ocultar ':'Hide '))+this.loc(c.name),
           blocks: collapsed ? [] : matched.map(b=>{
             const placed = this.isPlaced(b.id);
             const armed = S.armed===b.id;
             return {
               code:b.code, name:this.loc(b.name), placed, accent:c.color, iconPath:this.pieceIcon(b),
+              pressed: armed,
+              aria: placed ? (this.loc(b.name)+' — '+(S.lang==='es'?'ya colocada':'already placed'))
+                    : (armed ? (this.loc(b.name)+' — '+(S.lang==='es'?'seleccionada, elige una capa':'selected, pick a layer'))
+                    : ((S.lang==='es'?'Seleccionar ':'Select ')+this.loc(b.name)+' ('+this.loc(c.name)+')')),
               draggable: !placed, cursor: placed?'default':'grab',
               onDragStart: placed?null:(e=>{ if(e&&e.dataTransfer){e.dataTransfer.setData('text/plain', b.id); e.dataTransfer.effectAllowed='move';} this.setState({armed:b.id, selected:b.id, feedback:null}); }),
               onClick: ()=>this.onBlockClick(b.id),
@@ -3039,10 +3044,15 @@ class Component extends DCLogic {
         onDragLeave: ()=>{ if(S.over===id)this.setState({over:null}); },
         onDrop: e=>{ let id2=S.armed; if(e){e.preventDefault(); if(e.dataTransfer){const d=e.dataTransfer.getData('text/plain'); if(d)id2=d;}} if(id2)this.place(id2, id); },
         onClick: ()=>this.onLayerClick(id),
+        onKey: (e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); this.onLayerClick(id); } },
+        aria: (S.lang==='es'
+          ? ('Capa '+this.loc(c.name)+'. '+(S.armed?'Pulsa Enter para colocar aquí la pieza seleccionada.':'Pulsa Enter para ver por qué existe esta capa.'))
+          : ('Layer '+this.loc(c.name)+'. '+(S.armed?'Press Enter to place the selected piece here.':'Press Enter to see why this layer exists.'))),
         placedBlocks: ids.map(bid=>{ const b=this.blockById(bid); return {
           code:b.code, name:this.loc(b.name), color:c.color,
           bg:this.hexA(c.color,0.14), border:this.hexA(c.color,0.4),
           removeTip: this.state.lang==='es'?'Quitar':'Remove',
+          aria: (this.state.lang==='es'?'Quitar ':'Remove ')+this.loc(b.name)+(this.state.lang==='es'?' de ':' from ')+this.loc(c.name),
           onClick: (e)=>{ if(e)e.stopPropagation(); this.removePlaced(id,bid); },
         };}),
       };
@@ -3065,7 +3075,11 @@ class Component extends DCLogic {
         onDragLeave: ()=>{ if(S.over===tid)this.setState({over:null}); },
         onDrop: e=>{ let id2=S.armed; if(e){e.preventDefault(); if(e.dataTransfer){const d=e.dataTransfer.getData('text/plain'); if(d)id2=d;}} if(id2)this.place(id2,tid); },
         onClick: ()=>this.onLayerClick(tid),
-        placedBlocks: ids.map(bid=>{ const b=this.blockById(bid); return { code:b.code, bg:this.hexA(sc.color,0.16), border:this.hexA(sc.color,0.45), color:sc.color, removeTip:this.state.lang==='es'?'Quitar':'Remove', onClick:(e)=>{ if(e)e.stopPropagation(); this.removePlaced(tid,bid); } }; }),
+        onKey: (e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); this.onLayerClick(tid); } },
+        aria: (S.lang==='es'
+          ? ('Pilar transversal '+this.loc(sc.name)+'. '+(S.armed?'Pulsa Enter para colocar aquí la pieza seleccionada.':'Pulsa Enter para ver por qué existe.'))
+          : ('Cross-cutting pillar '+this.loc(sc.name)+'. '+(S.armed?'Press Enter to place the selected piece here.':'Press Enter to see why it exists.'))),
+        placedBlocks: ids.map(bid=>{ const b=this.blockById(bid); return { code:b.code, bg:this.hexA(sc.color,0.16), border:this.hexA(sc.color,0.45), color:sc.color, removeTip:this.state.lang==='es'?'Quitar':'Remove', aria:(this.state.lang==='es'?'Quitar ':'Remove ')+this.loc(b.name)+(this.state.lang==='es'?' de ':' from ')+this.loc(sc.name), onClick:(e)=>{ if(e)e.stopPropagation(); this.removePlaced(tid,bid); } }; }),
       };
     });
 
