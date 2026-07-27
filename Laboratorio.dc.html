@@ -702,6 +702,16 @@
         </button>
       </div>
 
+      <sc-if value="{{ placing.active }}" hint-placeholder-val="{{ false }}">
+        <div role="status" style="display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin:0 -4px 14px; padding:10px 14px; border-radius:12px; border:1px solid {{ placing.border }}; background:{{ placing.bg }}; animation:fadeUp .2s ease both;">
+          <span style="width:28px; height:28px; flex:0 0 auto; border-radius:8px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:{{ placing.color }}; background:{{ placing.badgeBg }}; border:1px solid {{ placing.badgeBorder }};">{{ placing.code }}</span>
+          <span style="font-family:'Inter',sans-serif; font-size:13px; color:var(--text); font-weight:700;">{{ placing.name }}</span>
+          <span style="font-family:'Inter',sans-serif; font-size:13px; color:var(--text-muted);">{{ placing.hint }}</span>
+          <span style="flex:1 1 auto;"></span>
+          <button type="button" onClick="{{ placing.onCancel }}" style="border:1px solid var(--border-strong); background:var(--panel-2); color:var(--text-muted); border-radius:8px; padding:5px 12px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; appearance:none;">✕ {{ placing.cancelLabel }}</button>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ showPresets }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; max-width:880px; margin:14px auto 14px;">
         <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-right:2px;">{{ examplesLabel }}</span>
@@ -1550,6 +1560,7 @@ class Component extends DCLogic {
       title:'LabStack', subtitle:'Laboratorio visual de infraestructura — arrastra y construye tu stack',
       progress:'Progreso', reset:'Reiniciar', palette:'Tecnologías', paletteHint:'Arrastra una pieza al árbol, o toca para armarla y luego toca su capa.',
       canvasTitle:'Árbol de infraestructura', keyIdeas:'Ideas clave', flow:'Cómo funciona', terminal:'Terminal (simulada)',
+      placingHint:'seleccionada — toca (o pulsa Enter en) la capa donde colocarla.', placingCancel:'Cancelar',
       guideTitle:'Bienvenido al laboratorio', guideIntro:'Construye una infraestructura completa de abajo hacia arriba, igual que en la vida real: primero la red, al final la nube. Cada pieza mal colocada te explicará por qué.',
       howto:[{n:'1',text:'Elige una tecnología del panel izquierdo y arrástrala al árbol (o toca la pieza y luego la capa).'},{n:'2',text:'Si aciertas la capa, la pieza se coloca y recibes su explicación. Si no, te decimos dónde va y por qué.'},{n:'3',text:'Toca una capa (sin pieza en mano) para leer por qué existe, qué pasa si falta y una analogía.'},{n:'4',text:'Completa las capas y pulsa «Simular flujo» para ver, paso a paso, una petición recorrer tu stack.'}],
       checklist:'Capas del stack', done:'capas completas', flowLabel:'Simular flujo', flowRunning:'Fluyendo…',
@@ -1587,6 +1598,7 @@ class Component extends DCLogic {
       title:'LabStack', subtitle:'Visual infrastructure lab — drag and build your stack',
       progress:'Progress', reset:'Reset', palette:'Technologies', paletteHint:'Drag a piece onto the tree, or tap to arm it and then tap its layer.',
       canvasTitle:'Infrastructure tree', keyIdeas:'Key ideas', flow:'How it works', terminal:'Terminal (simulated)',
+      placingHint:'selected — tap (or press Enter on) the layer to place it.', placingCancel:'Cancel',
       guideTitle:'Welcome to the lab', guideIntro:'Build a full infrastructure from the bottom up, just like in real life: networking first, cloud last. Every misplaced piece will explain why.',
       howto:[{n:'1',text:'Pick a technology from the left panel and drag it onto the tree (or tap the piece, then the layer).'},{n:'2',text:'If you hit the right layer, the piece lands and you get its explanation. If not, we tell you where it goes and why.'},{n:'3',text:'Tap a layer (with no piece in hand) to read why it exists, what breaks without it, and an analogy.'},{n:'4',text:'Fill the layers and hit “Run flow” to watch, step by step, a request travel through your stack.'}],
       checklist:'Stack layers', done:'layers complete', flowLabel:'Run flow', flowRunning:'Flowing…',
@@ -2197,7 +2209,10 @@ class Component extends DCLogic {
   closeTools(){ this.setState({ showTools:false }); }
   toggleSims(){ this.setState(s=>({ showSims:!s.showSims })); }
   closeSims(){ this.setState({ showSims:false }); }
-  onKeyDownGlobal(e){ if(!e) return; if(e.key==='Escape'){ this.closeAllOverlays(); return; } if(e.key==='Tab' && this.openOverlayId()) this.trapTab(e); }
+  cancelPlacing(){ this.setState({ armed:null, over:null }); }
+  onKeyDownGlobal(e){ if(!e) return; const s=this.state; const overlayOpen=this.openOverlayId()||s.showTools||s.showSims;
+    if(e.key==='Escape'){ if(s.armed && !overlayOpen){ this.cancelPlacing(); } else { this.closeAllOverlays(); } return; }
+    if(e.key==='Tab' && this.openOverlayId()) this.trapTab(e); }
   closeAllOverlays(){ const s=this.state; if(s.showTools||s.showSims||s.showGlossary||s.showCmdRef||s.showContent||s.showPaths||s.showAchievements){ this.setState({ showTools:false, showSims:false, showGlossary:false, showCmdRef:false, showContent:false, showPaths:false, showAchievements:false, achConfirm:false }); } if(s.tour && s.tour.active) this.endTour(); }
   // ---- modal dialog focus management (a11y) ----
   openOverlayId(){ const s=this.state;
@@ -3005,6 +3020,12 @@ class Component extends DCLogic {
     const placedCount = id => (S.placed[id]||[]).length;
     const stackIds = ['nube','datos','orquestacion','contenedores','so','hci','virtualizacion','almacenamiento','computo','red'];
     const armedBlock = S.armed ? this.blockById(S.armed) : null;
+    const _ac = armedBlock ? this.catById(armedBlock.cat).color : '#6366f1';
+    const placing = armedBlock
+      ? { active:true, code:armedBlock.code, name:this.loc(armedBlock.name), color:_ac,
+          border:this.hexA(_ac,0.5), bg:this.hexA(_ac,0.08), badgeBg:this.hexA(_ac,0.16), badgeBorder:this.hexA(_ac,0.4),
+          hint:t.placingHint, cancelLabel:t.placingCancel, onCancel:()=>this.cancelPlacing() }
+      : { active:false };
     const stackBottomUp = [...stackIds].reverse();
     const firstEmpty = (!S.armed && !S.flowing) ? stackBottomUp.find(id=>placedCount(id)===0) : null;
     const script = S.flowing ? this.flowScript() : [];
@@ -3458,7 +3479,7 @@ class Component extends DCLogic {
       flowCursor: flowDisabled?'not-allowed':'pointer',
       flowHover: flowDisabled?'':'background:rgba(99,102,241,0.2); border-color:var(--accent);',
       layersDoneLabel: doneLayers+'/'+allIds.length+' '+t.done,
-      hasDetail, detail, feedback,
+      hasDetail, detail, feedback, placing,
       liveMsg: (feedback && feedback.show) ? (feedback.title+'. '+feedback.msg) : '',
       hasLayerDetail, layerDetail,
       flowCaption, flowCaptionShow: S.flowing && !!flowCaption,
