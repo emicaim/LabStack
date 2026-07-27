@@ -90,7 +90,7 @@
   radial-gradient(900px 600px at -5% 110%, rgba(129,140,248,0.08), transparent 60%),
   var(--bg);">
 
-  <header class="lab-header theme-dark" style="flex:0 0 auto; display:flex; align-items:center; gap:20px; padding:14px 22px; border-bottom:1px solid var(--border); background:#0f172a; color:var(--text); backdrop-filter:blur(8px); z-index:5;">
+  <header class="lab-header theme-dark" style="flex:0 0 auto; display:flex; align-items:center; gap:20px; padding:14px 22px; border-bottom:1px solid var(--border); background:#0f172a; color:var(--text); z-index:5;">
     <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:0 1 auto;">
       <img src="./fokosoft.png" alt="FokoSoft" style="width:38px; height:38px; border-radius:10px; object-fit:cover; flex:0 0 auto; display:block;">
       <div style="min-width:0;">
@@ -185,7 +185,7 @@
       <sc-for list="{{ cats }}" as="cat" hint-placeholder-count="6">
         <div style="margin-bottom:16px;">
           <button type="button" onClick="{{ cat.onToggle }}" aria-expanded="{{ cat.expanded }}" aria-label="{{ cat.toggleAria }}" style="display:flex; align-items:center; gap:8px; width:100%; box-sizing:border-box; margin:0 0 8px; padding:2px 4px; cursor:pointer; user-select:none; background:transparent; border:none; font:inherit; text-align:left; color:inherit;">
-            <span style="width:8px; height:8px; border-radius:3px; background:{{ cat.color }}; box-shadow:0 0 8px {{ cat.color }};"></span>
+            <span style="width:8px; height:8px; border-radius:3px; background:{{ cat.color }};"></span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.04em; color:{{ cat.color }}; text-transform:uppercase; font-weight:700;">{{ cat.name }}</span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);">{{ cat.count }}</span>
             <span style="flex:1 1 auto;"></span>
@@ -367,7 +367,7 @@
             </div>
           </div>
           <div style="position:absolute; left:16px; top:14px; display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:calc(100% - 360px); pointer-events:none;">
-            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); background:var(--header-bg); backdrop-filter:blur(6px); padding:5px 11px; border-radius:99px; border:1px solid var(--border); max-width:100%;">{{ map.hint }}</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); background:var(--header-bg); padding:5px 11px; border-radius:99px; border:1px solid var(--border); max-width:100%;">{{ map.hint }}</span>
             <sc-if value="{{ map.isDemo }}" hint-placeholder-val="{{ false }}">
               <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#f97316; background:var(--warm); padding:5px 11px; border-radius:99px; border:1px solid var(--warm-border); max-width:100%;">{{ t.mapDemo }}</span>
             </sc-if>
@@ -382,23 +382,23 @@
           </button>
           <sc-if value="{{ map.chaosActive }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute; right:16px; top:110px; display:flex; flex-direction:column; align-items:flex-end; gap:6px; max-width:290px; pointer-events:none;">
-              <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:{{ map.resColor }}; background:var(--header-bg); backdrop-filter:blur(6px); padding:5px 11px; border-radius:99px; border:1px solid var(--border);">{{ map.resLabel }}</span>
-              <span style="font-size:11px; color:var(--text-muted); background:var(--header-bg); backdrop-filter:blur(6px); padding:5px 11px; border-radius:99px; border:1px solid var(--border); text-align:right; line-height:1.4;">{{ map.chaosHint }}</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:{{ map.resColor }}; background:var(--header-bg); padding:5px 11px; border-radius:99px; border:1px solid var(--border);">{{ map.resLabel }}</span>
+              <span style="font-size:11px; color:var(--text-muted); background:var(--header-bg); padding:5px 11px; border-radius:99px; border:1px solid var(--border); text-align:right; line-height:1.4;">{{ map.chaosHint }}</span>
             </div>
           </sc-if>
           <sc-if value="{{ map.captionShow }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:62%; display:flex; align-items:center; gap:9px; padding:10px 15px; border-radius:12px; border:1px solid rgba(99,102,241,0.4); background:var(--accent-tint); backdrop-filter:blur(6px); box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
+            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:62%; display:flex; align-items:center; gap:9px; padding:10px 15px; border-radius:12px; border:1px solid rgba(99,102,241,0.4); background:var(--accent-tint); box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
               <span style="width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); flex:0 0 auto;"></span>
               <span style="font-size:13px; color:var(--text); line-height:1.45;">{{ map.caption }}</span>
             </div>
           </sc-if>
           <sc-if value="{{ map.chaosMsgShow }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:70%; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid {{ map.chaosMsgBorder }}; background:{{ map.chaosMsgBg }}; backdrop-filter:blur(6px); box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
+            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:70%; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid {{ map.chaosMsgBorder }}; background:{{ map.chaosMsgBg }}; box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
               <span style="flex:0 0 auto; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; color:#05080f; background:{{ map.chaosMsgColor }};">{{ map.chaosMsgIcon }}</span>
               <span style="font-size:13px; color:var(--text); line-height:1.45;">{{ map.chaosMsg }}</span>
             </div>
           </sc-if>
-          <div style="position:absolute; left:16px; bottom:16px; max-width:calc(100% - 230px); display:flex; flex-wrap:wrap; align-items:center; gap:5px 11px; padding:8px 13px; border-radius:12px; background:var(--header-bg); backdrop-filter:blur(6px); border:1px solid var(--border); pointer-events:none;">
+          <div style="position:absolute; left:16px; bottom:16px; max-width:calc(100% - 230px); display:flex; flex-wrap:wrap; align-items:center; gap:5px 11px; padding:8px 13px; border-radius:12px; background:var(--header-bg); border:1px solid var(--border); pointer-events:none;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-right:1px;">{{ t.mapLegend }}</span>
             <sc-for list="{{ map.legend }}" as="lg" hint-placeholder-count="0">
               <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-muted);"><span style="width:8px; height:8px; border-radius:3px; background:{{ lg.color }}; box-shadow:0 0 6px {{ lg.color }};"></span>{{ lg.name }}</span>
@@ -1005,7 +1005,7 @@
   </footer>
 
   <sc-if value="{{ showAchievements }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeAch }}" style="position:fixed; inset:0; z-index:50; background:rgba(2,6,20,0.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div onClick="{{ closeAch }}" style="position:fixed; inset:0; z-index:50; background:rgba(2,6,20,0.62);display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="ach" aria-label="{{ t.achTitle }}" onClick="{{ stopProp }}" style="width:min(720px,100%); max-height:82vh; overflow-y:auto; background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); padding:22px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
           <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px;">🏆 {{ t.achTitle }} · {{ achLabel }}</div>
@@ -1038,7 +1038,7 @@
   </sc-if>
 
   <sc-if value="{{ showCmdRef }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeCmdRef }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div onClick="{{ closeCmdRef }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.62);display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="cmdref" aria-label="{{ t.cmdRefTitle }}" onClick="{{ stopPropC }}" style="width:min(720px,100%); max-height:86vh; display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); padding:22px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; flex:0 0 auto;">
           <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px;">📋 {{ t.cmdRefTitle }} · {{ cmdRef.total }} {{ t.cmdRefResults }}</div>
@@ -1068,7 +1068,7 @@
   </sc-if>
 
   <sc-if value="{{ showGlossary }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeGlossary }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div onClick="{{ closeGlossary }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.62);display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="glossary" aria-label="{{ t.glTitle }}" onClick="{{ stopPropC }}" style="width:min(720px,100%); max-height:86vh; display:flex; flex-direction:column; background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); padding:22px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; flex:0 0 auto;">
           <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px;">📖 {{ t.glTitle }} · {{ glossary.count }} {{ t.glResults }}</div>
@@ -1110,7 +1110,7 @@
   </sc-if>
 
   <sc-if value="{{ showPaths }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closePaths }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div onClick="{{ closePaths }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.62);display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="paths" aria-label="{{ t.pathTitle }}" onClick="{{ stopPropC }}" style="width:min(720px,100%); max-height:86vh; overflow-y:auto; background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); padding:22px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
           <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px;">🎓 {{ t.pathTitle }} · {{ path.label }}</div>
@@ -1143,7 +1143,7 @@
   </sc-if>
 
   <sc-if value="{{ showContent }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeContent }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.55); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div onClick="{{ closeContent }}" style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.62);display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="content" aria-label="{{ t.contentTitle }}" onClick="{{ stopPropC }}" style="width:min(780px,100%); max-height:86vh; overflow-y:auto; background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); padding:22px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
           <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px;">📦 {{ t.contentTitle }}</div>
@@ -1179,7 +1179,7 @@
   </sc-if>
 
   <sc-if value="{{ tour.show }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.6); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
+    <div style="position:fixed; inset:0; z-index:55; background:rgba(2,6,20,0.62); display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeUp .2s ease both;">
       <div role="dialog" aria-modal="true" tabindex="-1" data-dc-dialog="tour" aria-label="{{ t.tour }}" style="width:min(560px,100%); background:var(--panel); border:1px solid var(--border-strong); border-radius:18px; box-shadow:var(--card-shadow); overflow:hidden;">
         <div style="height:4px; background:var(--panel-2);"><div style="height:100%; width:{{ tour.pct }}; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .3s;"></div></div>
         <div style="padding:24px;">
