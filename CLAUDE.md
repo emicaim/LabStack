@@ -37,7 +37,7 @@ This is a custom React-backed component format, not plain HTML. A `.dc.html` fil
 
 ### Data model (all defined as methods returning arrays/objects in the logic script)
 
-- `cats()` — the 16 infrastructure categories (id, color, bilingual name). 10 are stackable layers; `seguridad`, `cicd`, `iac`, `monitorizacion`, `gobernanza`, `mensajeria` are cross-cutting transversals (rendered separately, not in the stack).
+- `cats()` — the 17 infrastructure categories (id, color, bilingual name). 10 are stackable layers; `seguridad`, `cicd`, `iac`, `monitorizacion`, `gobernanza`, `mensajeria`, `backup` are cross-cutting transversals (rendered separately, not in the stack).
 - `blocks()` — the draggable items. Each block has `id`, `cat` (category id), `code` (badge), bilingual `name`/`why`/`desc`, `facts[]`, and optionally a fake `term[]` transcript or `steps[]`.
 - `layerMeta()` — per-layer pedagogy (bilingual `hint`, `why`, `miss`, `anal`, `flow`), keyed by category id.
 - `strings()` — UI chrome strings.

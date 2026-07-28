@@ -1258,6 +1258,7 @@ class Component extends DCLogic {
       { id:'iac', color:'#c026d3', fam:'ops', name:{es:'IaC · Terraform',en:'IaC · Terraform'} },
       { id:'monitorizacion', color:'#d946ef', fam:'ops', name:{es:'Monitorización',en:'Monitoring'} },
       { id:'gobernanza', color:'#a855f7', fam:'ops', name:{es:'Gobierno · Cumplimiento',en:'Governance · Compliance'} },
+      { id:'backup', color:'#6d28d9', fam:'ops', name:{es:'Backup · Recuperación',en:'Backup · Recovery'} },
     ];
   }
   icons() {
@@ -1271,6 +1272,7 @@ class Component extends DCLogic {
       contenedores:'M12 2 2 7v10l10 5 10-5V7L12 2zM2 7l10 5 10-5M12 12v10',
       orquestacion:'M12 2l8.5 5v10L12 22 3.5 17V7L12 2zM12 8l4.3 2.5v4L12 17l-4.3-2.5v-4L12 8z',
       mensajeria:'M3 5h18v14H3zM3 5l9 7 9-7',
+      backup:'M21 12a9 9 0 11-2.64-6.36M21 3v5h-5',
       datos:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6',
       nube:'M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',
       seguridad:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
@@ -1300,6 +1302,7 @@ class Component extends DCLogic {
       kafka:'M5 3v18M5 12h5M12 6a2 2 0 100 4 2 2 0 000-4zM12 8H10M12 14a2 2 0 100 4 2 2 0 000-4zM12 16H10M18 9a2 2 0 100 4 2 2 0 000-4zM18 11h-6', rabbitmq:'M4 10h4V4h4v6h4V7h4v13H4zM11 15h2', nats:'M4 6h16v12H4zM7 9l5 4 5-4', elasticsearch:'M11 4a7 7 0 100 14 7 7 0 000-14zM16 16l4 4M8 11h6', cassandra:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
       istio:'M12 3l7 15H5zM12 3v15M8 14h8', kong:'M4 12h6M14 8l-4 4 4 4M20 5v14M14 8l6-3M14 16l6 3', vault:'M4 4h16v16H4zM12 9a3 3 0 100 6 3 3 0 000-6zM12 15v3M8 8h.01M16 8h.01', argocd:'M12 2a10 10 0 100 20 10 10 0 000-20zM12 7v5l3 2M16 4l1 3-3-1',
       veeam:'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3M9 15l3 3 3-3M12 11v7', zabbix:'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM12 15a3 3 0 100-6 3 3 0 000 6z',
+      backup:'M21 12a9 9 0 11-2.64-6.36M21 3v5h-5', snapshot:'M4 6h4l2-2h4l2 2h4v13H4zM12 16a3.5 3.5 0 100-7 3.5 3.5 0 000 7z', replication:'M4 7h10l-2-2M4 7l2 2M20 17H10l2 2M20 17l-2-2M6 3v4M18 21v-4', velero:'M12 2l8.5 5v10L12 22 3.5 17V7L12 2zM9 12l2 2 4-4',
     };
   }
   pieceIcon(b){ if(!b) return ''; const P=this.pieceIcons(); return P[b.id] || this.icons()[b.cat] || ''; }
@@ -1377,6 +1380,10 @@ class Component extends DCLogic {
       vault:{ one:F('Bóveda central de secretos y credenciales.','Central vault for secrets and credentials.'), use:F('Para no dejar contraseñas ni claves en el código.','To keep passwords and keys out of your code.'), alt:'AWS Secrets Manager, SOPS, Sealed Secrets' },
       argocd:{ one:F('GitOps: el clúster sigue lo declarado en Git.','GitOps: the cluster follows what Git declares.'), use:F('Para desplegar en Kubernetes de forma declarativa y auditable.','To deploy to Kubernetes declaratively and auditably.'), alt:'Flux, Jenkins X, Spinnaker' },
       veeam:{ one:F('Copias de seguridad y recuperación de servidores y VMs.','Backup and recovery of servers and VMs.'), use:F('Cuando necesitas restaurar datos o sistemas tras un fallo, borrado o ransomware.','When you must restore data or systems after a failure, deletion or ransomware.'), alt:'Commvault, Veritas, Bacula, Restic, AWS Backup' },
+      backup:{ one:F('Copias de datos para poder recuperarlos.','Copies of your data so you can recover it.'), use:F('Siempre que la pérdida de esos datos sea inaceptable.','Whenever losing that data would be unacceptable.'), alt:'Veeam, Restic, Borg, Duplicati, AWS Backup' },
+      snapshot:{ one:F('Foto del estado en un instante para volver atrás rápido.','Point-in-time snapshot to roll back fast.'), use:F('Antes de un cambio arriesgado (no como backup único).','Before a risky change (not as your only backup).'), alt:'LVM, ZFS, snapshots de VMware/cloud' },
+      replication:{ one:F('Copia continua a un sitio secundario para DR.','Continuous copy to a secondary site for DR.'), use:F('Para continuidad si cae el sitio principal (RPO/RTO bajos).','For continuity if the primary site fails (low RPO/RTO).'), alt:'Zerto, Veeam Replication, DRBD' },
+      velero:{ one:F('Backup y restauración de clústeres de Kubernetes.','Backup and restore of Kubernetes clusters.'), use:F('Para DR y migración de clústeres K8s y sus volúmenes.','For DR and migration of K8s clusters and their volumes.'), alt:'Kasten K10, Stash, snapshots del CSI' },
       zabbix:{ one:F('Monitoriza la infraestructura y avisa cuando algo falla.','Monitors infrastructure and alerts when something breaks.'), use:F('Para vigilar servidores, red y servicios, sobre todo on-premise.','To watch servers, network and services, especially on-prem.'), alt:'Nagios, PRTG, Checkmk, Prometheus, Grafana' },
     };
   }
@@ -1463,6 +1470,11 @@ class Component extends DCLogic {
         miss:F('Los servicios dependen unos de otros en tiempo real: si uno cae o se satura, arrastra a los dem\u00e1s.','Services depend on each other in real time: if one fails or overloads, it drags the rest down.'),
         anal:F('Como la centralita de correo de una empresa: dejas la carta en el buz\u00f3n y el destinatario la recoge cuando puede, sin esperar cara a cara.','Like a company mailroom: you drop the letter in the box and the recipient picks it up when they can, with no face-to-face wait.'),
         flow:F('El servicio publica un evento en el bus y otros lo consumen de forma as\u00edncrona, sin bloquear la petici\u00f3n.','The service publishes an event on the bus and others consume it asynchronously, without blocking the request.')},
+      backup:{badge:'BKP',hint:F('Transversal: copias y recuperaci\u00f3n de datos y sistemas.','Cross-cutting: backup and recovery of data and systems.'),
+        why:F('Los fallos, los borrados y los ataques (ransomware) ocurren: el backup permite recuperar datos y sistemas, y da continuidad al negocio ante un desastre.','Failures, deletions and attacks (ransomware) happen: backup lets you recover data and systems, and keeps the business running after a disaster.'),
+        miss:F('Si algo se pierde, se corrompe o se cifra, no hay vuelta atr\u00e1s: p\u00e9rdida de datos irreversible y parada del servicio.','If something is lost, corrupted or encrypted, there is no going back: irreversible data loss and downtime.'),
+        anal:F('Como guardar copias de las llaves y los documentos importantes en otro lugar: si pierdes el original, sigues teniendo acceso.','Like keeping copies of your keys and important documents elsewhere: if you lose the original, you still have access.'),
+        flow:F('Mientras la petici\u00f3n se atiende, las copias protegen los datos por detr\u00e1s para poder restaurarlos ante un fallo.','While the request is served, backups protect the data in the background so it can be restored after a failure.')},
     };
   }
   blocksBase() {
@@ -1558,8 +1570,12 @@ class Component extends DCLogic {
       {id:'vault',cat:'seguridad',code:'VLT',name:F('HashiCorp Vault','HashiCorp Vault'),why:F('Gestiona secretos, claves y credenciales de forma centralizada.','Centrally manages secrets, keys and credentials.'),desc:F('Almacena y entrega secretos con acceso auditado, rotación automática y credenciales dinámicas de corta vida en lugar de contraseñas fijas en el código.','Stores and delivers secrets with audited access, automatic rotation and short-lived dynamic credentials instead of hardcoded passwords.'),facts:[F('Secretos dinámicos y de corta vida.','Short-lived, dynamic secrets.'),F('Cifrado como servicio y acceso auditado.','Encryption-as-a-service and audited access.')]},
       // CI/CD (ampliación)
       {id:'argocd',cat:'cicd',code:'ARGO',name:F('Argo CD','Argo CD'),why:F('Despliegue GitOps declarativo para Kubernetes.','Declarative GitOps deployment for Kubernetes.'),desc:F('Sincroniza el clúster con el estado declarado en Git: detecta desviaciones (drift) y revierte automáticamente a lo definido en el repositorio.','Syncs the cluster with the state declared in Git: detects drift and automatically reverts to what the repo defines.'),facts:[F('La fuente de verdad es Git.','The source of truth is Git.'),F('Auto-sync, detección de drift y rollback.','Auto-sync, drift detection and rollback.')]},
-      // ALMACENAMIENTO (ampliación) — copias de seguridad / DR
-      {id:'veeam',cat:'almacenamiento',code:'VBR',name:F('Veeam Backup','Veeam Backup'),why:F('Hace copias de seguridad y replica servidores y VMs para poder restaurarlos ante fallos, borrados o ransomware.','Backs up and replicates servers and VMs so you can restore them after failures, deletions or ransomware.'),desc:F('Protege máquinas virtuales, físicas y cargas en la nube con copias incrementales, verificación automática y recuperación rápida, incluida la recuperación ante desastres (DR).','Protects virtual, physical and cloud workloads with incremental backups, automatic verification and fast recovery, including disaster recovery (DR).'),facts:[F('Sigue la regla 3-2-1: 3 copias, 2 medios, 1 fuera del sitio.','Follows the 3-2-1 rule: 3 copies, 2 media, 1 off-site.'),F('Restauración granular: desde un archivo hasta una VM entera.','Granular restore: from a single file to a whole VM.')],term:[['$','veeam job start --name Backup-Prod'],['','Creating incremental restore point...'],['','Verifying backup (SureBackup)... OK'],['','Job finished: 42 VMs protected']]},
+      // BACKUP · RECUPERACIÓN (transversal)
+      {id:'backup',cat:'backup',code:'BKP',name:F('Copia de seguridad','Backup'),why:F('Guarda copias de los datos para poder recuperarlos si se pierden, se corrompen o los cifra un ataque.','Keeps copies of your data so you can recover it if it is lost, corrupted or encrypted by an attack.'),desc:F('Puede ser completa, incremental o diferencial. Una buena estrategia sigue la regla 3-2-1 y, sobre todo, prueba la restauración: un backup que no se restaura no vale.','It can be full, incremental or differential. A good strategy follows the 3-2-1 rule and, above all, tests the restore: a backup you cannot restore is worthless.'),facts:[F('Completa vs incremental vs diferencial.','Full vs incremental vs differential.'),F('Regla 3-2-1 y probar la restauración periódicamente.','3-2-1 rule and test the restore regularly.')]},
+      {id:'snapshot',cat:'backup',code:'SNAP',name:F('Snapshot','Snapshot'),why:F('Captura el estado de un volumen o VM en un instante para poder volver atrás muy rápido.','Captures the state of a volume or VM at an instant so you can roll back very fast.'),desc:F('Es instantáneo y ligero (copy-on-write), ideal antes de un cambio arriesgado; pero NO sustituye a un backup: vive en el mismo sistema y desaparece si este falla.','It is instant and lightweight (copy-on-write), ideal before a risky change; but it is NOT a backup: it lives on the same system and is gone if that system fails.'),facts:[F('Casi instantáneo, poco espacio al principio.','Almost instant, little space at first.'),F('No es un backup: mismo almacenamiento.','Not a backup: same underlying storage.')]},
+      {id:'replication',cat:'backup',code:'REPL',name:F('Replicación / DR','Replication / DR'),why:F('Copia los datos de forma continua a un sitio secundario para seguir operando si cae el principal.','Continuously copies data to a secondary site so you keep operating if the primary goes down.'),desc:F('Es la base de la recuperación ante desastres: se mide con RPO (cuántos datos puedes perder) y RTO (cuánto tardas en recuperar el servicio).','It is the foundation of disaster recovery: measured by RPO (how much data you can lose) and RTO (how long to restore service).'),facts:[F('RPO y RTO definen el objetivo de recuperación.','RPO and RTO define the recovery target.'),F('Síncrona (sin pérdida) o asíncrona (más barata).','Synchronous (no loss) or asynchronous (cheaper).')]},
+      {id:'velero',cat:'backup',code:'VELO',name:F('Velero (K8s)','Velero (K8s)'),why:F('Copia y restaura los recursos de un clúster de Kubernetes y sus volúmenes.','Backs up and restores the resources of a Kubernetes cluster and its volumes.'),desc:F('Exporta los objetos del clúster (namespaces, deployments…) junto a snapshots de los volúmenes hacia object storage; sirve para migrar clústeres y para DR.','Exports cluster objects (namespaces, deployments…) along with volume snapshots to object storage; useful to migrate clusters and for DR.'),facts:[F('Backup por namespace o de todo el clúster.','Backup per namespace or of the whole cluster.'),F('Guarda las copias en object storage (S3…).','Stores backups in object storage (S3…).')]},
+      {id:'veeam',cat:'backup',code:'VBR',name:F('Veeam Backup','Veeam Backup'),why:F('Hace copias de seguridad y replica servidores y VMs para poder restaurarlos ante fallos, borrados o ransomware.','Backs up and replicates servers and VMs so you can restore them after failures, deletions or ransomware.'),desc:F('Protege máquinas virtuales, físicas y cargas en la nube con copias incrementales, verificación automática y recuperación rápida, incluida la recuperación ante desastres (DR).','Protects virtual, physical and cloud workloads with incremental backups, automatic verification and fast recovery, including disaster recovery (DR).'),facts:[F('Sigue la regla 3-2-1: 3 copias, 2 medios, 1 fuera del sitio.','Follows the 3-2-1 rule: 3 copies, 2 media, 1 off-site.'),F('Restauración granular: desde un archivo hasta una VM entera.','Granular restore: from a single file to a whole VM.')],term:[['$','veeam job start --name Backup-Prod'],['','Creating incremental restore point...'],['','Verifying backup (SureBackup)... OK'],['','Job finished: 42 VMs protected']]},
       // MONITORIZACION (ampliación)
       {id:'zabbix',cat:'monitorizacion',code:'ZBX',name:F('Zabbix','Zabbix'),why:F('Monitoriza la disponibilidad y el rendimiento de servidores, red y servicios, y avisa cuando algo falla.','Monitors availability and performance of servers, network and services, and alerts when something breaks.'),desc:F('Recoge métricas con o sin agente (SNMP, IPMI), detecta problemas con umbrales y triggers, y dispara alertas; muy usado en infraestructura on-premise.','Collects metrics with or without agents (SNMP, IPMI), detects issues via thresholds and triggers, and fires alerts; widely used in on-prem infrastructure.'),facts:[F('Agentes o SNMP para vigilar también equipos de red.','Agents or SNMP to also watch network gear.'),F('Plantillas y triggers para alertar sin repetir configuración.','Templates and triggers to alert without repeating config.')]},
     ];
@@ -2118,22 +2134,22 @@ class Component extends DCLogic {
     return [
       { id:'k8s', name:{es:'App web en Kubernetes',en:'Web app on Kubernetes'},
         desc:{es:'Una aplicación web moderna: contenedores orquestados por Kubernetes, con base de datos, CI/CD y observabilidad.',en:'A modern web app: containers orchestrated by Kubernetes, with a database, CI/CD and observability.'},
-        placed:{ red:['router','lb','dns'], computo:['baremetal'], almacenamiento:['objstore'], virtualizacion:['hypervisor','vm'], so:['linux'], contenedores:['docker','image','container'], orquestacion:['k8s','pod','deployment','service','ingress'], datos:['postgres','redis'], seguridad:['firewall','tls'], cicd:['git','pipeline','registry','gitops'], iac:['terraform'], monitorizacion:['prometheus','grafana','alerts'] } },
+        placed:{ red:['router','lb','dns'], computo:['baremetal'], almacenamiento:['objstore'], virtualizacion:['hypervisor','vm'], so:['linux'], contenedores:['docker','image','container'], orquestacion:['k8s','pod','deployment','service','ingress'], datos:['postgres','redis'], seguridad:['firewall','tls'], cicd:['git','pipeline','registry','gitops'], iac:['terraform'], monitorizacion:['prometheus','grafana','alerts'], backup:['backup','velero'] } },
       { id:'cloud', name:{es:'Nube serverless',en:'Serverless cloud'},
         desc:{es:'Todo gestionado por el proveedor: funciones bajo demanda, CDN y datos NoSQL, sin servidores que administrar.',en:'Fully provider-managed: on-demand functions, CDN and NoSQL data, with no servers to run.'},
-        placed:{ red:['dns'], nube:['serverless','cdn','managedk8s'], datos:['mongodb'], seguridad:['iam','tls'], cicd:['git','actions'], iac:['terraform'], monitorizacion:['logs','alerts','tracing'] } },
+        placed:{ red:['dns'], nube:['serverless','cdn','managedk8s'], datos:['mongodb'], seguridad:['iam','tls'], cicd:['git','actions'], iac:['terraform'], monitorizacion:['logs','alerts','tracing'], backup:['backup'] } },
       { id:'hci', name:{es:'Datacenter con Nutanix (HCI)',en:'Datacenter with Nutanix (HCI)'},
         desc:{es:'Infraestructura on-premise clásica: red física, almacenamiento SAN/NAS y virtualización convergida en un clúster Nutanix.',en:'Classic on-prem infrastructure: physical network, SAN/NAS storage and virtualization converged in a Nutanix cluster.'},
-        placed:{ red:['router','switch','vlan'], computo:['rack','baremetal'], almacenamiento:['san','nas','raid','veeam'], virtualizacion:['hypervisor','kvm','vm'], hci:['ahv','prism','hcinode'], so:['linux','winserver'], seguridad:['firewall','vpn','encryption','tls'], iac:['ansible'], monitorizacion:['prometheus','grafana','zabbix'] } },
+        placed:{ red:['router','switch','vlan'], computo:['rack','baremetal'], almacenamiento:['san','nas','raid'], virtualizacion:['hypervisor','kvm','vm'], hci:['ahv','prism','hcinode'], so:['linux','winserver'], seguridad:['firewall','vpn','encryption','tls'], iac:['ansible'], monitorizacion:['prometheus','grafana','zabbix'], backup:['backup','veeam','replication'] } },
       { id:'micro', name:{es:'Microservicios event-driven',en:'Event-driven microservices'},
         desc:{es:'Microservicios desacoplados por eventos (Kafka/NATS) con service mesh (Istio), API gateway, búsqueda, secretos (Vault) y despliegue GitOps (Argo CD).',en:'Microservices decoupled via events (Kafka/NATS) with a service mesh (Istio), API gateway, search, secrets (Vault) and GitOps delivery (Argo CD).'},
-        placed:{ red:['router','lb','dns','kong'], computo:['baremetal'], almacenamiento:['objstore'], so:['linux'], contenedores:['docker','image','container'], orquestacion:['k8s','pod','deployment','service','ingress','istio'], mensajeria:['kafka','nats'], datos:['postgres','redis','elasticsearch'], seguridad:['firewall','tls','vault'], cicd:['git','pipeline','registry','argocd'], iac:['terraform'], monitorizacion:['prometheus','grafana','alerts','tracing'] } },
+        placed:{ red:['router','lb','dns','kong'], computo:['baremetal'], almacenamiento:['objstore'], so:['linux'], contenedores:['docker','image','container'], orquestacion:['k8s','pod','deployment','service','ingress','istio'], mensajeria:['kafka','nats'], datos:['postgres','redis','elasticsearch'], seguridad:['firewall','tls','vault'], cicd:['git','pipeline','registry','argocd'], iac:['terraform'], monitorizacion:['prometheus','grafana','alerts','tracing'], backup:['backup','velero'] } },
       { id:'onprem-web', name:{es:'Web on-premise (VMs)',en:'On-prem web (VMs)'},
         desc:{es:'El stack web tradicional sobre máquinas virtuales: red física con balanceador, almacenamiento RAID/NAS, Linux y base de datos MySQL, con firewall y TLS.',en:'The traditional web stack on virtual machines: physical network with a load balancer, RAID/NAS storage, Linux and a MySQL database, with firewall and TLS.'},
-        placed:{ red:['router','switch','dns','lb'], computo:['baremetal'], almacenamiento:['raid','nas','veeam'], virtualizacion:['hypervisor','vm'], so:['linux'], datos:['mysql'], seguridad:['firewall','tls'], monitorizacion:['logs','alerts','zabbix'] } },
+        placed:{ red:['router','switch','dns','lb'], computo:['baremetal'], almacenamiento:['raid','nas'], virtualizacion:['hypervisor','vm'], so:['linux'], datos:['mysql'], seguridad:['firewall','tls'], monitorizacion:['logs','alerts','zabbix'], backup:['backup','veeam'] } },
       { id:'dataplat', name:{es:'Plataforma de datos (Big Data)',en:'Data platform (Big Data)'},
         desc:{es:'Ingesta y análisis a gran escala: eventos por Kafka, almacén distribuido (Cassandra), búsqueda (Elasticsearch), caché y object storage, orquestado en Kubernetes.',en:'Large-scale ingest and analytics: Kafka events, a distributed store (Cassandra), search (Elasticsearch), cache and object storage, orchestrated on Kubernetes.'},
-        placed:{ red:['router','lb','dns'], computo:['rack','baremetal'], almacenamiento:['objstore','san'], so:['linux'], contenedores:['docker','container'], orquestacion:['k8s','pod','deployment'], mensajeria:['kafka'], datos:['cassandra','elasticsearch','redis'], seguridad:['firewall','tls','iam'], cicd:['git','pipeline'], iac:['terraform'], monitorizacion:['prometheus','grafana','logs'] } },
+        placed:{ red:['router','lb','dns'], computo:['rack','baremetal'], almacenamiento:['objstore','san'], so:['linux'], contenedores:['docker','container'], orquestacion:['k8s','pod','deployment'], mensajeria:['kafka'], datos:['cassandra','elasticsearch','redis'], seguridad:['firewall','tls','iam'], cicd:['git','pipeline'], iac:['terraform'], monitorizacion:['prometheus','grafana','logs'], backup:['backup','velero'] } },
     ];
   }
   loadPreset(id){
@@ -2893,7 +2909,7 @@ class Component extends DCLogic {
       [ {id:'storage', cats:['almacenamiento'], label:T('Almacenamiento','Storage'), icon:'💾'},
         {id:'data', cats:['datos'], label:T('Bases de datos','Databases'), icon:'🗄️'},
         {id:'cloud', cats:['nube'], label:T('Nube (proveedor)','Cloud (provider)'), icon:'☁️', dashed:true} ],
-      [ {id:'ops', cats:['cicd','iac','monitorizacion','gobernanza'], label:T('Operación transversal','Cross-cutting ops'), icon:'🛠️'} ],
+      [ {id:'ops', cats:['cicd','iac','monitorizacion','gobernanza','backup'], label:T('Operación transversal','Cross-cutting ops'), icon:'🛠️'} ],
     ];
     const PAD=18, GW=126, GGAP=12, HEAD=34, CELL_H=42, CELL_GAP=8, GHEAD=24, ROW_GAP=58, ZONE_GAP=44, WP=52;
     // measure zones
@@ -2996,6 +3012,7 @@ class Component extends DCLogic {
     const scalable=has('orquestacion')||has('contenedores');
     if(scalable && has('red') && !hasBlk('lb')) warns.push({ title:T('Punto único de fallo','Single point of failure'), msg:T('Sin balanceador: no hay reparto de carga ni alta disponibilidad si un servidor cae.','No load balancer: no load spreading or high availability if a server fails.'), cats:['red'] });
     if(has('datos') && !has('almacenamiento') && !has('nube')) warns.push({ title:T('Datos sin persistencia','Data without persistence'), msg:T('La base de datos no tiene almacenamiento debajo: riesgo de pérdida al reiniciar o fallar.','The database has no storage underneath: risk of loss on restart or failure.'), cats:['datos'] });
+    if((has('datos')||has('almacenamiento')) && !has('backup')) warns.push({ title:T('Sin copia de seguridad','No backup'), msg:T('Hay datos pero ningún backup: ante un fallo, borrado o ransomware no se podrían recuperar. Añade la capa de Backup · Recuperación.','There is data but no backup: after a failure, deletion or ransomware it could not be recovered. Add the Backup · Recovery layer.'), cats:['datos'] });
     if(has('red') && !hasBlk('tls')) warns.push({ title:T('Tráfico sin cifrar','Unencrypted traffic'), msg:T('Falta TLS en el perímetro: el tráfico viaja sin cifrar.','No TLS at the edge: traffic travels unencrypted.'), cats:['red'] });
     // el firewall se exige si hay red enrutable/expuesta real (router, switch o balanceador), no sólo DNS
     if((hasBlk('router')||hasBlk('switch')||hasBlk('lb')) && !hasBlk('firewall')) warns.push({ title:T('Perímetro sin firewall','Edge without firewall'), msg:T('No hay firewall filtrando la entrada a la red.','No firewall filtering ingress to the network.'), cats:['red'] });
@@ -3015,7 +3032,7 @@ class Component extends DCLogic {
       virtualizacion:{cost:25,cpu:2,ram:8}, hci:{cost:150,cpu:16,ram:64}, so:{cost:0,cpu:1,ram:2},
       contenedores:{cost:10,cpu:1,ram:2}, orquestacion:{cost:35,cpu:2,ram:4}, mensajeria:{cost:30,cpu:2,ram:4}, datos:{cost:80,cpu:4,ram:16},
       nube:{cost:110,cpu:0,ram:0}, seguridad:{cost:25,cpu:1,ram:1}, cicd:{cost:15,cpu:1,ram:2},
-      iac:{cost:5,cpu:0,ram:0}, monitorizacion:{cost:20,cpu:1,ram:2}, gobernanza:{cost:20,cpu:0,ram:0},
+      iac:{cost:5,cpu:0,ram:0}, monitorizacion:{cost:20,cpu:1,ram:2}, gobernanza:{cost:20,cpu:0,ram:0}, backup:{cost:25,cpu:1,ram:2},
     };
   }
   sizing(placed){
@@ -3140,7 +3157,7 @@ class Component extends DCLogic {
     });
 
     // transversal rails (security, ci/cd, iac)
-    const transIds = ['seguridad','cicd','iac','mensajeria','monitorizacion','gobernanza'];
+    const transIds = ['seguridad','cicd','iac','mensajeria','monitorizacion','gobernanza','backup'];
     const transversals = transIds.map(tid=>{
       const sc = this.catById(tid); const ids = S.placed[tid]||[]; const over=S.over===tid;
       const isTarget = !!(armedBlock && armedBlock.cat===tid);
