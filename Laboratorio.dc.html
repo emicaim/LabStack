@@ -2118,6 +2118,15 @@ class Component extends DCLogic {
       { id:'hci', name:{es:'Datacenter con Nutanix (HCI)',en:'Datacenter with Nutanix (HCI)'},
         desc:{es:'Infraestructura on-premise clásica: red física, almacenamiento SAN/NAS y virtualización convergida en un clúster Nutanix.',en:'Classic on-prem infrastructure: physical network, SAN/NAS storage and virtualization converged in a Nutanix cluster.'},
         placed:{ red:['router','switch','vlan'], computo:['rack','baremetal'], almacenamiento:['san','nas','raid'], virtualizacion:['hypervisor','kvm','vm'], hci:['ahv','prism','hcinode'], so:['linux','winserver'], seguridad:['firewall','vpn','encryption','tls'], iac:['ansible'], monitorizacion:['prometheus','grafana'] } },
+      { id:'micro', name:{es:'Microservicios event-driven',en:'Event-driven microservices'},
+        desc:{es:'Microservicios desacoplados por eventos (Kafka/NATS) con service mesh (Istio), API gateway, búsqueda, secretos (Vault) y despliegue GitOps (Argo CD).',en:'Microservices decoupled via events (Kafka/NATS) with a service mesh (Istio), API gateway, search, secrets (Vault) and GitOps delivery (Argo CD).'},
+        placed:{ red:['router','lb','dns','kong'], computo:['baremetal'], almacenamiento:['objstore'], so:['linux'], contenedores:['docker','image','container'], orquestacion:['k8s','pod','deployment','service','ingress','istio'], mensajeria:['kafka','nats'], datos:['postgres','redis','elasticsearch'], seguridad:['firewall','tls','vault'], cicd:['git','pipeline','registry','argocd'], iac:['terraform'], monitorizacion:['prometheus','grafana','alerts','tracing'] } },
+      { id:'onprem-web', name:{es:'Web on-premise (VMs)',en:'On-prem web (VMs)'},
+        desc:{es:'El stack web tradicional sobre máquinas virtuales: red física con balanceador, almacenamiento RAID/NAS, Linux y base de datos MySQL, con firewall y TLS.',en:'The traditional web stack on virtual machines: physical network with a load balancer, RAID/NAS storage, Linux and a MySQL database, with firewall and TLS.'},
+        placed:{ red:['router','switch','dns','lb'], computo:['baremetal'], almacenamiento:['raid','nas'], virtualizacion:['hypervisor','vm'], so:['linux'], datos:['mysql'], seguridad:['firewall','tls'], monitorizacion:['logs','alerts'] } },
+      { id:'dataplat', name:{es:'Plataforma de datos (Big Data)',en:'Data platform (Big Data)'},
+        desc:{es:'Ingesta y análisis a gran escala: eventos por Kafka, almacén distribuido (Cassandra), búsqueda (Elasticsearch), caché y object storage, orquestado en Kubernetes.',en:'Large-scale ingest and analytics: Kafka events, a distributed store (Cassandra), search (Elasticsearch), cache and object storage, orchestrated on Kubernetes.'},
+        placed:{ red:['router','lb','dns'], computo:['rack','baremetal'], almacenamiento:['objstore','san'], so:['linux'], contenedores:['docker','container'], orquestacion:['k8s','pod','deployment'], mensajeria:['kafka'], datos:['cassandra','elasticsearch','redis'], seguridad:['firewall','tls','iam'], cicd:['git','pipeline'], iac:['terraform'], monitorizacion:['prometheus','grafana','logs'] } },
     ];
   }
   loadPreset(id){
