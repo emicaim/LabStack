@@ -386,7 +386,7 @@
         <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow:hidden;">
           <div onWheel="{{ map.onWheel }}" onMouseDown="{{ map.onDown }}" onMouseMove="{{ map.onMove }}" onMouseUp="{{ map.onUp }}" onMouseLeave="{{ map.onUp }}"
                style="position:absolute; inset:0; overflow:hidden; cursor:{{ map.cursor }}; background:radial-gradient(circle at 50% 38%, rgba(99,102,241,0.05), transparent 62%);">
-            <div style="position:absolute; left:0; top:0; transform:{{ map.transform }}; transform-origin:0 0; width:{{ map.world.w }}px; height:{{ map.world.h }}px;">
+            <div style="position:absolute; left:0; top:0; transform:{{ map.transform }}; transform-origin:0 0; width:{{ map.world.w }}px; height:{{ map.world.h }}px; transition:{{ map.worldTransition }};">
               <sc-for list="{{ map.zones }}" as="z" hint-placeholder-count="4">
                 <div style="position:absolute; left:{{ z.x }}px; top:{{ z.y }}px; width:{{ z.w }}px; height:{{ z.h }}px; border-radius:18px; border:1.5px {{ z.dashStyle }} {{ z.border }}; background:{{ z.bg }}; pointer-events:none;">
                   <div style="position:absolute; top:-13px; left:16px; display:flex; align-items:center; gap:6px; padding:3px 11px; border-radius:99px; background:var(--panel); border:1px solid var(--border-strong); font-size:11.5px; font-weight:600; color:var(--text-muted); white-space:nowrap;"><span style="font-size:13px;">{{ z.icon }}</span>{{ z.label }}</div>
@@ -403,6 +403,10 @@
                     <path d="{{ l.d }}" fill="none" stroke="{{ l.stroke }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 13" opacity="0.95" style="animation:flowDash 1.6s linear infinite;"></path>
                   </sc-if>
                 </sc-for>
+                <sc-if value="{{ map.trail.show }}" hint-placeholder-val="{{ false }}">
+                  <path d="{{ map.trail.d }}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.14"></path>
+                  <path d="{{ map.trail.d }}" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="{{ map.trail.total }}" stroke-dashoffset="{{ map.trail.offset }}" style="transition:stroke-dashoffset .85s cubic-bezier(.45,0,.3,1);"></path>
+                </sc-if>
               </svg>
               <sc-for list="{{ map.labels }}" as="g" hint-placeholder-count="0">
                 <div title="{{ g.alertMsg }}" style="position:absolute; left:{{ g.left }}px; top:{{ g.top }}px; width:{{ g.w }}px; display:flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:{{ g.color }}; white-space:nowrap;">
@@ -428,7 +432,9 @@
                 </div>
               </sc-for>
               <sc-if value="{{ map.packet.show }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; left:{{ map.packet.x }}px; top:{{ map.packet.y }}px; width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 6px rgba(99,102,241,0.20), 0 0 20px 5px var(--accent); transition:left .55s cubic-bezier(.4,0,.35,1), top .55s cubic-bezier(.4,0,.35,1); z-index:5;"></div>
+                <div style="position:absolute; left:0; top:0; z-index:6; pointer-events:none; offset-path:{{ map.packet.path }}; offset-rotate:0deg; offset-distance:{{ map.packet.dist }}; transition:offset-distance .85s cubic-bezier(.45,0,.3,1); display:flex; align-items:center; gap:6px; padding:5px 11px 5px 8px; border-radius:99px; background:var(--accent); color:#fff; font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:0.04em; white-space:nowrap; box-shadow:0 0 0 5px rgba(99,102,241,0.18), 0 0 26px 5px var(--accent);">
+                  <span style="width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 8px #fff;"></span>{{ map.packet.label }}
+                </div>
               </sc-if>
             </div>
           </div>
@@ -453,15 +459,19 @@
             </div>
           </sc-if>
           <sc-if value="{{ map.captionShow }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:62%; display:flex; align-items:center; gap:9px; padding:10px 15px; border-radius:12px; border:1px solid rgba(99,102,241,0.4); background:var(--accent-tint); box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
-              <span style="width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); flex:0 0 auto;"></span>
-              <span style="font-size:13px; color:var(--text); line-height:1.45;">{{ map.caption }}</span>
+            <div style="position:absolute; left:16px; right:70px; bottom:78px; display:flex; justify-content:center; pointer-events:none;">
+              <div style="max-width:700px; display:flex; align-items:center; gap:10px; padding:11px 16px; border-radius:12px; border:1px solid rgba(99,102,241,0.45); background:var(--panel); box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
+              <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--accent); background:var(--panel); border:1px solid rgba(99,102,241,0.45); border-radius:99px; padding:3px 9px;">{{ map.stepLabel }}</span>
+              <span style="font-size:13px; color:var(--text); line-height:1.45;"><b>{{ map.stepName }}</b> — {{ map.caption }}</span>
+              </div>
             </div>
           </sc-if>
           <sc-if value="{{ map.chaosMsgShow }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); max-width:70%; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid {{ map.chaosMsgBorder }}; background:{{ map.chaosMsgBg }}; box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
+            <div style="position:absolute; left:16px; right:70px; bottom:18px; display:flex; justify-content:center; pointer-events:none;">
+              <div style="max-width:720px; display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid {{ map.chaosMsgBorder }}; background:{{ map.chaosMsgBg }}; box-shadow:var(--card-shadow); animation:fadeUp .25s ease both;">
               <span style="flex:0 0 auto; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; color:#05080f; background:{{ map.chaosMsgColor }};">{{ map.chaosMsgIcon }}</span>
               <span style="font-size:13px; color:var(--text); line-height:1.45;">{{ map.chaosMsg }}</span>
+              </div>
             </div>
           </sc-if>
           <div style="position:absolute; left:16px; bottom:16px; max-width:calc(100% - 230px); display:flex; flex-wrap:wrap; align-items:center; gap:5px 11px; padding:8px 13px; border-radius:12px; background:var(--header-bg); border:1px solid var(--border); pointer-events:none;">
@@ -1904,7 +1914,7 @@ class Component extends DCLogic {
       modeIncident:'Incidente', incTitle:'Sala de incidentes', incHint:'Diagnostica una avería real: reúne pistas, identifica la causa raíz y aplica el arreglo correcto.', incPickHint:'Elige un incidente para resolver:', incSymptom:'Síntoma', incStartBtn:'Empezar a investigar', incChecks:'Comprobaciones', incChecksHint:'Toca una comprobación para ver su salida.', incToDiagnose:'Ya tengo una hipótesis →', incDiagnoseTitle:'¿Cuál es la causa raíz?', incConfirmCause:'Confirmar causa', incBackInvestigate:'← Volver a investigar', incFixTitle:'¿Cómo lo arreglas?', incApplyFix:'Aplicar arreglo', incResolvedTag:'Incidente resuelto', incLearnLabel:'Aprendizaje', incAnother:'Elegir otro incidente', incRetry:'Reintentar', incPhInvestigate:'Investigar', incPhDiagnose:'Diagnosticar', incPhFix:'Arreglar', incExit:'Salir',
       quizAdaptive:'Adaptativo: las categorías donde fallas volverán a aparecer más.', quizWeak:'A reforzar', quizMastered:'Dominadas',
       chaosStart:'Simular avería', chaosOn:'Toca una pieza…', chaosResil:'Resiliencia', chaosSpof:'puntos únicos de fallo', chaosHint:'Modo avería: toca una pieza para tirarla y ver el impacto.',
-      analysisTitle:'Análisis de arquitectura', analysisRobust:'Robustez', mapLegend:'Leyenda', legFlow:'camino de la petición', legDep:'necesita debajo', legOps:'opera sobre',
+      analysisTitle:'Análisis de arquitectura', analysisRobust:'Robustez', mapLegend:'Leyenda', legFlow:'camino de la petición', legDep:'necesita debajo', legOps:'opera sobre', flowPacket:'GET /',
       infoUse:'¿Cuándo usarla?', infoAlt:'Alternativas',
       sizingTitle:'Dimensionado', szCost:'Coste', szBudget:'Presupuesto', szMonth:'€/mes', szPerMonth:'€/mes', szUnitCpu:'vCPU', szUnitRam:'GB', szEach:'por pieza',
       searchPh:'Buscar tecnología…', famAllLabel:'Todas', noResults:'Sin resultados',
@@ -1958,7 +1968,7 @@ class Component extends DCLogic {
       modeIncident:'Incident', incTitle:'Incident room', incHint:'Diagnose a real outage: gather clues, identify the root cause and apply the right fix.', incPickHint:'Pick an incident to resolve:', incSymptom:'Symptom', incStartBtn:'Start investigating', incChecks:'Checks', incChecksHint:'Tap a check to see its output.', incToDiagnose:'I have a hypothesis →', incDiagnoseTitle:'What is the root cause?', incConfirmCause:'Confirm cause', incBackInvestigate:'← Back to investigating', incFixTitle:'How do you fix it?', incApplyFix:'Apply fix', incResolvedTag:'Incident resolved', incLearnLabel:'Takeaway', incAnother:'Pick another incident', incRetry:'Retry', incPhInvestigate:'Investigate', incPhDiagnose:'Diagnose', incPhFix:'Fix', incExit:'Exit',
       quizAdaptive:'Adaptive: the categories you miss will show up more often.', quizWeak:'To review', quizMastered:'Mastered',
       chaosStart:'Simulate failure', chaosOn:'Tap a piece…', chaosResil:'Resilience', chaosSpof:'single points of failure', chaosHint:'Failure mode: tap a piece to drop it and see the impact.',
-      analysisTitle:'Architecture analysis', analysisRobust:'Robustness', mapLegend:'Legend', legFlow:'request path', legDep:'needs underneath', legOps:'operates on',
+      analysisTitle:'Architecture analysis', analysisRobust:'Robustness', mapLegend:'Legend', legFlow:'request path', legDep:'needs underneath', legOps:'operates on', flowPacket:'GET /',
       infoUse:'When to use it', infoAlt:'Alternatives',
       sizingTitle:'Sizing', szCost:'Cost', szBudget:'Budget', szMonth:'€/mo', szPerMonth:'€/mo', szUnitCpu:'vCPU', szUnitRam:'GB', szEach:'per piece',
       searchPh:'Search technology…', famAllLabel:'All', noResults:'No results',
@@ -3181,14 +3191,45 @@ class Component extends DCLogic {
     const placed=this.effectivePlaced().placed;
     return order.filter(id=>(placed[id]||[]).length>0);
   }
+  // Ruta que recorre la petición, parada a parada, en ángulo recto.
+  // Segmentos rectos a propósito: así la longitud es exacta y el paquete
+  // cae justo sobre cada parada (offset-distance va en % del recorrido).
+  mapFlowRoute(M){
+    const cats=this.mapFlowCats().filter(c=>M.catBox&&M.catBox[c]);
+    if(cats.length<2) return null;
+    const center=c=>{ const b=M.catBox[c]; return { x:Math.round(b.x+b.w/2), y:Math.round(b.y+b.h/2) }; };
+    const pts=[center(cats[0])], stopIdx=[0];
+    for(let i=1;i<cats.length;i++){
+      const a=pts[pts.length-1], b=center(cats[i]);
+      if(Math.abs(b.x-a.x)>2 && Math.abs(b.y-a.y)>2) pts.push({ x:a.x, y:b.y });
+      pts.push(b); stopIdx.push(pts.length-1);
+    }
+    const cum=[0];
+    for(let i=1;i<pts.length;i++) cum[i]=cum[i-1]+Math.abs(pts[i].x-pts[i-1].x)+Math.abs(pts[i].y-pts[i-1].y);
+    const total=cum[cum.length-1]||1;
+    return { d:'M '+pts.map(q=>q.x+' '+q.y).join(' L '), total, stopDist:stopIdx.map(i=>cum[i]), cats };
+  }
+  // Encuadra la parada activa. No mueve nada si ya se ve con holgura, para
+  // que el mapa no tiemble cuando cabe entero en pantalla.
+  mapFocusCat(cat){
+    const b=this._catBox && this._catBox[cat]; if(!b) return;
+    if(!this._vp) this.measureVp();
+    const vp=this._vp||{w:900,h:760}, m=this.state.map, sc=m.scale;
+    const cx=b.x+b.w/2, cy=b.y+b.h/2;
+    const px=cx*sc+m.tx, py=cy*sc+m.ty, mx=vp.w*0.22, my=vp.h*0.22;
+    if(px>mx && px<vp.w-mx && py>my && py<vp.h-my) return;
+    this.setState({ map:{ tx:vp.w/2-cx*sc, ty:vp.h/2-cy*sc, scale:sc } });
+  }
   runMapFlow(){
     if(this.state.flowing) return;
     const n=this.mapFlowCats().length; if(n<2) return;
     this.unlock('flow');
-    const dur=Math.max(650, Math.round(3600/n));
+    const dur=Math.max(950, Math.round(5600/n));
+    const cats=this.mapFlowCats();
     this.setState({ flowing:true, flowStep:0, selected:null, selectedLayer:null, feedback:null });
+    this.mapFocusCat(cats[0]);
     let i=0;
-    const tick=()=>{ i++; if(i<n){ this.setState({flowStep:i}); this._flowT=setTimeout(tick,dur); } else { this._flowT=setTimeout(()=>this.setState({flowing:false, flowStep:-1}), dur); } };
+    const tick=()=>{ i++; if(i<n){ this.setState({flowStep:i}); this.mapFocusCat(cats[i]); this._flowT=setTimeout(tick,dur); } else { this._flowT=setTimeout(()=>this.setState({flowing:false, flowStep:-1}), 1900); } };
     this._flowT=setTimeout(tick,dur);
   }
   // ---- chaos / failure simulation ----
@@ -3327,7 +3368,7 @@ class Component extends DCLogic {
     wire('cicd', svc, 'ops', T('la fábrica de software despliega aquí las versiones nuevas','the software factory deploys new versions here'));
     wire('iac', pick('computo','hci','red'), 'ops', T('la infraestructura se declara en código y se provisiona desde aquí','infrastructure is declared as code and provisioned from here'));
     wire('seguridad', 'red', 'ops', T('la seguridad protege el perímetro por el que entra el tráfico','security protects the edge where traffic comes in'));
-    return { world:{w:worldW,h:worldH}, zones, nodes, labels, links, isDemo, count:nodes.length, catPt };
+    return { world:{w:worldW,h:worldH}, zones, nodes, labels, links, isDemo, count:nodes.length, catPt, catBox };
   }
   // ---- cableado del mapa -------------------------------------------------
   // Trazado ortogonal (ángulos rectos, esquinas redondeadas) como en un
@@ -3731,7 +3772,7 @@ class Component extends DCLogic {
     // ---- mode: physical map ----
     let map={ show:false };
     if(mode==='map'){
-      const M=this.buildMap(); this._world=M.world;
+      const M=this.buildMap(); this._world=M.world; this._catBox=M.catBox;
       const mp=S.map;
       const anP=this.effectivePlaced().placed;
       const legend=this.cats().filter(c=>(anP[c.id]||[]).length>0).map(c=>({ color:c.color, name:this.loc(c.name) }));
@@ -3749,18 +3790,32 @@ class Component extends DCLogic {
       });
       const flowCats=this.mapFlowCats();
       const activeCat=(S.flowing && S.flowStep>=0 && flowCats[S.flowStep])? flowCats[S.flowStep] : null;
-      M.nodes.forEach(n=>{ n.glow=(activeCat && n.cat===activeCat)? ('0 0 0 2px '+n.color+', 0 0 18px '+this.hexA(n.color,0.75)) : 'none'; });
-      let packet={ show:false, x:0, y:0 };
-      if(activeCat && M.catPt[activeCat]) packet={ show:true, x:M.catPt[activeCat].x, y:M.catPt[activeCat].y };
+      const visited={}; if(S.flowing && S.flowStep>=0) flowCats.slice(0,S.flowStep+1).forEach(c=>{ visited[c]=1; });
+      M.nodes.forEach(n=>{
+        if(activeCat && n.cat===activeCat) n.glow='0 0 0 2px '+n.color+', 0 0 18px '+this.hexA(n.color,0.75);
+        else if(visited[n.cat]) n.glow='0 0 0 1px '+this.hexA(n.color,0.6);
+        else n.glow='none';
+      });
+      const route=this.mapFlowRoute(M);
+      let packet={ show:false, path:'none', dist:'0%', label:'' };
+      let trail={ show:false, d:'', total:1, offset:1 };
+      if(route && S.flowing && S.flowStep>=0){
+        const done=route.stopDist[Math.min(S.flowStep, route.stopDist.length-1)];
+        packet={ show:true, path:"path('"+route.d+"')", dist:((done/route.total)*100).toFixed(2)+'%', label:t.flowPacket };
+        trail={ show:true, d:route.d, total:route.total, offset:route.total-done };
+      }
       const fcap = activeCat ? this.loc(meta[activeCat].flow) : '';
+      const stepName = activeCat ? this.loc(this.catById(activeCat).name) : '';
+      const stepLabel = activeCat ? ((S.flowStep+1)+' / '+flowCats.length) : '';
       const canFlow = flowCats.length>=2, flowOff = S.flowing || !canFlow;
       map={ show:true, world:M.world, zones:M.zones, nodes:M.nodes, labels:M.labels, links:M.links,
         isDemo:M.isDemo, hint:t.mapHint+' · '+M.count+' '+t.mapPieces,
         transform:'translate('+Math.round(mp.tx)+'px,'+Math.round(mp.ty)+'px) scale('+mp.scale+')',
+        worldTransition: S.flowing? 'transform .8s cubic-bezier(.45,0,.3,1)' : 'none',
         cursor: S.mapPanning?'grabbing':'grab',
         onWheel:(e)=>this.onMapWheel(e), onDown:(e)=>this.onMapDown(e), onMove:(e)=>this.onMapMove(e), onUp:()=>this.onMapUp(),
         zoomIn:()=>this.mapZoom(1.25), zoomOut:()=>this.mapZoom(1/1.25), fit:()=>this.mapFit(),
-        packet, flowing:S.flowing, runFlow:()=>this.runMapFlow(), legend,
+        packet, trail, stepName, stepLabel, flowing:S.flowing, runFlow:()=>this.runMapFlow(), legend,
         flowLabel: S.flowing? t.flowRunning : t.flowLabel, flowDisabled: flowOff,
         flowBorder: flowOff?'var(--border-strong)':'rgba(99,102,241,0.5)',
         flowBg: flowOff?'var(--panel-alt)':'rgba(99,102,241,0.14)',

@@ -94,6 +94,15 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Los cables salen del **borde** de cada grupo con su conector, no del centro.
 - ✅ Cada cable explica al pasar por encima qué conecta y por qué (cobertura ~67%: la leyenda sigue siendo la explicación principal).
 
+### ✅ Hecho — la simulación del mapa se entiende
+- ✅ El paquete **recorre una ruta real** en ángulo recto (antes volaba en diagonal ignorando el cableado).
+- ✅ **Rastro que se dibuja solo** detrás del paquete: al acabar ves el camino completo de la petición.
+- ✅ **La cámara sigue** la parada activa, y solo se mueve si se está saliendo de la vista.
+- ✅ El paquete es una etiqueta **GET /**, no un punto anónimo.
+- ✅ Cartel con **paso n/total + nombre de la capa** + qué ocurre ahí; las paradas ya visitadas se quedan marcadas.
+- ✅ Ritmo más lento (~950 ms por paso) y pausa final para leer la ruta entera.
+- Pendiente si se quiere: **controles de reproducción** (pausa / paso a paso) para que el alumno marque su propio ritmo.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 - ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

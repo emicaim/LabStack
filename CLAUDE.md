@@ -121,6 +121,19 @@ Each cable carries a `tip` (`<title>` inside a `<g>`, plus a transparent 14px-wi
 
 The links `<svg>` sits **after the zones and before the labels/nodes** in the DOM: above zone fills (or the cables get washed out) and below node cards (or cables cross the illustrations). Don't reorder it.
 
+### Map flow simulation
+
+`runMapFlow()` walks `mapFlowCats()` (categories present, bottom-up through the stack) one step at a time via `state.flowStep`. Four things move together, and all four come from **one** source of truth — `mapFlowRoute(M)`:
+
+- **The route**: an orthogonal polyline through the centre of each stop's `catBox`. It uses **sharp corners on purpose** — every segment is axis-aligned, so `|dx|+|dy|` is the exact length. That exactness is what lets the packet land precisely on each stop. Do not round these corners without switching to `getTotalLength()`.
+- **The packet**: an HTML pill labelled `GET /` driven by `offset-path: path(...)` + an animated `offset-distance` percentage (`stopDist[i] / total`). It renders after the nodes, so it passes *over* the cards — it reads as the request entering the equipment.
+- **The trail**: the same `d`, drawn inside the links `<svg>` (so *behind* the cards) with `stroke-dasharray:total` and a transitioned `stroke-dashoffset` of `total − distanceSoFar`. The route draws itself behind the packet and the whole path is still on screen when the run ends.
+- **The camera**: `mapFocusCat()` re-centres on the active stop, but **only when it is outside the middle ~56% of the viewport**, so a map that already fits does not jiggle. The world div gets a `transform` transition only while `flowing`.
+
+Nodes accumulate state: the active category gets a strong ring, already-visited ones keep a faint ring, so the path stays legible as it grows. The caption shows `n / total`, the layer name and `layerMeta[cat].flow`.
+
+**Gotcha:** `animation:fadeUp` ends on `transform:none`, which silently kills a `transform:translateX(-50%)` used for centring. The flow caption and the chaos message are centred with a flex wrapper instead — don't "simplify" them back to a transform.
+
 ### Contextual rails (which panels a mode gets)
 
 The three-rail grid is **not** fixed — each mode shows only the panels it needs, which is what keeps the app from feeling like a cockpit:
