@@ -120,6 +120,27 @@ Flow: `state.kids = { step, phase: 'ask' | 'ok' | 'end', wrong }`; `kidsPick()` 
 
 Colour is deliberate: each option carries **its own family colour**. At step 1 that means nothing to the child; by step 5 the colour itself has become a cue. That is the intended effect — don't neutralise it.
 
+### Events mode (`mode === 'events'`) — the OBM-style console
+
+A live console of raw events plus the ITSM layer on the incident. The pair teaches the thing a monitoring tool cannot: **an event is not an incident.**
+
+- `contenido/eventos.js` holds the events. Three kinds, and the distinction is the whole lesson:
+  - `cause: true` + `related: [ids]` — the root cause, which rolls up its symptoms.
+  - `symptomOf: id` — a consequence. Closing these one by one fixes nothing.
+  - `noise: true` — informational. It can be acknowledged and closed but **never** raises an incident; `events-test.js` asserts that.
+- Correlation must be **reciprocal**: a symptom naming its cause, and the cause listing that symptom. The test fails the build otherwise, because the indentation in the list would be lying.
+- The list is **grouped, not just sorted**: each cause is followed by its own symptoms. Sorting by severity alone puts a symptom visually under the wrong cause.
+- Acknowledging or closing a cause takes its symptoms with it (`evAckGroup`, `evCloseGroup`) — that is what makes triage feel like triage.
+- `evRaise(id)` is the bridge: acknowledge the group, switch to `desk`, open the ticket the event points at, and write the origin event into the work log.
+
+### ITSM layer on the incident
+
+`itsmView(tk, d)` wraps the Puesto ticket in what a real service desk shows:
+
+- **Priority is derived, never chosen.** `itsmMatrix()` maps the content's `prio` to impact × urgency; the product gives P1–P4 and the SLA target (1 h / 4 h / 8 h / 24 h). The panel shows the two inputs next to the result so the learner sees where "Crítica" actually comes from.
+- **State machine** Nuevo → En curso → Resuelto → Cerrado, driven by `desk.phase`.
+- **Work notes.** `deskLog()` records every real action: opening, the originating event, each command and the host it ran on, the hypothesis, the root cause and the fix. `deskState()` **must** return `log` — it did not at first, and every entry silently overwrote the last one.
+
 ### Desk mode (`mode === 'desk'`) — four sessions at once
 
 A ticket queue plus **four simultaneous terminals**, one per host (`fw01`, `sw-core`, `web01`, `db01`, from `contenido/tickets.js`). The teaching point is not typing commands — the Terminal mode already does that — it is that **the same command answers differently depending on where you run it**, so you have to pick the right box.

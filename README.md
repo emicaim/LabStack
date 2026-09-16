@@ -13,7 +13,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 - **Una sola puerta de entrada** y **4 grupos** en vez de un menú de nueve modos:
   - **Aprender** — monta tu stack por capas, agrupadas en los 5 planos (física → plataforma → aplicación → datos → nube), con densidad **Compacto / Detalle**.
   - **Practicar** — retos con objetivos y presupuesto + quiz adaptativo.
-  - **Explorar** — 7 vistas del stack que has montado: Mapa · Petición · Despliegue · Métricas · Terminal · Incidente · **Puesto** (guardia con 12 tickets y cuatro terminales a la vez).
+  - **Explorar** — 8 vistas del stack que has montado: Mapa · Petición · Despliegue · Métricas · Terminal · Incidente · **Eventos** (consola tipo OBM con correlación) · **Puesto** (ITSM con 12 tickets y cuatro terminales a la vez).
   - **Kids** — para peques: dos partidas cortas (la torre, 11 pisos; los ayudantes, 6), una capa cada vez, con dibujos y sin forma de equivocarse del todo.
 - **~69 tecnologías** en 16 categorías (6 familias de color) con fichas educativas + mensajería (Kafka/RabbitMQ/NATS) + marcos de gobierno (COSO / ISO 27001 / COBIT).
 - **Linter de arquitectura** (robustez, anti-patrones), **dimensionado** (coste/CPU/RAM) y **modo avería** (resiliencia).
@@ -28,6 +28,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 | Archivo | Descripción |
 |---|---|
 | `Laboratorio.dc.html` | La aplicación (plantilla `<x-dc>` + lógica `class Component`). |
+| `events-test.js` | Recorre la consola de eventos: correlación, triaje del ruido y el puente evento → incidencia. |
 | `desk-test.js` | Recorre el modo Puesto: resuelve los 12 tickets y comprueba que la evidencia sólo aparece en el equipo correcto. |
 | `content-test.js` | Valida el contenido: `node content-test.js` comprueba referencias entre ficheros, ids repetidos y que ES y EN estén completos. |
 | `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids). |

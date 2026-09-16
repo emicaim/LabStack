@@ -19,7 +19,7 @@ global.history = { replaceState(){} };
 global.navigator = { clipboard:{ writeText(){ return Promise.resolve(); } } };
 
 // cargar el contenido externo igual que hacen las <script> de la página
-['piezas','capas','textos','retos','kids','tickets'].forEach(function(n){
+['piezas','capas','textos','retos','kids','tickets','eventos'].forEach(function(n){
   const code=fs.readFileSync('F:/IngLab/Taller visual de infraestructura didáctico/contenido/'+n+'.js','utf8');
   new Function('window', code)(global.window);
 });
@@ -32,7 +32,7 @@ const factory = new Function('DCLogic','StreamableLogic','React','localStorage',
   code + '\nreturn Component;');
 const Component = factory(DCLogic, DCLogic, global.React, global.localStorage, global.window, global.document, global.history, global.navigator);
 
-const MODES = ['home','kids','sandbox','mission','quiz','map','terminal','metrics','http','deploy','incident','desk'];
+const MODES = ['home','kids','sandbox','mission','quiz','map','terminal','metrics','http','deploy','incident','desk','events'];
 let fail = 0;
 
 function run(label, setup){

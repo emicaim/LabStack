@@ -133,6 +133,13 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ **Tab autocompleta** y **`man`** funcionan también en el puesto, por sesión.
 - ✅ **12 tickets** cubriendo el trabajo real: 502, firewall, puertos de switch, disco, VPN, certificado caducado, bucle de capa 2, muerte por memoria, DNS interno, copia que nunca se restauró, IP duplicada y RAID degradado.
 
+### ✅ Hecho — consola de eventos (OBM) + capa ITSM
+- ✅ **Consola de eventos** con gravedad, equipo, origen, estado y filtros. 17 eventos: causas, síntomas correlados y ruido.
+- ✅ **Correlación de verdad**: los síntomas cuelgan de su causa, se agrupan en la lista y reconocer o cerrar la causa se los lleva.
+- ✅ **El ruido no abre incidencia**: se reconoce y se cierra. Triar es la lección.
+- ✅ **Puente evento → ticket**: «Crear incidencia» abre el ticket correspondiente en el Puesto y lo anota en el histórico.
+- ✅ **Capa ITSM** en el ticket: estado (Nuevo/En curso/Resuelto/Cerrado), prioridad **derivada de impacto × urgencia** (P1–P4) con su SLA, asignación e **histórico** de todo lo que has hecho.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

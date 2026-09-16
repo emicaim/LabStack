@@ -10,6 +10,7 @@
 <script src="./contenido/retos.js"></script>
 <script src="./contenido/kids.js"></script>
 <script src="./contenido/tickets.js"></script>
+<script src="./contenido/eventos.js"></script>
 <script>if (location.protocol === 'file:') window.__resources = window.__resources || {};</script>
 <script src="./support.js"></script>
 </head>
@@ -60,6 +61,7 @@
   @keyframes kidBob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
   @keyframes kidPop { 0% { transform: scale(0.72); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
   @keyframes kidShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+  @media (max-width:1240px){ .ev-grid{ grid-template-columns:minmax(0,1fr) !important; } }
   @media (max-width:1240px){ .desk-grid{ grid-template-columns:minmax(0,1fr) !important; } }
   @media (max-width:760px){ .desk-terms{ grid-template-columns:minmax(0,1fr) !important; } }
   @media (max-width:900px){
@@ -266,6 +268,111 @@
         </div>
       </sc-if>
 
+      <!-- CONSOLA DE EVENTOS -->
+      <sc-if value="{{ showEvents }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:16px 22px 28px;">
+          <div class="ev-grid" style="display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:18px; align-items:start; max-width:1560px; margin:0 auto;">
+
+            <div style="min-width:0;">
+              <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:4px;">
+                <span style="font-family:'Inter',sans-serif; font-size:17px; font-weight:700;">{{ events.title }}</span>
+                <span style="flex:1 1 auto;"></span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-muted);">{{ events.openCount }} {{ events.openLabel }} · {{ events.newCount }} {{ events.newLabel }}</span>
+              </div>
+              <p style="font-size:12.5px; line-height:1.55; color:var(--text-muted); margin:0 0 12px;">{{ events.hint }}</p>
+
+              <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:11px;">
+                <sc-for list="{{ events.counts }}" as="ec" hint-placeholder-count="4">
+                  <span style="display:flex; align-items:center; gap:7px; border:1px solid {{ ec.color }}; background:{{ ec.bg }}; border-radius:8px; padding:5px 11px; font-size:11.5px; color:var(--text);"><b style="font-family:'JetBrains Mono',monospace; font-size:13px; color:{{ ec.color }};">{{ ec.count }}</b>{{ ec.label }}</span>
+                </sc-for>
+              </div>
+
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
+                <sc-for list="{{ events.filters }}" as="ef" hint-placeholder-count="5">
+                  <button onClick="{{ ef.onClick }}" style="display:flex; align-items:center; gap:6px; border:1px solid {{ ef.border }}; background:{{ ef.bg }}; color:{{ ef.color }}; padding:5px 11px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12px; font-weight:600;" style-hover="border-color:var(--accent-b);">{{ ef.label }}<span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; opacity:0.75;">{{ ef.count }}</span></button>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ events.empty }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center; color:var(--text-faint); font-size:13px; padding:34px 8px;">{{ events.emptyMsg }}</div>
+              </sc-if>
+
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <sc-for list="{{ events.rows }}" as="er" hint-placeholder-count="8">
+                  <button onClick="{{ er.onClick }}" style="display:flex; align-items:center; gap:10px; text-align:left; margin-left:{{ er.indent }}; border:1px solid {{ er.selBorder }}; background:{{ er.selBg }}; border-left:4px solid {{ er.bar }}; color:var(--text); padding:9px 12px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; opacity:{{ er.op }}; transition:all .13s;" style-hover="border-color:var(--accent-b);">
+                    <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:{{ er.sevColor }}; background:{{ er.sevBg }}; border-radius:5px; padding:3px 7px; width:58px; text-align:center;">{{ er.sev }}</span>
+                    <span style="flex:0 0 auto; display:flex; align-items:center; gap:5px; width:96px;"><span style="width:7px; height:7px; border-radius:50%; background:{{ er.nodeColor }};"></span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ er.node }}</span></span>
+                    <span style="min-width:0; flex:1 1 auto; font-size:12.5px; line-height:1.35; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ er.title }}</span>
+                    <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:{{ er.tagColor }};">{{ er.tag }}</span>
+                    <span style="flex:0 0 auto; font-size:11px; color:{{ er.stateColor }}; width:82px; text-align:right;">{{ er.state }}</span>
+                    <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-faint); width:78px; text-align:right; white-space:nowrap;">{{ er.ago }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- detalle del evento -->
+            <div style="position:sticky; top:8px; border-radius:14px; border:1px solid var(--border-strong); background:var(--panel); padding:16px;">
+              <sc-if value="{{ events.hasSel }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:9px;">
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:{{ events.det.sevColor }}; background:{{ events.det.sevBg }}; border:1px solid {{ events.det.sevColor }}; border-radius:5px; padding:3px 8px;">{{ events.det.sev }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ events.det.id }}</span>
+                    <span style="flex:1 1 auto;"></span>
+                    <span style="font-size:11px; color:var(--text-faint);">{{ events.det.ago }}</span>
+                  </div>
+                  <div style="font-family:'Inter',sans-serif; font-size:15px; font-weight:700; line-height:1.35; margin-bottom:9px;">{{ events.det.title }}</div>
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11.5px; color:var(--text-muted); margin-bottom:11px;">
+                    <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px; height:8px; border-radius:50%; background:{{ events.det.nodeColor }};"></span><b style="font-family:'JetBrains Mono',monospace; color:var(--text);">{{ events.det.node }}</b></span>
+                    <span style="color:var(--text-faint);">·</span><span>{{ events.det.source }}</span>
+                  </div>
+                  <p style="font-size:12.5px; line-height:1.6; color:var(--text-muted); margin:0 0 13px; padding-top:11px; border-top:1px solid var(--border);">{{ events.det.text }}</p>
+
+                  <sc-if value="{{ events.det.hasParent }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ events.det.parentClick }}" style="display:block; width:100%; box-sizing:border-box; text-align:left; border:1px dashed var(--border-strong); background:var(--panel-alt); color:var(--text); border-radius:9px; padding:9px 11px; margin-bottom:11px; cursor:pointer; font-family:'Inter',sans-serif;" style-hover="border-color:var(--accent-b);">
+                      <span style="display:block; font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-bottom:3px;">{{ events.det.parentTitle }} · {{ events.det.parentId }}</span>
+                      <span style="display:block; font-size:12px; line-height:1.4;">{{ events.det.parentText }}</span>
+                    </button>
+                  </sc-if>
+
+                  <sc-if value="{{ events.det.hasKids }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-bottom:13px;">
+                      <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-bottom:7px;">{{ events.det.kidsTitle }}</div>
+                      <div style="display:flex; flex-direction:column; gap:4px;">
+                        <sc-for list="{{ events.det.kids }}" as="ek" hint-placeholder-count="0">
+                          <div style="display:flex; align-items:center; gap:8px; border-left:3px solid {{ ek.color }}; background:var(--panel-alt); border-radius:0 7px 7px 0; padding:6px 9px;">
+                            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);">{{ ek.id }}</span>
+                            <span style="font-size:11.5px; line-height:1.35; color:var(--text-muted);">{{ ek.title }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ events.det.noise }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; gap:9px; align-items:flex-start; border-radius:10px; border:1px solid var(--border-strong); background:var(--panel-alt); padding:10px 12px; margin-bottom:12px;">
+                      <span style="flex:0 0 auto; font-size:15px; line-height:1.2;">💤</span>
+                      <span style="font-size:12px; line-height:1.5; color:var(--text-muted);">{{ events.det.noiseMsg }}</span>
+                    </div>
+                  </sc-if>
+
+                  <div style="display:flex; flex-direction:column; gap:7px;">
+                    <sc-if value="{{ events.det.canRaise }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ events.det.onRaise }}" style="border:1px solid rgba(99,102,241,0.5); background:rgba(99,102,241,0.14); color:var(--accent); padding:11px 14px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:700;" style-hover="background:rgba(99,102,241,0.24); border-color:var(--accent);">{{ events.det.raiseLabel }}</button>
+                    </sc-if>
+                    <button onClick="{{ events.det.onAck }}" disabled="{{ events.det.ackDone }}" style="border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text); padding:10px 14px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;" style-hover="border-color:var(--accent-b);">{{ events.det.ackLabel }}</button>
+                    <button onClick="{{ events.det.onClose }}" style="border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:10px 14px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;" style-hover="border-color:var(--accent-b); color:var(--text);">{{ events.det.closeLabel }}</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ events.noSel }}" hint-placeholder-val="{{ true }}">
+                <div style="text-align:center; color:var(--text-faint); font-size:12.5px; line-height:1.55; padding:30px 10px;">{{ events.pickMsg }}</div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
       <!-- PUESTO: cola de tickets + cuatro sesiones a la vez -->
       <sc-if value="{{ showDesk }}" hint-placeholder-val="{{ false }}">
         <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:16px 22px 28px;">
@@ -285,6 +392,23 @@
                   <div style="font-family:'Inter',sans-serif; font-size:15.5px; font-weight:700; line-height:1.3; margin-bottom:4px;">{{ desk.ticket.subject }}</div>
                   <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px;">{{ desk.ticket.from }}</div>
                   <p style="font-size:13px; line-height:1.6; color:var(--text-muted); margin:0; padding-top:10px; border-top:1px solid var(--border);">{{ desk.ticket.body }}</p>
+                </div>
+
+                <div style="border-radius:14px; border:1px solid var(--border-strong); background:var(--panel); padding:14px 15px;">
+                  <div style="display:flex; align-items:center; gap:6px; margin-bottom:11px;">
+                    <sc-for list="{{ desk.itsm.states }}" as="st" hint-placeholder-count="4">
+                      <span style="flex:1 1 0; text-align:center; font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; color:{{ st.text }}; border-bottom:3px solid {{ st.color }}; padding-bottom:5px;">{{ st.name }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex; gap:7px; margin-bottom:10px;">
+                    <span style="flex:0 0 auto; display:grid; place-items:center; font-family:'Inter',sans-serif; font-size:16px; font-weight:800; color:{{ desk.itsm.prioColor }}; background:{{ desk.itsm.prioBg }}; border:1px solid {{ desk.itsm.prioColor }}; border-radius:9px; width:44px;">{{ desk.itsm.prio }}</span>
+                    <span style="flex:1 1 0; min-width:0; border-radius:8px; border:1px solid var(--border); background:var(--panel-alt); padding:6px 9px;"><span style="display:block; font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint);">{{ desk.itsm.impactoLabel }}</span><span style="display:block; font-size:12px; font-weight:700;">{{ desk.itsm.impacto }}</span></span>
+                    <span style="flex:1 1 0; min-width:0; border-radius:8px; border:1px solid var(--border); background:var(--panel-alt); padding:6px 9px;"><span style="display:block; font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint);">{{ desk.itsm.urgenciaLabel }}</span><span style="display:block; font-size:12px; font-weight:700;">{{ desk.itsm.urgencia }}</span></span>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-faint); line-height:1.45; margin-bottom:11px;">{{ desk.itsm.matrixNote }}</div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); margin-bottom:5px;"><span>{{ desk.itsm.slaLabel }} {{ desk.itsm.sla }}</span><span>{{ desk.itsm.slaPct }}</span></div>
+                  <div style="height:6px; border-radius:99px; background:var(--panel-2); overflow:hidden; margin-bottom:7px;"><div style="height:100%; width:{{ desk.itsm.slaPct }}; background:{{ desk.itsm.slaColor }}; border-radius:99px; transition:width .4s;"></div></div>
+                  <div style="font-size:11px; color:var(--text-muted); line-height:1.45;">{{ desk.itsm.assignee }}</div>
                 </div>
 
                 <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:13px 14px;">
@@ -328,6 +452,21 @@
                     </div>
                   </div>
                 </sc-if>
+
+                <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:13px 14px;">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:9px;">{{ desk.itsm.logTitle }}</div>
+                  <sc-if value="{{ desk.itsm.logEmpty }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:11.5px; color:var(--text-faint); line-height:1.5;">{{ desk.itsm.logEmptyMsg }}</div>
+                  </sc-if>
+                  <div style="display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto;">
+                    <sc-for list="{{ desk.itsm.log }}" as="lg" hint-placeholder-count="0">
+                      <div style="display:flex; gap:9px; align-items:flex-start;">
+                        <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); padding-top:1px;">{{ lg.at }}</span>
+                        <span style="min-width:0; font-size:11.5px; line-height:1.45; color:var(--text-muted); word-break:break-word;">{{ lg.t }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
 
                 <sc-if value="{{ desk.showDone }}" hint-placeholder-val="{{ false }}">
                   <div style="border-radius:14px; border:1px solid rgba(34,197,94,0.45); background:rgba(34,197,94,0.10); padding:15px 16px; animation:fadeUp .25s ease both;">
@@ -1674,7 +1813,8 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { part: null, step: 0, phase: 'ask', wrong: null }, desk: { ticket: null, focus: 0, phase: 'work', cause: null, fix: null, wrong: null, solved: {}, terms: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
+  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { part: null, step: 0, phase: 'ask', wrong: null }, desk: { ticket: null, focus: 0, phase: 'work', cause: null, fix: null, wrong: null, solved: {}, terms: null, log: [] },
+  events: { ack: {}, closed: {}, sel: null, filter: 'all' }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   // El contenido vive en contenido/*.js y se carga con <script src> antes que
@@ -2962,6 +3102,179 @@ class Component extends DCLogic {
   }
   termColor(c){ return c==='in'?'var(--accent)': c==='ok'?'#4ade80': c==='err'?'#fb7185': c==='dim'?'#5a6a85': c==='sys'?'var(--text-muted)':'#c9d3e3'; }
 
+  // ================= CONSOLA DE EVENTOS (estilo OBM) =================
+  // Un evento no es una incidencia. Llegan a montones, casi todos son ruido o
+  // síntomas de una misma causa. Aquí se tría: reconocer, ver qué cuelga de
+  // qué, y decidir qué merece abrir un ticket.
+  eventos(){ return this.content('eventos', []); }
+  evState(){ const e=this.state.events||{}; return { ack:e.ack||{}, closed:e.closed||{}, sel:e.sel||null, filter:e.filter||'all' }; }
+  evSet(p){ this.setState({ events:{ ...this.evState(), ...p } }); }
+  evSelect(id){ this.evSet({ sel:id }); }
+  evFilter(f){ this.evSet({ filter:f, sel:null }); }
+  evAck(id){ const s=this.evState(); this.evSet({ ack:{ ...s.ack, [id]:1 } }); }
+  evAckGroup(id){
+    const s=this.evState(), ev=this.eventos().find(x=>x.id===id); if(!ev) return;
+    const ack={ ...s.ack, [id]:1 }; (ev.related||[]).forEach(r=>{ ack[r]=1; });
+    this.evSet({ ack });
+  }
+  evClose(id){ const s=this.evState(); this.evSet({ closed:{ ...s.closed, [id]:1 }, sel:null }); }
+  evCloseGroup(id){
+    const s=this.evState(), ev=this.eventos().find(x=>x.id===id); if(!ev) return;
+    const closed={ ...s.closed, [id]:1 }; (ev.related||[]).forEach(r=>{ closed[r]=1; });
+    this.evSet({ closed, sel:null });
+  }
+  // el puente: de un evento correlado sale la incidencia
+  evRaise(id){
+    const ev=this.eventos().find(x=>x.id===id); if(!ev||!ev.ticket) return;
+    this.evAckGroup(id);
+    this.setMode('desk');
+    this.deskOpen(ev.ticket);
+    this.deskLog(this.state.lang==='es' ? ('Incidencia abierta desde el evento '+ev.id) : ('Incident raised from event '+ev.id));
+  }
+  evSevs(){
+    const es=this.state.lang==='es';
+    return { critical:{ n:es?'Crítico':'Critical', c:'#fb7185', w:4 }, major:{ n:es?'Mayor':'Major', c:'#f97316', w:3 },
+      minor:{ n:es?'Menor':'Minor', c:'#eab308', w:2 }, warning:{ n:es?'Aviso':'Warning', c:'#38bdf8', w:1 } };
+  }
+  eventsViewFull(){ const v=this.eventsView(); v.noSel=!v.hasSel; return v; }
+  eventsView(){
+    const S=this.evState(), es=this.state.lang==='es', T=(a,b)=>es?a:b;
+    const all=this.eventos(), sev=this.evSevs(), hosts=this.deskHosts();
+    const nodeColor=n=>{ const h=hosts.find(x=>x.id===n)||hosts.find(x=>x.name===n); const c=h? this.catById(h.cat) : null; return c? c.color : 'var(--text-faint)'; };
+    const nodeName=n=>{ const h=hosts.find(x=>x.id===n); return h? h.name : n; };
+    const abierto=all.filter(e=>!S.closed[e.id]);
+    const cuenta={}; Object.keys(sev).forEach(k=>{ cuenta[k]=abierto.filter(e=>e.sev===k).length; });
+    const sinRec=abierto.filter(e=>!S.ack[e.id]).length;
+
+    let lista=abierto;
+    if(S.filter==='new') lista=abierto.filter(e=>!S.ack[e.id]);
+    else if(S.filter==='cause') lista=abierto.filter(e=>e.cause);
+    else if(sev[S.filter]) lista=abierto.filter(e=>e.sev===S.filter);
+    // Agrupado, no sólo ordenado: cada causa arrastra a sus síntomas justo
+    // debajo. Si sólo se ordena por gravedad, el sangrado miente — un síntoma
+    // aparece colgando de la causa equivocada.
+    const peso=x=>sev[x.sev].w;
+    const enLista=new Set(lista.map(x=>x.id));
+    const cabezas=lista.filter(x=>!x.symptomOf || !enLista.has(x.symptomOf))
+      .sort((a,b)=>(peso(b)-peso(a))||(a.min-b.min));
+    const orden=[];
+    cabezas.forEach(h=>{ orden.push(h);
+      lista.filter(x=>x.symptomOf===h.id).sort((a,b)=>(peso(b)-peso(a))||(a.min-b.min))
+        .forEach(k=>orden.push(k)); });
+    lista=orden;
+
+    const fila=e=>{ const sv=sev[e.sev], ack=!!S.ack[e.id], padre=e.symptomOf? all.find(x=>x.id===e.symptomOf) : null;
+      return { id:e.id, sev:sv.n, sevColor:sv.c, sevBg:this.hexA(sv.c,0.16),
+        node:nodeName(e.node), nodeColor:nodeColor(e.node), source:e.source,
+        ago:(es?'hace ':'')+e.min+(es?' min':' min ago'),
+        title:this.loc(e.title),
+        state: ack? T('Reconocido','Acknowledged') : T('Nuevo','New'),
+        stateColor: ack? 'var(--text-faint)' : sv.c,
+        op: ack? '0.62' : '1',
+        bar: e.cause? sv.c : (padre? this.hexA(sv.c,0.35) : this.hexA(sv.c,0.7)),
+        tag: e.cause? T('CAUSA','CAUSE') : (padre? T('síntoma','symptom') : (e.noise? T('informativo','info') : '')),
+        tagColor: e.cause? sv.c : 'var(--text-faint)',
+        indent: padre? '22px' : '0px',
+        selBg: S.sel===e.id? 'var(--accent-tint)' : 'var(--panel)',
+        selBorder: S.sel===e.id? 'var(--accent)' : 'var(--border)',
+        onClick:()=>this.evSelect(e.id) };};
+
+    let det=null;
+    const e=S.sel? all.find(x=>x.id===S.sel) : null;
+    if(e){ const sv=sev[e.sev], hijos=(e.related||[]).map(r=>all.find(x=>x.id===r)).filter(Boolean);
+      const padre=e.symptomOf? all.find(x=>x.id===e.symptomOf) : null;
+      det={ id:e.id, title:this.loc(e.title), text:this.loc(e.text),
+        sev:sv.n, sevColor:sv.c, sevBg:this.hexA(sv.c,0.16),
+        node:nodeName(e.node), nodeColor:nodeColor(e.node), source:e.source,
+        ago:(es?'hace ':'')+e.min+(es?' minutos':' minutes ago'),
+        ackDone:!!S.ack[e.id], ackLabel: S.ack[e.id]? T('Reconocido','Acknowledged') : T('Acusar recibo','Acknowledge'),
+        onAck:()=>this.evAckGroup(e.id), onClose:()=>this.evCloseGroup(e.id),
+        closeLabel: hijos.length? T('Cerrar causa y síntomas','Close cause and symptoms') : T('Cerrar evento','Close event'),
+        canRaise:!!e.ticket, raiseLabel:T('Crear incidencia →','Raise incident →'), onRaise:()=>this.evRaise(e.id),
+        hasKids:hijos.length>0, kidsTitle:T('Síntomas que cuelgan de esta causa','Symptoms rolled up under this cause'),
+        kids:hijos.map(k=>({ id:k.id, title:this.loc(k.title), color:sev[k.sev].c })),
+        hasParent:!!padre, parentTitle:T('Es un síntoma de','This is a symptom of'),
+        parentId:padre? padre.id : '', parentText:padre? this.loc(padre.title) : '',
+        parentClick:padre? (()=>this.evSelect(padre.id)) : (()=>{}),
+        noise:!!e.noise, noiseMsg:T('Informativo: se acusa y se cierra. Abrir una incidencia por esto sólo genera ruido.',
+                                    'Informational: acknowledge and close. Raising an incident for this only creates noise.') };
+    }
+
+    const chip=(k,n,c)=>({ key:k, label:n, count:c, active:S.filter===k,
+      bg:S.filter===k? 'var(--sel)':'var(--panel)', color:S.filter===k? 'var(--accent)':'var(--text-muted)',
+      border:S.filter===k? 'var(--accent)':'var(--border-strong)', onClick:()=>this.evFilter(k) });
+
+    return { show:true, title:T('Consola de eventos','Event console'),
+      hint:T('Llegan solos. Reconoce lo que ya estás mirando, cierra el ruido y abre incidencia sólo de las causas.',
+             'They arrive on their own. Acknowledge what you are already on, close the noise, and raise incidents only for causes.'),
+      counts:Object.keys(sev).map(k=>({ label:sev[k].n, count:String(cuenta[k]), color:sev[k].c, bg:this.hexA(sev[k].c,0.14) })),
+      openCount:String(abierto.length), newCount:String(sinRec),
+      openLabel:T('abiertos','open'), newLabel:T('sin reconocer','unacknowledged'),
+      filters:[ chip('all',T('Todos','All'),String(abierto.length)), chip('new',T('Sin reconocer','New'),String(sinRec)),
+        chip('cause',T('Solo causas','Causes only'),String(abierto.filter(x=>x.cause).length)),
+        chip('critical',sev.critical.n,String(cuenta.critical)), chip('major',sev.major.n,String(cuenta.major)) ],
+      rows:lista.map(fila), empty:lista.length===0,
+      emptyMsg:T('Nada por aquí con ese filtro.','Nothing here with that filter.'),
+      hasSel:!!det, det: det || { id:'', title:'', text:'', sev:'', sevColor:'', sevBg:'', node:'', nodeColor:'', source:'', ago:'',
+        ackDone:false, ackLabel:'', onAck:()=>{}, onClose:()=>{}, closeLabel:'', canRaise:false, raiseLabel:'', onRaise:()=>{},
+        hasKids:false, kidsTitle:'', kids:[], hasParent:false, parentTitle:'', parentId:'', parentText:'', parentClick:()=>{},
+        noise:false, noiseMsg:'' },
+      pickMsg:T('Elige un evento de la lista para ver qué es y qué hacer con él.','Pick an event from the list to see what it is and what to do with it.') };
+  }
+  // ---- capa ITSM sobre el ticket -------------------------------------------
+  // La prioridad no se elige a dedo: sale de impacto × urgencia, como en
+  // cualquier ITSM. Y el histórico deja constancia de lo que has hecho, que
+  // es la mitad del trabajo real de una incidencia.
+  itsmMatrix(){
+    // prio del contenido -> (impacto, urgencia); de ahí sale P1..P4 y el SLA
+    return { critica:{ imp:3, urg:3 }, alta:{ imp:3, urg:2 }, media:{ imp:2, urg:2 }, baja:{ imp:1, urg:1 } };
+  }
+  itsmPrio(prio){
+    const es=this.state.lang==='es', T=(a,b)=>es?a:b;
+    const m=this.itsmMatrix()[prio] || { imp:2, urg:2 };
+    const niv=n=>n>=3? T('Alto','High') : (n===2? T('Medio','Medium') : T('Bajo','Low'));
+    const score=m.imp*m.urg;
+    const p = score>=9? 1 : (score>=6? 2 : (score>=4? 3 : 4));
+    const col=['#fb7185','#f97316','#eab308','#38bdf8'][p-1];
+    const sla=[60,240,480,1440][p-1];
+    const horas=sla>=60? (sla/60)+' h' : sla+' min';
+    return { p:'P'+p, color:col, bg:this.hexA(col,0.14), impacto:niv(m.imp), urgencia:niv(m.urg),
+      sla:horas, slaMin:sla };
+  }
+  deskLog(txt){
+    const d=this.deskState(), log=(d.log||[]).slice();
+    log.push({ t:txt, at:this.deskClock(log.length) });
+    this.setState({ desk:{ ...d, log } });
+  }
+  deskClock(n){ const base=9*60+12+n*7; const h=Math.floor(base/60)%24, m=base%60;
+    return (h<10?'0':'')+h+':'+(m<10?'0':'')+m; }
+  itsmView(tk, d){
+    const es=this.state.lang==='es', T=(a,b)=>es?a:b;
+    const pr=this.itsmPrio(tk.prio);
+    const estados=[ { k:'new', n:T('Nuevo','New') }, { k:'work', n:T('En curso','In progress') },
+      { k:'res', n:T('Resuelto','Resolved') }, { k:'closed', n:T('Cerrado','Closed') } ];
+    const fase=d.phase, activo = fase==='done' ? 'res' : 'work';
+    const iAct=estados.findIndex(x=>x.k===activo);
+    // el SLA no corre de verdad: se muestra consumido según lo avanzada que está
+    const usado = fase==='done'? 0.55 : (fase==='fix'? 0.42 : (fase==='cause'? 0.28 : 0.14));
+    const slaColor = usado>0.8? '#fb7185' : (usado>0.6? '#f97316' : '#22c55e');
+    return {
+      prio:pr.p, prioColor:pr.color, prioBg:pr.bg,
+      impacto:pr.impacto, urgencia:pr.urgencia, sla:pr.sla,
+      impactoLabel:T('Impacto','Impact'), urgenciaLabel:T('Urgencia','Urgency'), slaLabel:T('SLA','SLA'),
+      matrixNote:T('La prioridad sale de impacto × urgencia, no se elige a mano.','Priority comes from impact × urgency, it is not picked by hand.'),
+      states:estados.map((x,i)=>({ name:x.n, done:i<iAct, active:i===iAct,
+        color: i<iAct? '#22c55e' : (i===iAct? pr.color : 'var(--border-strong)'),
+        text: i<=iAct? 'var(--text)' : 'var(--text-faint)' })),
+      slaPct:Math.round(usado*100)+'%', slaColor,
+      slaText:T('Consumido ','Used ')+Math.round(usado*100)+T('% del objetivo de ','% of the ')+pr.sla,
+      assignee:T('Asignada a: tú · Guardia de Sistemas','Assigned to: you · Systems on-call'),
+      logTitle:T('Histórico','Work notes'),
+      log:(d.log||[]).map(l=>({ at:l.at, t:l.t })),
+      logEmpty:(d.log||[]).length===0,
+      logEmptyMsg:T('Todo lo que hagas quedará anotado aquí.','Everything you do gets logged here.'),
+    };
+  }
   // ================= PUESTO DE TRABAJO =================
   // Cuatro sesiones abiertas a la vez y una cola de tickets. La gracia
   // didáctica es que el mismo comando contesta distinto según el equipo:
@@ -2990,7 +3303,7 @@ class Component extends DCLogic {
   deskState(){
     const d=this.state.desk||{};
     return { ticket:d.ticket||null, focus:d.focus||0, phase:d.phase||'work',
-      cause:d.cause||null, fix:d.fix||null, wrong:d.wrong||null, solved:d.solved||{}, terms:d.terms||null };
+      cause:d.cause||null, fix:d.fix||null, wrong:d.wrong||null, solved:d.solved||{}, terms:d.terms||null, log:d.log||[] };
   }
   deskNewTerms(){
     const es=this.state.lang==='es';
@@ -3000,7 +3313,11 @@ class Component extends DCLogic {
   deskTerms(){ const d=this.deskState(); return d.terms || this.deskNewTerms(); }
   deskPrompt(host, cwd){ return 'root@'+host+':'+((cwd||'/root').replace('/root','~'))+'# '; }
   deskSet(patch){ const d=this.deskState(); this.setState({ desk:{ ...d, ...patch } }); }
-  deskOpen(id){ this.deskSet({ ticket:id, phase:'work', cause:null, fix:null, wrong:null, terms:this.deskNewTerms(), focus:0 }); }
+  deskOpen(id){
+    const es=this.state.lang==='es';
+    this.deskSet({ ticket:id, phase:'work', cause:null, fix:null, wrong:null, terms:this.deskNewTerms(), focus:0, log:[] });
+    this.deskLog(es? 'Incidencia asignada y abierta' : 'Incident assigned and opened');
+  }
   deskBack(){ this.deskSet({ ticket:null, phase:'work', cause:null, fix:null, wrong:null }); }
   deskFocus(i){ this.deskSet({ focus:i }); }
   deskInput(i,e){ const v=(e&&e.target)?e.target.value:''; const terms=this.deskTerms().slice();
@@ -3050,14 +3367,16 @@ class Component extends DCLogic {
     terms[i]={ ...t, input:'', histIdx:-1, cmdHistory:cmdHist,
       cwd: r.cwd || t.cwd, history: hist.length>200? hist.slice(hist.length-200) : hist };
     this.deskSet({ terms, focus:i });
+    if(input.trim()){ const es=this.state.lang==='es';
+      this.deskLog((es?'Ejecutado en ':'Ran on ')+(t.name||host)+': '+input.trim()); }
   }
   deskRun(cmd){ const d=this.deskState(), i=d.focus||0, terms=this.deskTerms().slice();
     terms[i]={ ...terms[i], input:cmd }; this.deskSet({ terms }); }
-  deskDiagnose(){ this.deskSet({ phase:'cause', wrong:null }); }
+  deskDiagnose(){ const es=this.state.lang==='es'; this.deskSet({ phase:'cause', wrong:null }); this.deskLog(es?'Hipótesis formada, pasa a diagnóstico':'Hypothesis formed, moving to diagnosis'); }
   deskPickCause(id){
     const d=this.deskState(), tk=this.tickets().find(x=>x.id===d.ticket); if(!tk) return;
     const c=(tk.causes||[]).find(x=>x.id===id);
-    if(c && c.correct) this.deskSet({ cause:id, phase:'fix', wrong:null });
+    if(c && c.correct){ this.deskSet({ cause:id, phase:'fix', wrong:null }); this.deskLog((this.state.lang==='es'?'Causa raíz identificada: ':'Root cause identified: ')+this.loc(c.text)); }
     else this.deskSet({ wrong:id });
   }
   deskPickFix(id){
@@ -3066,7 +3385,10 @@ class Component extends DCLogic {
     if(f && f.correct){
       const solved={ ...(d.solved||{}) }; solved[tk.id]=1;
       this.fireConfetti();
-      this.setState({ desk:{ ...d, fix:id, phase:'done', wrong:null, solved } });
+      const es=this.state.lang==='es';
+      const log=[...(d.log||[]), { t:(es?'Arreglo aplicado: ':'Fix applied: ')+this.loc(f.text), at:this.deskClock((d.log||[]).length) },
+        { t:(es?'Incidencia resuelta':'Incident resolved'), at:this.deskClock((d.log||[]).length+1) }];
+      this.setState({ desk:{ ...d, fix:id, phase:'done', wrong:null, solved, log } });
     } else this.deskSet({ wrong:id });
   }
   deskView(){
@@ -3083,6 +3405,8 @@ class Component extends DCLogic {
 
     if(!d.ticket){
       return { show:true, open:false, closed:true, phaseWork:false, lessonLabel:'', nextTicketLabel:'', termHint:'',
+        itsm:{ prio:'', prioColor:'', prioBg:'', impacto:'', urgencia:'', sla:'', impactoLabel:'', urgenciaLabel:'', slaLabel:'',
+          matrixNote:'', states:[], slaPct:'0%', slaColor:'', slaText:'', assignee:'', logTitle:'', log:[], logEmpty:true, logEmptyMsg:'' },
         queueTitle:T('Cola de tickets','Ticket queue'),
         queueHint:T('Elige un aviso. Se abren cuatro sesiones y tienes que averiguar qué pasa mirando en el equipo correcto.',
                     'Pick a ticket. Four sessions open and you have to work out what is wrong by looking on the right box.'),
@@ -3111,7 +3435,7 @@ class Component extends DCLogic {
       border: d.wrong===x.id? '#f97316' : 'var(--border-strong)', bg: d.wrong===x.id? 'var(--warm)' : 'var(--panel)',
       anim: d.wrong===x.id? 'kidShake .4s ease' : 'none' });
 
-    return { show:true, open:true, closed:false, phaseWork:(d.phase==='work'),
+    return { show:true, open:true, closed:false, phaseWork:(d.phase==='work'), itsm:this.itsmView(tk,d),
       lessonLabel:t0.deskLesson, nextTicketLabel:t0.deskNext,
       ticket:{ id:tk.id, subject:this.loc(tk.subject), from:this.loc(tk.from), body:this.loc(tk.body),
         prio:p.n, prioColor:p.c, prioBg:this.hexA(p.c,0.14) },
@@ -3942,7 +4266,7 @@ class Component extends DCLogic {
     const guideOpen = !hasDetail && !hasLayerDetail;
 
     // ---- navegación por grupos: aprender · practicar · explorar ----
-    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore', desk:'explore', kids:'kids' };
+    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore', desk:'explore', events:'explore', kids:'kids' };
     const navGroup = groupOf[mode] || 'home';
     const navGroups = [
       { id:'build', icon:'🧱', label:t.navBuild, hint:t.navBuildHint, to:'sandbox' },
@@ -3960,7 +4284,7 @@ class Component extends DCLogic {
     // ---- sub-navegación: las vistas dentro del grupo activo ----
     let subDef = [];
     if(navGroup==='practice') subDef = [ {m:'mission',icon:'🎯',label:t.modeMission}, {m:'quiz',icon:'❓',label:t.modeQuiz} ];
-    if(navGroup==='explore') subDef = [ {m:'map',icon:'🗺',label:t.modeMap}, {m:'http',icon:'🚦',label:t.modeHttp}, {m:'deploy',icon:'🚀',label:t.modeDeploy}, {m:'metrics',icon:'📈',label:t.modeMetrics}, {m:'terminal',icon:'▚',label:t.modeTerminal}, {m:'incident',icon:'🚑',label:t.modeIncident}, {m:'desk',icon:'🎧',label:t.modeDesk} ];
+    if(navGroup==='explore') subDef = [ {m:'map',icon:'🗺',label:t.modeMap}, {m:'http',icon:'🚦',label:t.modeHttp}, {m:'deploy',icon:'🚀',label:t.modeDeploy}, {m:'metrics',icon:'📈',label:t.modeMetrics}, {m:'terminal',icon:'▚',label:t.modeTerminal}, {m:'incident',icon:'🚑',label:t.modeIncident}, {m:'events',icon:'🔔',label:t.modeEvents}, {m:'desk',icon:'🎧',label:t.modeDesk} ];
     const subnav = subDef.map(x=>{ const on = mode===x.m; return {
       icon:x.icon, label:x.label, current: on?'page':'false',
       bg: on?'var(--accent-tint)':'var(--panel)', border: on?'var(--accent)':'var(--border-strong)',
@@ -4027,7 +4351,7 @@ class Component extends DCLogic {
         { value:String(blocks.length), label:t.statPieces },
         { value:String(stackIds.length), label:t.statLayers },
         { value:String(this.missions().length), label:t.statMissions },
-        { value:'7', label:t.statModes },
+        { value:'8', label:t.statModes },
       ],
     };
     const szTot = this.sizing(anPlaced);
@@ -4184,6 +4508,7 @@ class Component extends DCLogic {
       showHome: mode==='home', home,
       showKids: mode==='kids', kids: this.kidsView(),
       showDesk: mode==='desk', desk: this.deskView(),
+      showEvents: mode==='events', events: this.eventsViewFull(),
       showChecklist: buildingNow, progressParts, nextStep,
       moreBg: S.showTools?'var(--panel-2)':'var(--panel-alt)', moreColor: S.showTools?'var(--text)':'var(--text-muted)',
       toolTheme:()=>this.toolTheme(), toolAch:()=>this.toolAch(), toolShare:()=>this.toolShare(), toolReset:()=>this.toolReset(),
