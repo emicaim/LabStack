@@ -157,6 +157,13 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ **`npm test`**: las cinco comprobaciones de una vez, con la salida entera de la que falle.
 - ✅ **Fase 3, sistema visual**: 30 tamaños de letra → 11, 22 radios → 5, fuera la rejilla animada y los degradados de fondo, y la cabecera respeta el tema.
 
+### ✅ Hecho — funciona sin internet
+- ✅ **React, fuentes y confeti dentro del repo** (`vendor/`, 516 KB). La app arranca con doble clic y sin conexión.
+- ✅ Las fuentes van con el **subconjunto latino** (8 ficheros, 328 KB): cubre español e inglés enteros.
+- ✅ De paso, **arreglado el confeti**: la URL del CDN apuntaba a un fichero que no existe en esa versión, así que no había saltado nunca.
+- ✅ Comprobado tumbando todo el DNS: arranca, se ve igual y no queda ni un error de red.
+- Pendiente si se quiere: **PWA instalable** (service worker + manifest) para que desde GitHub Pages quede offline tras la primera visita.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

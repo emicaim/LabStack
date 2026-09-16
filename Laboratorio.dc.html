@@ -12,15 +12,20 @@
 <script src="./contenido/tickets.js"></script>
 <script src="./contenido/eventos.js"></script>
 <script src="./contenido/comandos.js"></script>
-<script>if (location.protocol === 'file:') window.__resources = window.__resources || {};</script>
+<!-- React desde vendor/: la app arranca sin conexión. Quita este bloque y
+     volverá a tirar del CDN de unpkg. -->
+<script>
+  window.__resources = Object.assign({
+    'https://unpkg.com/react@18.3.1/umd/react.production.min.js': './vendor/react.production.min.js',
+    'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': './vendor/react-dom.production.min.js'
+  }, window.__resources || {});
+</script>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="./vendor/fuentes.css" rel="stylesheet">
 <style>
   :root{
     --bg:#eef2f7; --panel:#ffffff; --panel-alt:#f6f9fc; --panel-2:#eef3f8;
@@ -2395,7 +2400,7 @@ class Component extends DCLogic {
     const done=()=>{ this.setState({copied:true}); if(this._copyT)clearTimeout(this._copyT); this._copyT=setTimeout(()=>this.setState({copied:false}),1900); };
     try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done,done); } else done(); }catch(e){ done(); }
   }
-  loadConfetti(){ try{ if(window.confetti || this._confettiTried) return; this._confettiTried=true; const s=document.createElement('script'); s.src='https://unpkg.com/canvas-confetti@1.9.3/dist/confetti.browser.min.js'; s.async=true; document.head.appendChild(s); }catch(e){} }
+  loadConfetti(){ try{ if(window.confetti || this._confettiTried) return; this._confettiTried=true; const s=document.createElement('script'); s.src='./vendor/confetti.browser.js'; s.async=true; document.head.appendChild(s); }catch(e){} }
   fireConfetti(){ try{ if(window.confetti) window.confetti({ particleCount:95, spread:72, startVelocity:38, origin:{ y:0.35 } }); }catch(e){} }
   componentDidMount(){
     this.loadConfetti();

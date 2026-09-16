@@ -10,7 +10,16 @@ Almost all real content and behavior lives in [Laboratorio.dc.html](Laboratorio.
 
 ## Running
 
-Open `Laboratorio.dc.html` in a browser. There is no build step and no server for the app itself — `support.js` boots on load and mounts the component. **Requires internet access**: the runtime fetches React 18 (and Babel standalone) from the unpkg CDN at runtime (see `REACT_URL` / `BABEL_URL` in [support.js](support.js)). Offline, the page will fail to boot.
+Open `Laboratorio.dc.html` in a browser. No build step, no server, **and no internet**.
+
+Everything it needs is in the repo:
+
+- `vendor/react*.js` — React 18.3.1 UMD. `support.js` still *names* the unpkg URL, but `cdnScriptFor()` looks the URL up in `window.__resources` first, and the `<script>` block in `<head>` maps both to `./vendor/`. Delete that block and it goes back to the CDN.
+- `vendor/fuentes.css` + `vendor/fonts/` — Inter and JetBrains Mono, **latin subset only** (8 files, 328 KB). Latin-1 covers Spanish and English completely; the few symbols outside it (`←`, `→`, `★`, `✓`) already fell back to the system font before.
+- `vendor/confetti.browser.js` — self-hosted, and this also **fixed a live bug**: the CDN URL in the code was `confetti.browser.min.js`, which does not exist in canvas-confetti 1.9.3. The confetti had never once fired.
+- `contenido/*.js` — loaded with `<script src>`, never `fetch`, for the same reason.
+
+Verified by rendering with every DNS lookup blackholed (`--host-resolver-rules="MAP * 0.0.0.0"`): the app boots, the fonts are right and there is not a single `ERR_` in the console. If you add a dependency, vendor it — do not reintroduce a CDN.
 
 ## The `.dc.html` "Design Component" format
 

@@ -4,7 +4,7 @@ Laboratorio educativo **de un solo archivo** para aprender la infraestructura de
 
 ## Cómo ejecutarlo
 
-Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet (carga React desde CDN). No requiere instalación ni servidor.
+Abre **`Laboratorio.dc.html`** en un navegador moderno. No requiere instalación, ni servidor, **ni conexión a internet**: React, las fuentes y el resto van en `vendor/`.
 
 > Para el flujo completo de "compartir por enlace" conviene servirlo (p. ej. GitHub Pages) en lugar de abrirlo como `file://`.
 
@@ -32,6 +32,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 | `desk-test.js` | Recorre el modo Puesto: resuelve los 12 tickets y comprueba que la evidencia sólo aparece en el equipo correcto. |
 | `test.js` + `package.json` | `npm test` lanza las cinco comprobaciones de una vez. No hay nada que instalar. |
 | `content-test.js` | Valida el contenido: `node content-test.js` comprueba referencias entre ficheros, ids repetidos y que ES y EN estén completos. |
+| `vendor/` | React, fuentes (subconjunto latino) y confeti, en local. Es lo que permite abrirla sin internet. |
 | `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids), `tickets.js` y `eventos.js` (Puesto y consola), `comandos.js` (qué te dice cada comando). |
 | `support.js` | Runtime del formato `.dc.html` (React vía CDN). **Generado — no editar.** |
 | `fokosoft.png` | Logo. |
