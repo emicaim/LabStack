@@ -140,6 +140,11 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ **Puente evento → ticket**: «Crear incidencia» abre el ticket correspondiente en el Puesto y lo anota en el histórico.
 - ✅ **Capa ITSM** en el ticket: estado (Nuevo/En curso/Resuelto/Cerrado), prioridad **derivada de impacto × urgencia** (P1–P4) con su SLA, asignación e **histórico** de todo lo que has hecho.
 
+### ✅ Hecho — el Puesto guía sin dar la respuesta
+- ✅ Cada comando sugerido lleva **qué te dice** (`contenido/comandos.js`, 38 entradas por prefijo): «ss -lntp → quién está escuchando y en qué puerto; si algo no arranca, mira si el puerto ya está cogido».
+- ✅ La lista avisa de **en qué sesión va a escribir**, para que pinchar no caiga en la máquina equivocada sin querer.
+- ✅ El comando correcto en el equipo equivocado **avisa de que en otro sí cuenta algo** — sin decir en cuál. Deja de ser un callejón sin salida y sigue habiendo que elegir.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

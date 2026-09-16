@@ -11,6 +11,7 @@
 <script src="./contenido/kids.js"></script>
 <script src="./contenido/tickets.js"></script>
 <script src="./contenido/eventos.js"></script>
+<script src="./contenido/comandos.js"></script>
 <script>if (location.protocol === 'file:') window.__resources = window.__resources || {};</script>
 <script src="./support.js"></script>
 </head>
@@ -412,10 +413,16 @@
                 </div>
 
                 <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:13px 14px;">
-                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:9px;">{{ desk.suggestTitle }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:4px;">{{ desk.suggestTitle }}</div>
+                  <div style="font-size:11px; line-height:1.45; color:var(--text-faint); margin-bottom:9px;">{{ desk.suggestNote }}</div>
                   <div style="display:flex; flex-direction:column; gap:5px;">
                     <sc-for list="{{ desk.suggest }}" as="ds" hint-placeholder-count="4">
-                      <button onClick="{{ ds.onClick }}" style="text-align:left; border:1px solid var(--border-strong); background:var(--panel); color:var(--accent); padding:6px 10px; border-radius:7px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px;" style-hover="border-color:var(--accent-b); background:var(--accent-tint);">{{ ds.cmd }}</button>
+                      <button onClick="{{ ds.onClick }}" style="display:block; width:100%; box-sizing:border-box; text-align:left; border:1px solid var(--border-strong); background:var(--panel); padding:8px 10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;" style-hover="border-color:var(--accent-b); background:var(--accent-tint);">
+                        <span style="display:block; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--accent);">{{ ds.cmd }}</span>
+                        <sc-if value="{{ ds.hasWhy }}" hint-placeholder-val="{{ false }}">
+                          <span style="display:block; font-size:11px; line-height:1.45; color:var(--text-muted); margin-top:3px;">{{ ds.why }}</span>
+                        </sc-if>
+                      </button>
                     </sc-for>
                   </div>
                 </div>
@@ -3285,6 +3292,15 @@ class Component extends DCLogic {
     firewall:'fw01', vpn:'vpn01', tls:'fw01', vault:'vault01', iam:'idp01', encryption:'fw01',
     linux:'web01', winserver:'win01',
     postgres:'db01', mysql:'db01', mongodb:'db01', cassandra:'db01', redis:'cache01', elasticsearch:'es01' }; }
+  // Busca del prefijo más largo al más corto: «systemctl status nginx»
+  // encuentra lo suyo antes de caer en «systemctl status».
+  cmdHint(cmd){
+    const G=this.content('comandos', {}), c=String(cmd||'').toLowerCase().trim();
+    let mejor='', hit=null;
+    Object.keys(G).forEach(k=>{ const kk=k.toLowerCase();
+      if(c.indexOf(kk)===0 && kk.length>mejor.length){ mejor=kk; hit=G[k]; } });
+    return hit? this.loc(hit) : '';
+  }
   deskHosts(){
     const base=this.content('equipos', []), placed=this.effectivePlaced().placed, names=this.deskHostName();
     return base.map(h=>{
@@ -3356,12 +3372,27 @@ class Component extends DCLogic {
     const hit=(tk.evidence||[]).find(ev=>ev.host===host && (ev.cmd||[]).some(c=>line===norm(c)||line.indexOf(norm(c))===0));
     return hit ? hit.lines.map(l=>({ t:l[0], c:l[1]||'out' })) : null;
   }
+  // ¿este comando tiene evidencia en OTRO equipo del ticket abierto?
+  deskOtherHost(host, raw){
+    const d=this.deskState(); if(!d.ticket) return null;
+    const tk=this.tickets().find(x=>x.id===d.ticket); if(!tk) return null;
+    const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const line=norm(raw); if(!line) return null;
+    const hit=(tk.evidence||[]).find(e=>e.host!==host && (e.cmd||[]).some(c=>line===norm(c)||line.indexOf(norm(c))===0));
+    return hit? hit.host : null;
+  }
   deskSubmit(i){
     const terms=this.deskTerms().slice(), t=terms[i], input=t.input, host=t.host;
     const cmdHist = input.trim()? [...(t.cmdHistory||[]), input] : (t.cmdHistory||[]);
     const echo={ t:this.deskPrompt(t.name||host, t.cwd)+input, c:'in' };
     const ev=this.deskEvidence(host, input);
     const r = ev ? { lines:ev } : this.execCmd(input, { cwd:t.cwd, host:(t.name||host) });
+    // Si ese comando SÍ cuenta algo en otro equipo de este mismo aviso, se dice.
+    // No revela cuál: convierte un callejón sin salida en una señal.
+    if(!ev){ const otro=this.deskOtherHost(host, input);
+      if(otro) r.lines=[...(r.lines||[]), { t:(this.state.lang==='es'
+        ? '· Aquí este comando no cuenta nada de este aviso. En otro de los equipos sí.'
+        : '· Here this command tells you nothing about this ticket. On one of the other hosts it does.'), c:'dim' }]; }
     if(r.clear){ terms[i]={ ...t, input:'', history:[], cmdHistory:cmdHist, histIdx:-1 }; this.deskSet({ terms, focus:i }); return; }
     const hist=[...t.history, echo, ...(r.lines||[])];
     terms[i]={ ...t, input:'', histIdx:-1, cmdHistory:cmdHist,
@@ -3405,6 +3436,7 @@ class Component extends DCLogic {
 
     if(!d.ticket){
       return { show:true, open:false, closed:true, phaseWork:false, lessonLabel:'', nextTicketLabel:'', termHint:'',
+        suggestNote:'',
         itsm:{ prio:'', prioColor:'', prioBg:'', impacto:'', urgencia:'', sla:'', impactoLabel:'', urgenciaLabel:'', slaLabel:'',
           matrixNote:'', states:[], slaPct:'0%', slaColor:'', slaText:'', assignee:'', logTitle:'', log:[], logEmpty:true, logEmptyMsg:'' },
         queueTitle:T('Cola de tickets','Ticket queue'),
@@ -3442,7 +3474,9 @@ class Component extends DCLogic {
       backLabel:T('← Volver a la cola','← Back to the queue'), onBack:()=>this.deskBack(),
       termHint:T('↑↓ historial · Tab autocompleta · man <comando> · clic para cambiar de sesión','↑↓ history · Tab completes · man <command> · click to switch session'),
       suggestTitle:T('Por dónde empezar','Where to start'),
-      suggest:(tk.suggest||[]).map(c=>({ cmd:c, onClick:()=>this.deskRun(c) })),
+      suggest:(tk.suggest||[]).map(c=>({ cmd:c, why:this.cmdHint(c), hasWhy:!!this.cmdHint(c), onClick:()=>this.deskRun(c) })),
+      suggestNote:T('Se escribirá en la sesión marcada ('+((this.deskTerms()[d.focus||0]||{}).name||'')+'). Elegir el equipo es parte del trabajo.',
+                    'It will be typed into the highlighted session ('+((this.deskTerms()[d.focus||0]||{}).name||'')+'). Choosing the host is part of the job.'),
       terms, phase:d.phase,
       diagnoseLabel:T('Ya sé qué pasa →','I know what is wrong →'), onDiagnose:()=>this.deskDiagnose(),
       showCauses:d.phase==='cause', causeTitle:T('¿Cuál es la causa?','What is the cause?'),

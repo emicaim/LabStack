@@ -158,6 +158,10 @@ Tab completion is `deskComplete(i)`, per session, sharing `termCmds()` with Term
 
 `content-test.js` enforces the rules below — most importantly that **a ticket's evidence spans at least two hosts**. One host means the learner never has to choose where to look, which is the whole point of the mode; it caught three of the first five tickets failing exactly that.
 
+**Command hints.** `contenido/comandos.js` maps a command prefix to one line of *what it tells you* — not what it does, what you learn from it. `cmdHint()` matches **longest prefix first**, so `systemctl status nginx` gets its own line instead of falling back to `systemctl status`. The suggestion list renders it under each command, so "type this" becomes "I am looking for this". Add a command to a ticket's `suggest` and give it an entry here — `desk-test.js` fails if any suggested command has no hint.
+
+**The right command on the wrong host is a signpost, not a dead end.** `deskOtherHost()` checks whether the typed command has evidence on a *different* host of the open ticket and, if so, appends one dim line saying so. It deliberately **does not name the host** — choosing the box stays the exercise; the test asserts the line never leaks a hostname. A command that is evidence for nobody (`uptime`, `df -h`) must not trigger it.
+
 **Writing a ticket** (`contenido/tickets.js`): give it evidence on **more than one host**, including at least one that rules something out — a firewall that turns out to be fine is as instructive as the broken thing. Keep the distinctive line long enough to be unique: `desk-test.js` matches on the longest line precisely because a short one like `4` collides with generic output.
 
 ### Map artwork (schematic illustrations)

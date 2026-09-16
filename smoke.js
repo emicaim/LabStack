@@ -19,7 +19,7 @@ global.history = { replaceState(){} };
 global.navigator = { clipboard:{ writeText(){ return Promise.resolve(); } } };
 
 // cargar el contenido externo igual que hacen las <script> de la página
-['piezas','capas','textos','retos','kids','tickets','eventos'].forEach(function(n){
+['piezas','capas','textos','retos','kids','tickets','eventos','comandos'].forEach(function(n){
   const code=fs.readFileSync('F:/IngLab/Taller visual de infraestructura didáctico/contenido/'+n+'.js','utf8');
   new Function('window', code)(global.window);
 });

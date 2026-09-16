@@ -7,13 +7,13 @@ const src=fs.readFileSync(path.join(D,'Laboratorio.dc.html'),'utf8');
 const code=src.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/)[1];
 class DCLogic{ constructor(){this.props={}} setState(p){Object.assign(this.state, typeof p==='function'?p(this.state):p)} }
 const win={location:{hash:'',search:'',pathname:'/'},addEventListener(){}};
-['piezas','capas','textos','retos','kids','tickets','eventos'].forEach(n=>
+['piezas','capas','textos','retos','kids','tickets','eventos','comandos'].forEach(n=>
   new Function('window', fs.readFileSync(path.join(D,'contenido',n+'.js'),'utf8'))(win));
 const doc={addEventListener(){},createElement:()=>({style:{},click(){}}),head:{appendChild(){}},body:{appendChild(){},removeChild(){}},querySelector:()=>null,querySelectorAll:()=>[]};
 const C=new Function('DCLogic','StreamableLogic','React','localStorage','window','document','setInterval','clearInterval','setTimeout',
   code+'\nreturn Component;')(DCLogic,DCLogic,{createElement:()=>({}),Fragment:'F'},{getItem:()=>null,setItem(){},removeItem(){}},win,doc,()=>0,()=>{},()=>0);
 
-let fail=0; const mal=m=>{ console.error('  ✕ '+m); fail++; };
+let fail=0; const mal=m=>{ console.error('  ✕ '+m); fail++; }; const bien=m=>console.log('  ✓ '+m);
 const c=new C(); c.props={}; c.setState({mode:'desk'});
 const tickets=c.tickets(), hosts=c.deskHosts().map(h=>h.id);
 const escribir=(i,cmd)=>{ const v=c.renderVals().desk; v.terms[i].onInput({target:{value:cmd}}); v.terms[i].onKey({key:'Enter',preventDefault(){}}); };
@@ -118,6 +118,59 @@ v4.terms[2].onKey({ key: 'Enter', preventDefault() {} });
 const manTxt = c.renderVals().desk.terms[2].lines.map(l => l.t).join(' ').toLowerCase();
 if (manTxt.indexOf('ss') < 0 || manTxt.indexOf('not found') >= 0) mal('man no responde en el puesto');
 else console.log('  ✓ man responde dentro del puesto');
+
+
+// --- cada comando sugerido tiene que decir qué te dice ---
+console.log('\n  pistas de los comandos sugeridos:');
+let sinPista = [];
+tickets.forEach(tk => {
+  c.deskOpen(tk.id);
+  const v = c.renderVals().desk;
+  if (v.suggest.length !== (tk.suggest || []).length) mal(tk.id + ': faltan sugerencias en la vista');
+  v.suggest.forEach(sg => { if (!sg.hasWhy || !sg.why) sinPista.push(tk.id + ' » ' + sg.cmd); });
+});
+if (sinPista.length) mal('comandos sugeridos sin explicación: ' + sinPista.join(', '));
+else {
+  const total = tickets.reduce((s, tk) => s + (tk.suggest || []).length, 0);
+  bien('los ' + total + ' comandos sugeridos llevan su «qué te dice»');
+}
+// y la explicación tiene que ser la específica, no la genérica del prefijo
+c.deskOpen('T-1042');
+const sug = c.renderVals().desk.suggest;
+const largo = sug.find(x => x.cmd === 'systemctl status nginx');
+const generico = c.cmdHint('systemctl status');
+if (!largo) mal('no encuentro la sugerencia de nginx');
+else if (largo.why === generico) mal('coge la explicación genérica en vez de la del comando completo');
+else bien('el prefijo más largo gana: "systemctl status nginx" tiene la suya, no la de "systemctl status"');
+if (c.cmdHint('comando-que-no-existe') !== '') mal('inventa explicación para un comando desconocido');
+else bien('un comando sin entrada simplemente no lleva explicación');
+
+// --- el comando bueno en la máquina equivocada avisa, y sólo ahí ---
+c.deskOpen('T-1042');
+const ev = c.tickets().find(x => x.id === 'T-1042').evidence.find(e => e.host === 'web01');
+const idx = h => c.deskHosts().findIndex(x => x.id === h);
+const lanza = (i, cmd) => { const v = c.renderVals().desk; v.terms[i].onInput({ target: { value: cmd } }); v.terms[i].onKey({ key: 'Enter', preventDefault() {} }); };
+const leer = i => c.renderVals().desk.terms[i].lines.map(l => l.t).join('\n');
+const AVISO = 'En otro de los equipos sí';
+
+lanza(idx('fw01'), ev.cmd[0]);
+if (leer(idx('fw01')).indexOf(AVISO) < 0) mal('el comando bueno en la máquina equivocada no avisa');
+else bien('"' + ev.cmd[0] + '" en fw01 avisa de que cuenta algo en otro equipo');
+
+lanza(idx('web01'), ev.cmd[0]);
+if (leer(idx('web01')).indexOf(AVISO) >= 0) mal('avisa también en la máquina correcta');
+else bien('en web01, que es la suya, no avisa: da la evidencia y punto');
+
+lanza(idx('db01'), 'uptime');
+if (leer(idx('db01')).indexOf(AVISO) >= 0) mal('avisa con un comando que no es evidencia de nadie');
+else bien('un comando que vale en cualquier sitio no dispara el aviso');
+
+// el aviso no puede delatar en qué equipo está la pista
+const todos = c.deskHosts().map(h => h.name).concat(c.deskHosts().map(h => h.id));
+const linea = leer(idx('fw01')).split('\n').find(l => l.indexOf(AVISO) >= 0) || '';
+const delata = todos.filter(n => n !== 'fw01' && linea.indexOf(n) >= 0);
+if (delata.length) mal('el aviso nombra el equipo donde está la pista: ' + delata.join(', '));
+else bien('el aviso no dice cuál es: sigue habiendo que elegir');
 
 console.log(fail? ('\n'+fail+' fallo(s)') : '\nPuesto OK');
 process.exit(fail?1:0);

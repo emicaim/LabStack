@@ -11,7 +11,7 @@ const DIR = __dirname;
 
 function cargar() {
   const win = { location: { hash: '', search: '', pathname: '/' }, addEventListener() {} };
-  ['piezas', 'capas', 'textos', 'retos', 'kids', 'tickets', 'eventos'].forEach(n => {
+  ['piezas', 'capas', 'textos', 'retos', 'kids', 'tickets', 'eventos', 'comandos'].forEach(n => {
     const f = path.join(DIR, 'contenido', n + '.js');
     if (!fs.existsSync(f)) throw new Error('falta contenido/' + n + '.js');
     new Function('window', fs.readFileSync(f, 'utf8'))(win);

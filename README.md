@@ -31,7 +31,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 | `events-test.js` | Recorre la consola de eventos: correlación, triaje del ruido y el puente evento → incidencia. |
 | `desk-test.js` | Recorre el modo Puesto: resuelve los 12 tickets y comprueba que la evidencia sólo aparece en el equipo correcto. |
 | `content-test.js` | Valida el contenido: `node content-test.js` comprueba referencias entre ficheros, ids repetidos y que ES y EN estén completos. |
-| `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids). |
+| `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids), `tickets.js` y `eventos.js` (Puesto y consola), `comandos.js` (qué te dice cada comando). |
 | `support.js` | Runtime del formato `.dc.html` (React vía CDN). **Generado — no editar.** |
 | `fokosoft.png` | Logo. |
 | `ROADMAP.md` | Estado del proyecto y plan de mejoras. |

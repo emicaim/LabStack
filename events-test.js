@@ -10,7 +10,7 @@ const src = fs.readFileSync(path.join(D, 'Laboratorio.dc.html'), 'utf8');
 const code = src.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/)[1];
 class DCLogic { constructor() { this.props = {}; } setState(p) { Object.assign(this.state, typeof p === 'function' ? p(this.state) : p); } }
 const win = { location: { hash: '', search: '', pathname: '/' }, addEventListener() {} };
-['piezas', 'capas', 'textos', 'retos', 'kids', 'tickets', 'eventos'].forEach(n =>
+['piezas', 'capas', 'textos', 'retos', 'kids', 'tickets', 'eventos', 'comandos'].forEach(n =>
   new Function('window', fs.readFileSync(path.join(D, 'contenido', n + '.js'), 'utf8'))(win));
 const doc = { addEventListener() {}, createElement: () => ({ style: {}, click() {} }), head: { appendChild() {} }, body: { appendChild() {}, removeChild() {} }, querySelector: () => null, querySelectorAll: () => [] };
 const C = new Function('DCLogic', 'StreamableLogic', 'React', 'localStorage', 'window', 'document', 'setInterval', 'clearInterval', 'setTimeout',
