@@ -280,6 +280,11 @@
               </div>
             </sc-if>
 
+            <sc-if value="{{ kids.chapterShow }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center; margin:0 0 16px;">
+                <span style="display:inline-block; padding:7px 18px; border-radius:99px; background:{{ kids.color }}; color:#fff; font-family:'Inter',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.01em; box-shadow:0 4px 0 0 rgba(0,0,0,0.14); animation:kidPop .45s ease both;">{{ kids.chapterTitle }}</span>
+              </div>
+            </sc-if>
             <sc-if value="{{ kids.guideShow }}" hint-placeholder-val="{{ true }}">
               <!-- el guía: pone voz y contexto, y se queda toda la partida -->
               <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:20px;">
@@ -353,15 +358,15 @@
           </div>
 
           <!-- la torre: lo construido no se borra nunca, crece de abajo hacia arriba -->
-          <div class="kids-tower" style="position:sticky; top:8px; border-radius:22px; border:3px dashed var(--border-strong); background:var(--panel-alt); padding:14px 12px 16px;">
+          <div class="kids-tower" style="position:sticky; top:8px; max-height:calc(100vh - 210px); overflow-y:auto; border-radius:22px; border:3px dashed var(--border-strong); background:var(--panel-alt); padding:14px 12px 16px;">
             <div style="text-align:center; font-family:'Inter',sans-serif; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin-bottom:12px;">{{ kids.towerTitle }}</div>
             <sc-if value="{{ kids.towerEmpty }}" hint-placeholder-val="{{ true }}">
               <div style="text-align:center; font-size:13px; line-height:1.5; color:var(--text-faint); padding:14px 6px;">{{ kids.towerEmptyMsg }}</div>
             </sc-if>
             <div style="display:flex; flex-direction:column; gap:3px;">
               <sc-for list="{{ kids.tower }}" as="kt" hint-placeholder-count="0">
-                <div style="position:relative; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:2px solid {{ kt.border }}; background:{{ kt.bg }}; animation:kidPop .4s ease both;">
-                  <span style="position:absolute; top:-4px; left:16px; width:24px; height:7px; border-radius:0 0 7px 7px; background:{{ kt.color }}; opacity:0.75;"></span>
+                <div style="position:relative; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:2px {{ kt.dash }} {{ kt.border }}; background:{{ kt.bg }}; animation:kidPop .4s ease both;">
+                  <span style="position:absolute; top:-4px; left:16px; width:24px; height:7px; border-radius:0 0 7px 7px; background:{{ kt.color }}; opacity:{{ kt.nubOp }};"></span>
                   <svg width="30" height="25" viewBox="0 0 56 46" style="display:block; flex:0 0 auto;">
                     <sc-for list="{{ kt.art }}" as="kq" hint-placeholder-count="0">
                       <path d="{{ kq.d }}" fill="{{ kq.fill }}" stroke="{{ kq.stroke }}" stroke-width="{{ kq.sw }}" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -374,6 +379,26 @@
                 </div>
               </sc-for>
             </div>
+            <sc-if value="{{ kids.guardsShow }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:14px; padding-top:12px; border-top:2px dashed var(--border-strong);">
+                <div style="text-align:center; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-faint); margin-bottom:9px;">{{ kids.guardsTitle }}</div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                  <sc-for list="{{ kids.guards }}" as="kg" hint-placeholder-count="0">
+                    <div style="display:flex; align-items:center; gap:9px; padding:8px 11px; border-radius:12px; border:2px dashed {{ kg.border }}; background:{{ kg.bg }}; animation:kidPop .4s ease both;">
+                      <svg width="28" height="23" viewBox="0 0 56 46" style="display:block; flex:0 0 auto;">
+                        <sc-for list="{{ kg.art }}" as="kr" hint-placeholder-count="0">
+                          <path d="{{ kr.d }}" fill="{{ kr.fill }}" stroke="{{ kr.stroke }}" stroke-width="{{ kr.sw }}" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </sc-for>
+                      </svg>
+                      <span style="min-width:0;">
+                        <span style="display:block; font-size:12.5px; font-weight:700; color:var(--text); line-height:1.2;">{{ kg.name }}</span>
+                        <span style="display:block; font-size:10px; color:{{ kg.color }}; font-weight:600; margin-top:1px;">{{ kg.layer }}</span>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
           </div>
         </div>
       </sc-if>
@@ -2058,7 +2083,7 @@ class Component extends DCLogic {
       homeBack:'Volver al inicio', moreBtn:'Más',
       navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar', navKids:'Kids',
       navKidsHint:'Para peques: la infraestructura paso a paso, jugando',
-      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'8 pasos · a partir de 8 años',
+      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'13 pasos · a partir de 8 años',
       navBuildHint:'Monta tu stack pieza a pieza y entiende cada capa', navPracticeHint:'Retos con objetivos y quiz de repaso', navExploreHint:'Mira tu stack desde otros ángulos: mapa, petición, despliegue…',
       homeKicker:'Taller visual de infraestructura', homeTitle:'¿Qué quieres hacer hoy?',
       homeLead:'Aprende cómo se monta la infraestructura de un sistema real: capa por capa, entendiendo por qué existe cada una. Elige por dónde empezar.',
@@ -2114,7 +2139,7 @@ class Component extends DCLogic {
       homeBack:'Back to start', moreBtn:'More',
       navBuild:'Learn', navPractice:'Practice', navExplore:'Explore', navKids:'Kids',
       navKidsHint:'For kids: infrastructure step by step, by playing',
-      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'8 steps · ages 8+',
+      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'13 steps · ages 8+',
       navBuildHint:'Build your stack piece by piece and understand every layer', navPracticeHint:'Goal-based challenges and a revision quiz', navExploreHint:'See your stack from other angles: map, request, deployment…',
       homeKicker:'Visual infrastructure workshop', homeTitle:'What do you want to do today?',
       homeLead:'Learn how the infrastructure of a real system is put together: layer by layer, understanding why each one exists. Pick where to start.',
@@ -3375,54 +3400,84 @@ class Component extends DCLogic {
   kidsSteps(){
     const F=(es,en)=>({es,en});
     return [
-      { cat:'red', block:'switch', wrong:['postgres','baremetal'],
+      { cat:'red', block:'switch', wrong:['postgres','baremetal'], chapter:1,
         title:F('Los caminos','The roads'),
         say:F('Vamos a construir por dentro una página web. Se empieza por abajo del todo: los caminos por donde viajan los mensajes.','We are going to build the inside of a web page. We start at the very bottom: the roads the messages travel on.'),
         ask:F('¿Qué reparte los mensajes entre ordenadores?','What hands out messages between computers?'),
         hint:F('Busca algo lleno de agujeritos para enchufar cables.','Look for something full of little holes for cables.'),
         why:F('El switch es un cartero rapidísimo: coge cada mensaje y lo lleva al ordenador correcto.','A switch is a super fast postman: it takes each message to the right computer.') },
-      { cat:'computo', block:'baremetal', wrong:['docker','nas'],
+      { cat:'red', block:'dns', wrong:['postgres','hypervisor'], chapter:1,
+        title:F('La agenda de internet','The internet phone book'),
+        say:F('En el piso de los caminos hay más cosas. Tú escribes un nombre, pero los ordenadores solo entienden números.','There is more on the roads floor. You type a name, but computers only understand numbers.'),
+        ask:F('¿Quién convierte un nombre en un número?','Who turns a name into a number?'),
+        hint:F('Su dibujo es una bola del mundo con líneas alrededor.','Its drawing is a globe with lines around it.'),
+        why:F('El DNS es la agenda de internet: tú dices el nombre y él te da el número para llegar.','DNS is the internet phone book: you say the name and it gives you the number to get there.') },
+      { cat:'computo', block:'baremetal', wrong:['docker','nas'], chapter:1,
         title:F('La máquina que trabaja','The machine that works'),
         say:F('Ya tenemos caminos. Ahora hace falta una máquina de verdad que piense y trabaje.','We have roads now. Now we need a real machine that thinks and works.'),
         ask:F('¿Cuál es el ordenador grande que nunca se apaga?','Which is the big computer that never turns off?'),
         hint:F('Es plano y ancho, con huecos para los discos delante.','It is flat and wide, with slots for disks at the front.'),
         why:F('El servidor es un ordenador que trabaja de día y de noche, sin descansar nunca.','A server is a computer that works day and night and never rests.') },
-      { cat:'almacenamiento', block:'nas', wrong:['linux','switch'],
+      { cat:'almacenamiento', block:'nas', wrong:['linux','switch'], chapter:1,
         title:F('El cajón que no olvida','The drawer that never forgets'),
         say:F('Si apagas un ordenador, se le olvida casi todo. Necesitamos un sitio donde guardar las cosas para siempre.','If you switch a computer off, it forgets almost everything. We need a place to keep things forever.'),
         ask:F('¿Dónde se guardan las fotos y los archivos?','Where do photos and files get stored?'),
         hint:F('Parece una torre con cajoncitos apilados.','It looks like a tower with little stacked drawers.'),
         why:F('El NAS es una caja con muchos cajones. Guardas algo dentro y ahí sigue mañana.','A NAS is a box with many drawers. You put something in and it is still there tomorrow.') },
-      { cat:'virtualizacion', block:'hypervisor', wrong:['postgres','switch'],
+      { cat:'virtualizacion', block:'hypervisor', wrong:['postgres','switch'], chapter:1,
         title:F('Partir la máquina','Splitting the machine'),
         say:F('Un servidor es enorme para un solo programa. ¡Se puede partir en varias máquinas pequeñas!','A server is huge for just one program. It can be split into several small machines!'),
         ask:F('¿Quién parte un ordenador grande en varios pequeños?','Who splits one big computer into several small ones?'),
         hint:F('Dibuja una máquina con tres máquinas pequeñas encima.','It draws one machine with three little machines on top.'),
         why:F('El hipervisor parte una máquina grande en varias, como cortar una tarta en porciones.','A hypervisor splits one big machine into several, like slicing a cake.') },
-      { cat:'so', block:'linux', wrong:['nas','docker'],
+      { cat:'so', block:'linux', wrong:['nas','docker'], chapter:1,
         title:F('El jefe de dentro','The boss inside'),
         say:F('Dentro de cada máquina hace falta alguien que mande y reparta el trabajo entre todos.','Inside every machine someone has to be in charge and share the work out.'),
         ask:F('¿Quién manda dentro de un ordenador?','Who is in charge inside a computer?'),
         hint:F('Es una ventana negra con letras verdes.','It is a black window with green letters.'),
         why:F('Linux es el jefe: decide quién usa la memoria y cuándo, para que nadie se pelee.','Linux is the boss: it decides who uses the memory and when, so nobody fights.') },
-      { cat:'contenedores', block:'docker', wrong:['baremetal','postgres'],
+      { cat:'contenedores', block:'docker', wrong:['baremetal','postgres'], chapter:1,
         title:F('Cajas que viajan','Travelling boxes'),
         say:F('Para llevar un programa de un ordenador a otro, lo metemos en una caja con todo lo que necesita dentro.','To move a program from one computer to another, we pack it in a box with everything it needs.'),
         ask:F('¿Qué mete el programa en una caja para que viaje?','What packs the program into a box so it can travel?'),
         hint:F('Son cajas apiladas, como las de un barco.','They are stacked boxes, like the ones on a ship.'),
         why:F('Docker mete el programa en una caja. Lo lleves donde lo lleves, funciona igual.','Docker packs the program in a box. Wherever you take it, it works the same.') },
-      { cat:'datos', block:'postgres', wrong:['switch','hypervisor'],
+      { cat:'orquestacion', block:'k8s', wrong:['nas','dns'], chapter:1,
+        title:F('El jefe de las cajas','The boss of the boxes'),
+        say:F('Cuando hay muchísimas cajas hace falta alguien que las coloque, las cuente y cambie las que se rompen.','When there are loads of boxes, someone has to place them, count them and replace the broken ones.'),
+        ask:F('¿Quién manda sobre todas las cajas a la vez?','Who is in charge of all the boxes at once?'),
+        hint:F('Su dibujo es un hexágono con puntitos alrededor, como una rueda.','Its drawing is a hexagon with dots around it, like a wheel.'),
+        why:F('Kubernetes es el jefe de obra: reparte las cajas entre las máquinas y, si una se cae, pone otra enseguida.','Kubernetes is the site foreman: it shares the boxes out and, if one falls, it puts another one up straight away.') },
+      { cat:'datos', block:'postgres', wrong:['switch','hypervisor'], chapter:1,
         title:F('La libreta gigante','The giant notebook'),
         say:F('La página tiene que acordarse de cosas: nombres, puntos, mensajes que le escribes...','The page has to remember things: names, points, messages you write to it...'),
         ask:F('¿Dónde se apunta todo para no olvidarlo?','Where is everything written down so it is not forgotten?'),
         hint:F('Tiene forma de tarta redonda de varios pisos.','It is shaped like a round cake with several layers.'),
         why:F('La base de datos es una libreta gigante: lo apunta todo y lo encuentra en un segundo.','A database is a giant notebook: it writes everything down and finds it in a second.') },
-      { cat:'nube', block:'cloudvm', wrong:['nas','linux'],
+      { cat:'nube', block:'cloudvm', wrong:['nas','linux'], chapter:1,
         title:F('La nube','The cloud'),
         say:F('¿Y si no quieres cuidar tú las máquinas? Se las alquilas a otra empresa y ellos las cuidan.','What if you do not want to look after the machines? You rent them from another company and they look after them.'),
         ask:F('¿Qué son ordenadores que están lejos y alquilas?','What are computers that live far away and you rent?'),
         hint:F('Su dibujo es una nube con un rayo dentro.','Its drawing is a cloud with a lightning bolt inside.'),
         why:F('En la nube usas ordenadores de otros. Tú solo pides, y ellos se encargan de todo.','In the cloud you use other people’s computers. You just ask, and they take care of everything.') },
+      { cat:'seguridad', block:'firewall', wrong:['nas','k8s'], chapter:2, side:true,
+        title:F('El portero','The doorkeeper'),
+        say:F('La torre ya está entera. Ahora faltan los que la cuidan: estos no viven en ningún piso, vigilan la torre completa.','The tower is finished. Now we need the ones who look after it: they do not live on any floor, they watch over the whole tower.'),
+        ask:F('¿Quién decide quién puede entrar y quién no?','Who decides who gets in and who does not?'),
+        hint:F('Su dibujo es un muro de ladrillos con una llama encima.','Its drawing is a brick wall with a flame on top.'),
+        why:F('El firewall es el portero: mira quién llama a la puerta y solo deja pasar a los de confianza.','A firewall is the doorkeeper: it checks who is knocking and only lets the trusted ones in.') },
+      { cat:'monitorizacion', block:'grafana', wrong:['docker','dns'], chapter:2, side:true,
+        title:F('El que vigila','The watcher'),
+        say:F('Si algo va mal dentro de la torre, alguien tiene que darse cuenta antes de que se rompa del todo.','If something goes wrong inside the tower, someone has to notice before it breaks completely.'),
+        ask:F('¿Quién mira todo el rato si la torre está bien?','Who keeps watching to see if the tower is doing fine?'),
+        hint:F('Su dibujo es una pantalla con una gráfica dentro.','Its drawing is a screen with a chart inside.'),
+        why:F('Grafana es como el salpicadero de un coche: enseña en dibujos si todo va bien o si algo se está calentando.','Grafana is like a car dashboard: it shows in pictures whether all is well or something is overheating.') },
+      { cat:'backup', block:'backup', wrong:['switch','postgres'], chapter:2, side:true,
+        title:F('La copia por si acaso','The just-in-case copy'),
+        say:F('¿Y si un día se rompe algo y se pierde todo lo guardado? Por eso siempre hay una copia aparte.','And what if one day something breaks and everything saved is lost? That is why there is always a spare copy.'),
+        ask:F('¿Qué guarda una copia de todo por si se pierde?','What keeps a copy of everything in case it gets lost?'),
+        hint:F('Su dibujo es un cartucho de cinta con dos ruedas.','Its drawing is a tape cartridge with two reels.'),
+        why:F('La copia de seguridad es tu red de seguridad: si algo se pierde, se vuelve a poner como estaba.','A backup is your safety net: if something is lost, it goes back to how it was.') },
     ];
   }
   kidsPick(id){
@@ -3445,11 +3500,16 @@ class Component extends DCLogic {
     const shot=(bid,cat)=>{ const c=this.catById(cat); return this.paintArt(this.artKeyFor(bid,cat), c? c.color : '#6366f1'); };
     // la torre guarda todo lo colocado: nunca se borra, siempre a la vista
     const placedN=(S.phase==='end')? total : (S.step + (S.phase==='ok'?1:0));
-    const tower=steps.slice(0,placedN).map((st,i)=>{ const c=this.catById(st.cat), b=this.blockById(st.block); return {
-      name:b? this.loc(b.name) : st.block, layer:this.loc(c.name), color:c.color,
+    const built=steps.slice(0,placedN).map((st,i)=>{ const c=this.catById(st.cat), b=this.blockById(st.block); return {
+      name:b? this.loc(b.name) : st.block, layer:this.loc(c.name), color:c.color, side:!!st.side,
       bg:this.hexA(c.color,0.16), border:this.hexA(c.color,0.5), num:String(i+1),
+      dash: st.side? 'dashed' : 'solid', nubOp: st.side? '0' : '0.75',
       art:shot(st.block, st.cat),
-    };}).reverse();
+    };});
+    // los pisos se apilan de abajo hacia arriba; los guardianes van aparte
+    const tower=built.filter(x=>!x.side).reverse();
+    const guards=built.filter(x=>x.side);
+    const floors=steps.filter(x=>!x.side).length, sides=steps.length-floors;
     const dots=steps.map((st,i)=>{ const dc=this.catById(st.cat).color, got=i<placedN;
       return {
         bg: got? dc : 'var(--panel-2)',
@@ -3462,14 +3522,19 @@ class Component extends DCLogic {
     if(S.phase==='end'){
       return { show:true, done:true, total:String(total),
         endTitle:T('¡Lo has construido entero!','You built the whole thing!'),
-        endBody:T('Has puesto las '+total+' capas, desde los cables de abajo hasta la nube de arriba. Así de verdad funciona por dentro una página web.','You placed all '+total+' layers, from the cables at the bottom to the cloud at the top. That is really how a web page works inside.'),
+        endBody:T('Has levantado los '+floors+' pisos de la torre, desde los cables de abajo hasta la nube de arriba, y has puesto los '+sides+' que la cuidan. Así funciona de verdad una página web por dentro.','You built all '+floors+' floors of the tower, from the cables at the bottom to the cloud at the top, and added the '+sides+' that look after it. That is really how a web page works inside.'),
         again:T('Jugar otra vez','Play again'), toMap:T('Ver el mapa de verdad','See the real map'),
         onAgain:()=>this.kidsRestart(), onMap:()=>this.setMode('map'),
-        dots, tower, towerTitle:T('Lo que has construido','What you built'), towerEmpty:false, towerEmptyMsg:'',
+        dots, tower, guards, guardsShow:guards.length>0,
+        towerTitle:T('Lo que has construido','What you built'), guardsTitle:T('La cuidan','Looking after it'),
+        towerEmpty:false, towerEmptyMsg:'',
         stepLabel:'', title:'', say:'', ask:'', hint:'', hintShow:false, why:'', whyShow:false, okTitle:'',
-        color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{}, askShow:false, guideShow:false };
+        color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{}, askShow:false, guideShow:false,
+        chapterShow:false, chapterTitle:'' };
     }
     const st=steps[S.step], c=this.catById(st.cat);
+    const chapNames={ 1:T('Capítulo 1 · La torre','Chapter 1 · The tower'), 2:T('Capítulo 2 · Los que la cuidan','Chapter 2 · The ones who look after it') };
+    const firstOfChapter = steps.findIndex(x=>x.chapter===st.chapter)===S.step;
     const ok=(S.phase==='ok');
     const ids=[st.block].concat(st.wrong);
     // orden estable pero distinto en cada paso, para que no se aprenda la posición
@@ -3501,6 +3566,7 @@ class Component extends DCLogic {
       stepLabel:T('Paso ','Step ')+(S.step+1)+' / '+total,
       title:this.loc(st.title), say:this.loc(st.say), ask:this.loc(st.ask),
       askShow:!ok, guideShow:true,
+      chapterShow:firstOfChapter, chapterTitle:chapNames[st.chapter]||'',
       color:c.color, layerName:this.loc(c.name),
       hintShow: !!S.wrong && !ok,
       hint: wrongBlock ? (T("Eso es ","That is ")+this.loc(wrongBlock.name)+T(", de la parte de ","; it belongs to ")+this.loc(wrongCat.name)+T(". ¡Ya te tocará! Pista: ",". You will get there! Hint: ")+this.loc(st.hint)) : "",
@@ -3508,7 +3574,8 @@ class Component extends DCLogic {
       okTitle:T('¡Muy bien!','Nice one!'),
       nextLabel: (S.step+1>=total)? T('¡Terminar!','Finish!') : T('Siguiente','Next'),
       onNext:()=>this.kidsNext(),
-      options, optionsShow:true, dots, tower, towerTitle:T('Tu torre','Your tower'),
+      options, optionsShow:true, dots, tower, guards, guardsShow:guards.length>0,
+      towerTitle:T('Tu torre','Your tower'), guardsTitle:T('La cuidan','Looking after it'),
       towerEmpty: tower.length===0, towerEmptyMsg:T('Aquí irán apareciendo las piezas que coloques.','The pieces you place will show up here.'),
       again:'', toMap:'', onAgain:()=>{}, onMap:()=>{}, endTitle:'', endBody:'' };
   }

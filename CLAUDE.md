@@ -91,6 +91,8 @@ A fourth header group, built on **the opposite rules to the rest of the app**. E
 - **What you build never disappears.** The tower on the right grows bottom-up with a Scratch-style nub on each block and is still whole on the final screen.
 - **The guide stays on screen** the whole game (`guideShow`), even after a correct answer. It is the child's anchor.
 
+**Two chapters, and the difference between them is the lesson.** Chapter 1 builds the tower (10 stack pieces, `side` falsy); chapter 2 adds the three that look after it (`side:true` — firewall, monitoring, backup). They render apart: tower blocks solid with a Scratch nub, guardians dashed under a separate heading — the same solid-vs-dashed language the adult app uses for stack vs. transversals. A child learns the shape of the idea without the word. `kidsView()` splits `built` into `tower` (reversed, bottom-up) and `guards`; the chapter banner shows only on the first step of each chapter.
+
 Flow: `state.kids = { step, phase: 'ask' | 'ok' | 'end', wrong }`; `kidsPick()` → `kidsNext()` → `kidsRestart()`; `kidsView()` builds everything. Progress is **not** persisted — the run is short and a half-finished state would confuse more than it helps. The final screen offers a bridge into `map`, so a child who finishes can go look at the real thing.
 
 Colour is deliberate: each option carries **its own family colour**. At step 1 that means nothing to the child; by step 5 the colour itself has become a cue. That is the intended effect — don't neutralise it.
