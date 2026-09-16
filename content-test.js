@@ -11,7 +11,7 @@ const DIR = __dirname;
 
 function cargar() {
   const win = { location: { hash: '', search: '', pathname: '/' }, addEventListener() {} };
-  ['piezas', 'capas', 'textos', 'retos', 'kids'].forEach(n => {
+  ['piezas', 'capas', 'textos', 'retos', 'kids', 'tickets'].forEach(n => {
     const f = path.join(DIR, 'contenido', n + '.js');
     if (!fs.existsSync(f)) throw new Error('falta contenido/' + n + '.js');
     new Function('window', fs.readFileSync(f, 'utf8'))(win);
@@ -91,6 +91,48 @@ kids.forEach((s, i) => {
 if (!kidsMal) {
   const p1 = kids.filter(s => s.chapter === 1).length, p2 = kids.filter(s => s.chapter === 2).length;
   bien('kids: ' + kids.length + ' pasos (' + p1 + ' la torre + ' + p2 + ' ayudantes), sin trampas ni huecos');
+}
+
+// --- tickets del puesto ---
+const equipos = L.equipos(), tks = L.tickets();
+const eqIds = new Set(equipos.map(e => e.id));
+const eqMal = equipos.filter(e => !catIds.has(e.cat));
+eqMal.length ? mal('equipos con categoría inexistente: ' + eqMal.map(e => e.id).join(', '))
+             : bien(equipos.length + ' equipos del puesto, todos con una categoría real');
+
+let tkMal = 0;
+const vistos = new Set();
+tks.forEach(tk => {
+  const n = 'ticket ' + tk.id;
+  if (vistos.has(tk.id)) { mal(n + ': id repetido'); tkMal++; }
+  vistos.add(tk.id);
+  ['from', 'subject', 'body', 'solved', 'lesson'].forEach(k => {
+    if (!tk[k] || !tk[k].es || !tk[k].en) { mal(n + ': falta "' + k + '" en algún idioma'); tkMal++; }
+  });
+  const hosts = new Set();
+  (tk.evidence || []).forEach(ev => {
+    if (!eqIds.has(ev.host)) { mal(n + ': evidencia en un equipo que no existe: ' + ev.host); tkMal++; }
+    hosts.add(ev.host);
+    if (!(ev.cmd || []).length) { mal(n + ': una evidencia sin comando'); tkMal++; }
+    if (!(ev.lines || []).length) { mal(n + ': una evidencia sin salida'); tkMal++; }
+  });
+  // un ticket con toda la pista en un solo equipo no enseña a elegir dónde
+  // mirar, que es justo el punto del modo
+  if (hosts.size < 2) { mal(n + ': toda la evidencia está en el mismo equipo'); tkMal++; }
+  const cOk = (tk.causes || []).filter(x => x.correct).length;
+  const fOk = (tk.fixes || []).filter(x => x.correct).length;
+  if (cOk !== 1) { mal(n + ': tiene ' + cOk + ' causas correctas, debe haber 1'); tkMal++; }
+  if (fOk !== 1) { mal(n + ': tiene ' + fOk + ' arreglos correctos, debe haber 1'); tkMal++; }
+  if ((tk.causes || []).length < 3) { mal(n + ': muy pocas causas entre las que elegir'); tkMal++; }
+  (tk.causes || []).concat(tk.fixes || []).forEach(x => {
+    if (!x.text || !x.text.es || !x.text.en) { mal(n + ': una opción sin traducir'); tkMal++; }
+  });
+});
+if (!tkMal) {
+  const usados = new Set();
+  tks.forEach(tk => (tk.evidence || []).forEach(e => usados.add(e.host)));
+  const media = (tks.reduce((s, tk) => s + (tk.evidence || []).length, 0) / tks.length).toFixed(1);
+  bien(tks.length + ' tickets: evidencia en ' + usados.size + ' equipos, ' + media + ' pistas de media, una sola respuesta buena cada uno');
 }
 
 // --- textos ---

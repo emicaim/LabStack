@@ -135,6 +135,8 @@ This is why **ticket evidence binds to the role id, not the hostname**: `evidenc
 
 Tab completion is `deskComplete(i)`, per session, sharing `termCmds()` with Terminal mode. `man` needs nothing special: it is a `case` in `execCmd`, so it already works.
 
+`content-test.js` enforces the rules below — most importantly that **a ticket's evidence spans at least two hosts**. One host means the learner never has to choose where to look, which is the whole point of the mode; it caught three of the first five tickets failing exactly that.
+
 **Writing a ticket** (`contenido/tickets.js`): give it evidence on **more than one host**, including at least one that rules something out — a firewall that turns out to be fine is as instructive as the broken thing. Keep the distinctive line long enough to be unique: `desk-test.js` matches on the longest line precisely because a short one like `4` collides with generic output.
 
 ### Map artwork (schematic illustrations)

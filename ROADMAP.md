@@ -131,7 +131,7 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Reutiliza `execCmd` (los ~148 comandos) pasándole la sesión; no hay un segundo intérprete.
 - ✅ **Los equipos salen del stack que has montado**: el nombre y la etiqueta vienen de la pieza que pusiste (Vault → `vault01`, Windows → `win01`, Redis → `cache01`). Lo que no hayas montado se queda como equipo de ejemplo, marcado.
 - ✅ **Tab autocompleta** y **`man`** funcionan también en el puesto, por sesión.
-- Pendiente si se quiere: más tickets.
+- ✅ **12 tickets** cubriendo el trabajo real: 502, firewall, puertos de switch, disco, VPN, certificado caducado, bucle de capa 2, muerte por memoria, DNS interno, copia que nunca se restauró, IP duplicada y RAID degradado.
 
 ### Corto plazo (alto valor, bajo esfuerzo)
 
