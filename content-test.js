@@ -1,46 +1,104 @@
-// Compara el contenido externalizado contra el fichero original.
-// Si mover 139 KB cambió aunque sea una coma, esto lo canta.
-const fs=require('fs');
-const DIR='F:/IngLab/Taller visual de infraestructura didáctico/';
-function build(file, loadContent){
-  const src=fs.readFileSync(file,'utf8');
-  const code=src.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/)[1];
-  class DCLogic{ constructor(){this.props={}} setState(p){Object.assign(this.state, typeof p==='function'?p(this.state):p)} }
-  const win={location:{hash:'',search:'',pathname:'/'},addEventListener(){}};
-  if(loadContent) ['piezas','capas','textos','retos','kids'].forEach(n=>{
-    new Function('window', fs.readFileSync(DIR+'contenido/'+n+'.js','utf8'))(win);
-  });
-  const doc={addEventListener(){},createElement:()=>({style:{},click(){}}),head:{appendChild(){}},body:{appendChild(){},removeChild(){}},querySelector:()=>null,querySelectorAll:()=>[]};
-  const C=new Function('DCLogic','StreamableLogic','React','localStorage','window','document','setInterval','clearInterval','setTimeout',
-    code+'\nreturn Component;')(DCLogic,DCLogic,{createElement:()=>({}),Fragment:'F'},{getItem:()=>null,setItem(){},removeItem(){}},win,doc,()=>0,()=>{},()=>0);
-  return new C();
-}
-const viejo=build(DIR+'Laboratorio.dc.html'.replace('Laboratorio.dc.html','Laboratorio.dc.html'), true); // placeholder
-const nuevo=build(DIR+'Laboratorio.dc.html', true);
-const orig =build('C:/Users/Emilio/AppData/Local/Temp/claude/f--IngLab-Taller-visual-de-infraestructura-did-ctico/f5534dd4-790d-4b5e-b1ed-f29e9dcfd4d9/scratchpad/backup.dc.html', false);
+// Valida el contenido de contenido/*.js.
+//
+// Ahora que el contenido vive repartido en varios ficheros, pueden aparecer
+// referencias cruzadas rotas que antes eran imposibles: un paso de Kids que
+// nombra una pieza que ya no existe, un reto que pide una categoría
+// inventada, un texto que está en español pero no en inglés. Esto lo caza.
+//
+//   node content-test.js
+const fs = require('fs'), path = require('path');
+const DIR = __dirname;
 
-let fail=0;
-const metodos=['catsBase','blocksBase','extrasBase','pieceIconsBase','specsBase','layerMeta','missionsBase','incidents','kidsSteps'];
-console.log('Contenido externalizado vs original:');
-for(const m of metodos){
-  for(const lang of ['es','en']){
-    orig.state.lang=lang; nuevo.state.lang=lang;
-    const a=JSON.stringify(orig[m]()), b=JSON.stringify(nuevo[m]());
-    if(a!==b){ console.error('  DIFIERE  '+m+' ('+lang+')  original '+a.length+' B vs nuevo '+b.length+' B'); fail++; }
-  }
-  const n=orig[m]();
-  console.log('  igual    '+m.padEnd(16)+(Array.isArray(n)? n.length+' entradas' : Object.keys(n).length+' claves'));
+function cargar() {
+  const win = { location: { hash: '', search: '', pathname: '/' }, addEventListener() {} };
+  ['piezas', 'capas', 'textos', 'retos', 'kids'].forEach(n => {
+    const f = path.join(DIR, 'contenido', n + '.js');
+    if (!fs.existsSync(f)) throw new Error('falta contenido/' + n + '.js');
+    new Function('window', fs.readFileSync(f, 'utf8'))(win);
+  });
+  return win.LABSTACK;
 }
-// strings: el original devuelve el idioma elegido
-for(const lang of ['es','en']){
-  orig.state.lang=lang; nuevo.state.lang=lang;
-  const a=JSON.stringify(orig.strings()), b=JSON.stringify(nuevo.strings());
-  if(a!==b){ console.error('  DIFIERE  strings ('+lang+')'); fail++; }
+
+const L = cargar();
+let fail = 0;
+const mal = m => { console.error('  ✕ ' + m); fail++; };
+const bien = m => console.log('  ✓ ' + m);
+
+const cats = L.categorias(), piezas = L.piezas(), fichas = L.fichas();
+const iconos = L.iconos(), dim = L.dimensionado(), capas = L.capas();
+const retos = L.retos(), incidentes = L.incidentes(), kids = L.kids();
+const textos = L.textos();
+const catIds = new Set(cats.map(c => c.id));
+const pieceIds = new Set(piezas.map(b => b.id));
+const catDe = {}; piezas.forEach(b => { catDe[b.id] = b.cat; });
+
+console.log('Contenido de LabStack\n');
+
+// --- piezas ---
+const sinCat = piezas.filter(b => !catIds.has(b.cat));
+sinCat.length ? mal(sinCat.length + ' piezas con categoría inexistente: ' + sinCat.map(b => b.id + '→' + b.cat).join(', '))
+              : bien(piezas.length + ' piezas, todas en una categoría que existe');
+
+const dupes = piezas.map(b => b.id).filter((id, i, a) => a.indexOf(id) !== i);
+dupes.length ? mal('ids de pieza repetidos: ' + [...new Set(dupes)].join(', ')) : bien('sin ids de pieza repetidos');
+
+const sinNombre = piezas.filter(b => !b.name || !b.name.es || !b.name.en);
+sinNombre.length ? mal(sinNombre.length + ' piezas sin nombre en los dos idiomas: ' + sinNombre.map(b => b.id).join(', '))
+                 : bien('todas las piezas tienen nombre en ES y EN');
+
+// --- referencias sueltas en fichas e iconos ---
+[['fichas', fichas], ['iconos', iconos]].forEach(([n, obj]) => {
+  const huerfanas = Object.keys(obj).filter(id => !pieceIds.has(id));
+  huerfanas.length ? mal(n + ' apunta a piezas que ya no existen: ' + huerfanas.join(', '))
+                   : bien(n + ': ' + Object.keys(obj).length + ' entradas, todas de piezas reales');
+});
+
+// --- categorías: cada una necesita coste y, si es apilable, pedagogía ---
+const sinDim = cats.filter(c => !dim[c.id]);
+sinDim.length ? mal('categorías sin dimensionado: ' + sinDim.map(c => c.id).join(', '))
+              : bien('las ' + cats.length + ' categorías tienen coste/CPU/RAM');
+const sinCapa = cats.filter(c => !capas[c.id]);
+sinCapa.length ? mal('categorías sin pedagogía en capas.js: ' + sinCapa.map(c => c.id).join(', '))
+               : bien('las ' + cats.length + ' categorías tienen su explicación de capa');
+
+// --- retos ---
+let retoMal = 0;
+retos.forEach(r => {
+  (r.need || []).forEach(c => { if (!catIds.has(c)) { mal('reto "' + r.id + '" pide una categoría inexistente: ' + c); retoMal++; } });
+  (r.redundant || []).forEach(c => { if (!catIds.has(c)) { mal('reto "' + r.id + '" redundante sobre categoría inexistente: ' + c); retoMal++; } });
+  (r.needBlock || []).forEach(b => { if (!pieceIds.has(b)) { mal('reto "' + r.id + '" pide una pieza inexistente: ' + b); retoMal++; } });
+});
+if (!retoMal) bien(retos.length + ' retos, todos apuntando a piezas y categorías reales');
+bien(incidentes.length + ' incidentes');
+
+// --- kids ---
+let kidsMal = 0;
+kids.forEach((s, i) => {
+  const n = 'paso ' + (i + 1) + ' (' + (s.title ? s.title.es : '?') + ')';
+  if (!catIds.has(s.cat)) { mal('kids ' + n + ': categoría inexistente ' + s.cat); kidsMal++; }
+  if (!pieceIds.has(s.block)) { mal('kids ' + n + ': pieza inexistente ' + s.block); kidsMal++; }
+  else if (catDe[s.block] !== s.cat) { mal('kids ' + n + ': ' + s.block + ' no es de ' + s.cat); kidsMal++; }
+  (s.wrong || []).forEach(w => {
+    if (!pieceIds.has(w)) { mal('kids ' + n + ': distractor inexistente ' + w); kidsMal++; }
+    // un distractor de la misma capa que la respuesta haría la pregunta injusta
+    else if (catDe[w] === s.cat) { mal('kids ' + n + ': el distractor ' + w + ' es de la misma capa que la respuesta'); kidsMal++; }
+  });
+  if ((s.wrong || []).length !== 2) { mal('kids ' + n + ': debe tener exactamente 2 distractores'); kidsMal++; }
+  ['title', 'say', 'ask', 'hint', 'why'].forEach(k => {
+    if (!s[k] || !s[k].es || !s[k].en) { mal('kids ' + n + ': falta "' + k + '" en algún idioma'); kidsMal++; }
+  });
+});
+if (!kidsMal) {
+  const p1 = kids.filter(s => s.chapter === 1).length, p2 = kids.filter(s => s.chapter === 2).length;
+  bien('kids: ' + kids.length + ' pasos (' + p1 + ' la torre + ' + p2 + ' ayudantes), sin trampas ni huecos');
 }
-console.log('  igual    strings          '+Object.keys(orig.strings()).length+' claves x2 idiomas');
-// y que mutar lo devuelto no contamine la siguiente llamada
-const e1=nuevo.extrasBase(); e1.__sucio=1;
-if(nuevo.extrasBase().__sucio){ console.error('  extrasBase comparte objeto entre llamadas'); fail++; }
-else console.log('  ok       cada llamada devuelve un objeto nuevo (no se contamina)');
-console.log(fail? ('\nFALLOS: '+fail) : '\nContenido idéntico al original');
-process.exit(fail?1:0);
+
+// --- textos ---
+const es = Object.keys(textos.es || {}), en = Object.keys(textos.en || {});
+const faltanEn = es.filter(k => !(k in textos.en)), faltanEs = en.filter(k => !(k in textos.es));
+if (faltanEn.length) mal('textos sin traducir al inglés: ' + faltanEn.join(', '));
+if (faltanEs.length) mal('textos que solo están en inglés: ' + faltanEs.join(', '));
+if (!faltanEn.length && !faltanEs.length) bien(es.length + ' textos de interfaz, completos en ES y EN');
+
+console.log(fail ? ('\n' + fail + ' problema(s) en el contenido') : '\nContenido correcto');
+process.exit(fail ? 1 : 0);

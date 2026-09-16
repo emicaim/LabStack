@@ -51,6 +51,8 @@ This is a custom React-backed component format, not plain HTML. A `.dc.html` fil
 
 **Every entry is a function, not a value:** `window.LABSTACK.piezas = function () { … return [ … ]; }`. That is not decoration — `extras()`, `specs()` and `pieceIcons()` **mutate** what their `*Base()` returns to merge in the teacher content pack. Returning a shared singleton would let those mutations pile up across calls. A fresh object per call reproduces the original semantics exactly.
 
+Splitting the content across files made a new class of bug possible — a Kids step naming a piece that no longer exists, a mission asking for an invented category, a string that is in Spanish but not English. None of it is caught by the smoke test, because the app still boots. **`node content-test.js`** checks exactly that: cross-file references, duplicate ids, every category with cost and pedagogy, Kids distractors never drawn from the answer's own layer, and ES/EN key parity. Run it after editing anything under `contenido/`.
+
 Reading goes through `content(key, fallback)`, which calls `contentMissing(key)` and logs a clear one-time error if a file did not load, instead of rendering a blank app. **To add a piece or change a text, edit `contenido/` — not the logic.** The `contentPack` teacher mode (localStorage JSON) still layers on top of all this, unchanged.
 
 ### Data model (all defined as methods returning arrays/objects in the logic script)
