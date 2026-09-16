@@ -10,7 +10,10 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 
 ## Qué incluye
 
-- **9 modos**: Libre · Misión · Quiz · Mapa físico · Terminal · Métricas · **Petición (waterfall)** · **Despliegue** · **Incidente**.
+- **Una sola puerta de entrada** y **3 grupos** en vez de un menú de nueve modos:
+  - **Aprender** — monta tu stack por capas, agrupadas en los 5 planos (física → plataforma → aplicación → datos → nube), con densidad **Compacto / Detalle**.
+  - **Practicar** — retos con objetivos y presupuesto + quiz adaptativo.
+  - **Explorar** — 6 vistas del stack que has montado: Mapa · Petición · Despliegue · Métricas · Terminal · Incidente.
 - **~69 tecnologías** en 16 categorías (6 familias de color) con fichas educativas + mensajería (Kafka/RabbitMQ/NATS) + marcos de gobierno (COSO / ISO 27001 / COBIT).
 - **Linter de arquitectura** (robustez, anti-patrones), **dimensionado** (coste/CPU/RAM) y **modo avería** (resiliencia).
 - **11 misiones** con niveles, **quiz adaptativo**, **ruta de aprendizaje** guiada, **logros** y **glosario** buscable.

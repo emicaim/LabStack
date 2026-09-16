@@ -28,14 +28,27 @@
     --card-shadow:0 1px 2px rgba(0,0,0,0.35), 0 12px 30px -14px rgba(0,0,0,0.6);
     --warm:#2a1c10; --warm-border:rgba(249,115,22,0.35);
   }
-  @media (max-width:1180px){ .lab-grid{ grid-template-columns:250px minmax(0,1fr) 330px !important; } }
-  @media (max-width:920px){
+  /* ---- rejilla de 3 raíles: se adapta al modo (g-lcr / g-lc / g-cr / g-c) ---- */
+  .lab-grid{ display:grid; min-height:0; grid-template-columns:minmax(0,1fr); }
+  .lab-grid.g-lcr{ grid-template-columns:272px minmax(0,1fr) 360px; }
+  .lab-grid.g-lc { grid-template-columns:272px minmax(0,1fr); }
+  .lab-grid.g-cr { grid-template-columns:minmax(0,1fr) 360px; }
+  .lab-grid.g-c  { grid-template-columns:minmax(0,1fr); }
+  @media (max-width:1340px){
+    .lab-grid.g-lcr{ grid-template-columns:244px minmax(0,1fr) 318px; }
+    .lab-grid.g-lc { grid-template-columns:244px minmax(0,1fr); }
+    .lab-grid.g-cr { grid-template-columns:minmax(0,1fr) 318px; }
+  }
+  @media (max-width:1100px){
     .lab-root{ height:auto !important; min-height:100vh !important; overflow:visible !important; }
-    .lab-grid{ grid-template-columns:1fr !important; }
+    .lab-grid, .lab-grid.g-lcr, .lab-grid.g-lc, .lab-grid.g-cr, .lab-grid.g-c{ grid-template-columns:minmax(0,1fr); }
     .lab-grid > aside, .lab-grid > main{ max-height:none !important; overflow:visible !important; }
-    .lab-grid > aside:first-child{ border-right:none !important; border-bottom:1px solid var(--border) !important; }
-    .lab-grid > aside:last-child{ border-left:none !important; border-top:1px solid var(--border) !important; }
+    .lab-grid > aside.rail-left{ border-right:none !important; border-bottom:1px solid var(--border) !important; }
+    .lab-grid > aside.rail-right{ border-left:none !important; border-top:1px solid var(--border) !important; }
     .lab-header{ flex-wrap:wrap !important; }
+  }
+  @media (max-width:820px){
+    .home-cards{ grid-template-columns:minmax(0,1fr) !important; }
   }
   @keyframes suggestPulse { 0%,100% { box-shadow:0 0 0 0 rgba(56,189,248,0); } 50% { box-shadow:0 0 0 3px rgba(56,189,248,0.22); } }
   @keyframes flowLayerGlow { 0%,100% { box-shadow:0 0 0 0 rgba(99,102,241,0); } 50% { box-shadow:0 0 18px -2px rgba(99,102,241,0.55); } }
@@ -90,72 +103,56 @@
   radial-gradient(900px 600px at -5% 110%, rgba(129,140,248,0.08), transparent 60%),
   var(--bg);">
 
-  <header class="lab-header theme-dark" style="flex:0 0 auto; display:flex; align-items:center; gap:20px; padding:14px 22px; border-bottom:1px solid var(--border); background:#0f172a; color:var(--text); z-index:5;">
-    <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:0 1 auto;">
-      <img src="./fokosoft.png" alt="FokoSoft" style="width:38px; height:38px; border-radius:10px; object-fit:cover; flex:0 0 auto; display:block;">
-      <div style="min-width:0;">
-        <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:18px; letter-spacing:-0.01em; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.title }}</div>
-      </div>
+  <header class="lab-header theme-dark" style="flex:0 0 auto; display:flex; align-items:center; gap:18px; padding:12px 20px; border-bottom:1px solid var(--border); background:#0f172a; color:var(--text); z-index:5;">
+    <button type="button" onClick="{{ goHome }}" title="{{ t.homeBack }}" aria-label="{{ t.homeBack }}" style="display:flex; align-items:center; gap:11px; min-width:0; flex:0 1 auto; background:transparent; border:none; padding:2px; cursor:pointer; color:inherit; font:inherit; text-align:left; border-radius:10px;">
+      <img src="./fokosoft.png" alt="" style="width:34px; height:34px; border-radius:9px; object-fit:cover; flex:0 0 auto; display:block;">
+      <span style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; letter-spacing:-0.01em; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.title }}</span>
+    </button>
+
+    <nav aria-label="{{ t.navModes }}" style="display:flex; flex:0 1 auto; min-width:0; border:1px solid var(--border-strong); border-radius:10px; overflow:hidden; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; white-space:nowrap;">
+      <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="3">
+        <button onClick="{{ g.onClick }}" aria-current="{{ g.current }}" title="{{ g.hint }}" style="display:flex; align-items:center; gap:7px; border:none; border-left:{{ g.sep }}; padding:8px 15px; cursor:pointer; background:{{ g.bg }}; color:{{ g.color }}; font-family:inherit; font-size:inherit; font-weight:inherit;" style-hover="{{ g.hoverStyle }}"><span style="font-size:14px; line-height:1;">{{ g.icon }}</span>{{ g.label }}</button>
+      </sc-for>
+    </nav>
+
+    <div style="flex:1 1 auto;"></div>
+
+    <div style="display:flex; flex:0 0 auto; border:1px solid var(--border-strong); border-radius:9px; overflow:hidden; font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;">
+      <button onClick="{{ setEs }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ esBg }}; color:{{ esColor }}; font-family:inherit; font-size:inherit;">ES</button>
+      <button onClick="{{ setEn }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ enBg }}; color:{{ enColor }}; font-family:inherit; font-size:inherit;">EN</button>
     </div>
 
-    <div style="flex:1 1 auto; display:flex; align-items:center; gap:12px; justify-content:flex-end; min-width:0; flex-wrap:wrap;">
-      <nav aria-label="{{ t.navModes }}" style="display:flex; flex:0 1 auto; min-width:0; border:1px solid var(--border-strong); border-radius:9px; overflow:hidden; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; white-space:nowrap;">
-        <button onClick="{{ setFree }}" style="border:none; padding:7px 14px; cursor:pointer; background:{{ m0Bg }}; color:{{ m0Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeFree }}</button>
-        <button onClick="{{ setMissionMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m1Bg }}; color:{{ m1Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeMission }}</button>
-        <button onClick="{{ setQuizMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m2Bg }}; color:{{ m2Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeQuiz }}</button>
-        <button onClick="{{ setMapMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m3Bg }}; color:{{ m3Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeMap }}</button>
-        <button onClick="{{ setTerminalMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m4Bg }}; color:{{ m4Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeTerminal }}</button>
-        <button onClick="{{ setMetricsMode }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 14px; cursor:pointer; background:{{ m5Bg }}; color:{{ m5Color }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.modeMetrics }}</button>
-      </nav>
-
-      <div style="position:relative; flex:0 0 auto;">
-        <button onClick="{{ toggleSims }}" title="{{ t.simGroup }}" style="display:flex; align-items:center; gap:6px; border:1px solid {{ simBorder }}; background:{{ simBg }}; color:{{ simColor }}; padding:7px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; white-space:nowrap;" style-hover="border-color:var(--accent-b);"><span style="font-size:14px; line-height:1;">⚙</span>{{ t.simGroup }}<span style="font-size:10px; opacity:0.7;">▾</span></button>
-        <sc-if value="{{ showSims }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ closeSims }}" style="position:fixed; inset:0; z-index:40;"></div>
-          <div style="position:absolute; top:calc(100% + 6px); right:0; z-index:41; min-width:210px; background:var(--panel); border:1px solid var(--border-strong); border-radius:12px; box-shadow:var(--card-shadow); padding:6px; display:flex; flex-direction:column; gap:2px; animation:fadeUp .15s ease both;">
-            <button onClick="{{ setHttpMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m6Bg }}; color:{{ m6MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚦</span>{{ t.modeHttp }}</button>
-            <button onClick="{{ setDeployMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m7Bg }}; color:{{ m7MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚀</span>{{ t.modeDeploy }}</button>
-            <button onClick="{{ setIncidentMode }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:{{ m8Bg }}; color:{{ m8MenuColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🚑</span>{{ t.modeIncident }}</button>
-          </div>
-        </sc-if>
-      </div>
-
-      <div style="display:flex; flex:0 0 auto; border:1px solid var(--border-strong); border-radius:9px; overflow:hidden; font-family:'JetBrains Mono',monospace; font-size:12px; white-space:nowrap;">
-        <button onClick="{{ setEs }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ esBg }}; color:{{ esColor }}; font-family:inherit; font-size:inherit;">ES</button>
-        <button onClick="{{ setEn }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ enBg }}; color:{{ enColor }}; font-family:inherit; font-size:inherit;">EN</button>
-      </div>
-
-      <button onClick="{{ toggleTheme }}" title="{{ themeLabel }}" style="display:flex; align-items:center; gap:7px; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:8px 12px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500;" style-hover="border-color:var(--accent-b); background:var(--panel-2); color:var(--text);">
-        <span style="font-size:15px; line-height:1;">{{ themeIcon }}</span>{{ themeLabel }}
-      </button>
-      <div style="position:relative; flex:0 0 auto;">
-        <button onClick="{{ toggleTools }}" title="{{ t.toolsBtn }}" style="display:flex; align-items:center; gap:7px; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:8px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; transition:all .15s;" style-hover="border-color:var(--accent-b); background:var(--panel-2);"><span style="font-size:15px; line-height:1;">🧰</span>{{ t.toolsBtn }}</button>
-        <sc-if value="{{ showTools }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ closeTools }}" style="position:fixed; inset:0; z-index:40;"></div>
-          <div style="position:absolute; top:calc(100% + 6px); right:0; z-index:41; min-width:225px; background:var(--panel); border:1px solid var(--border-strong); border-radius:12px; box-shadow:var(--card-shadow); padding:6px; display:flex; flex-direction:column; gap:2px; animation:fadeUp .15s ease both;">
-            <button onClick="{{ toolGlossary }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">📖</span>{{ t.glTitle }}</button>
-            <button onClick="{{ toolPaths }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🎓</span>{{ t.pathTitle }} · {{ pathLabel }}</button>
-            <button onClick="{{ toolContent }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">📦</span>{{ t.contentTitle }}</button>
-            <button onClick="{{ toolTour }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🎬</span>{{ t.tour }}</button>
-            <button onClick="{{ toolExport }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">🖨</span>{{ t.exportLabel }}</button>
-            <div style="height:1px; background:var(--border); margin:4px 6px;"></div>
-            <button onClick="{{ toolExportStack }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">💾</span>{{ t.stackExport }}</button>
-            <label style="display:flex; align-items:center; gap:11px; text-align:left; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px;">📂</span>{{ t.stackImport }}<input type="file" accept=".json,application/json" onChange="{{ importStackFile }}" style="display:none;" /></label>
-          </div>
-        </sc-if>
-      </div>
-      <button onClick="{{ toggleAch }}" title="{{ t.achTitle }}" style="display:flex; align-items:center; gap:7px; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:8px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; transition:all .15s;" style-hover="border-color:var(--accent-b); background:var(--panel-2);"><span style="font-size:14px; line-height:1;">🏆</span>{{ achLabel }}</button>
-      <button onClick="{{ share }}" title="{{ t.share }}" style="display:flex; align-items:center; gap:7px; border:1px solid {{ shareBorder }}; background:{{ shareBg }}; color:{{ shareColor }}; padding:8px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; transition:all .15s;" style-hover="border-color:var(--accent-b); background:var(--panel-2);"><span style="font-size:14px; line-height:1;">🔗</span>{{ shareLabel }}</button>
-      <button onClick="{{ reset }}" style="border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:8px 14px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500;" style-hover="border-color:var(--border-strong); background:var(--panel-2);">{{ t.reset }}</button>
+    <div style="position:relative; flex:0 0 auto;">
+      <button onClick="{{ toggleTools }}" title="{{ t.moreBtn }}" aria-label="{{ t.moreBtn }}" aria-expanded="{{ showTools }}" style="display:flex; align-items:center; gap:7px; border:1px solid var(--border-strong); background:{{ moreBg }}; color:{{ moreColor }}; padding:8px 13px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500;" style-hover="border-color:var(--accent-b); background:var(--panel-2);"><span style="font-size:15px; line-height:1;">⋯</span>{{ t.moreBtn }}</button>
+      <sc-if value="{{ showTools }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeTools }}" style="position:fixed; inset:0; z-index:40;"></div>
+        <div role="menu" style="position:absolute; top:calc(100% + 6px); right:0; z-index:41; min-width:256px; background:var(--panel); border:1px solid var(--border-strong); border-radius:12px; box-shadow:var(--card-shadow); padding:6px; display:flex; flex-direction:column; gap:2px; animation:fadeUp .15s ease both;">
+          <button onClick="{{ toolTheme }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">{{ themeIcon }}</span>{{ themeLabel }}</button>
+          <div style="height:1px; background:var(--border); margin:4px 6px;"></div>
+          <button onClick="{{ toolPaths }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">🎓</span>{{ t.pathTitle }}<span style="flex:1 1 auto;"></span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ pathLabel }}</span></button>
+          <button onClick="{{ toolGlossary }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">📖</span>{{ t.glTitle }}</button>
+          <button onClick="{{ toolTour }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">🎬</span>{{ t.tour }}</button>
+          <button onClick="{{ toolAch }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">🏆</span>{{ t.achTitle }}<span style="flex:1 1 auto;"></span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ achLabel }}</span></button>
+          <div style="height:1px; background:var(--border); margin:4px 6px;"></div>
+          <button onClick="{{ toolShare }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:{{ shareColor }}; padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">🔗</span>{{ shareLabel }}</button>
+          <button onClick="{{ toolExport }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">🖨</span>{{ t.exportLabel }}</button>
+          <button onClick="{{ toolExportStack }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">💾</span>{{ t.stackExport }}</button>
+          <label style="display:flex; align-items:center; gap:11px; text-align:left; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">📂</span>{{ t.stackImport }}<input type="file" accept=".json,application/json" onChange="{{ importStackFile }}" style="display:none;" /></label>
+          <div style="height:1px; background:var(--border); margin:4px 6px;"></div>
+          <button onClick="{{ toolContent }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2);"><span style="font-size:15px; width:17px; text-align:center;">📦</span>{{ t.contentTitle }}</button>
+          <button onClick="{{ toolReset }}" style="display:flex; align-items:center; gap:11px; text-align:left; border:none; background:transparent; color:var(--text-muted); padding:9px 11px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; white-space:nowrap;" style-hover="background:var(--panel-2); color:var(--text);"><span style="font-size:15px; width:17px; text-align:center;">↺</span>{{ t.reset }}</button>
+        </div>
+      </sc-if>
     </div>
   </header>
 
   <div class="sr-only" role="status" aria-live="polite">{{ liveMsg }}</div>
 
-  <div class="lab-grid" style="flex:1 1 auto; display:grid; grid-template-columns:288px minmax(0,1fr) 384px; min-height:0;">
+  <div class="lab-grid {{ gridClass }}" style="flex:1 1 auto; min-height:0;">
 
     <!-- PALETTE -->
-    <aside style="border-right:1px solid var(--border); background:var(--panel); overflow-y:auto; padding:16px 14px 40px;">
+    <sc-if value="{{ showPalette }}" hint-placeholder-val="{{ true }}">
+    <aside class="rail-left" style="border-right:1px solid var(--border); background:var(--panel); overflow-y:auto; padding:16px 14px 40px;">
       <div style="background:var(--panel-2); border:1px solid var(--border-strong); border-radius:12px; padding:12px; margin:2px 2px 14px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
           <span style="width:4px; height:15px; border-radius:2px; background:var(--accent); flex:0 0 auto;"></span>
@@ -206,9 +203,63 @@
         </div>
       </sc-for>
     </aside>
+    </sc-if>
 
     <!-- CANVAS -->
     <main style="position:relative; overflow-y:auto; padding:16px 22px 60px; background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:44px 44px; animation:gridDrift 40s linear infinite;">
+      <!-- HOME -->
+      <sc-if value="{{ showHome }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:940px; margin:0 auto; padding:28px 4px 24px; min-height:calc(100vh - 210px); display:flex; flex-direction:column; justify-content:center; animation:fadeUp .3s ease both;">
+          <div style="text-align:center; margin-bottom:34px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">{{ home.kicker }}</div>
+            <h1 style="font-family:'Inter',sans-serif; font-size:32px; font-weight:800; letter-spacing:-0.025em; margin:0 0 10px; line-height:1.15;">{{ home.title }}</h1>
+            <p style="font-size:15px; color:var(--text-muted); line-height:1.6; margin:0 auto; max-width:560px;">{{ home.lead }}</p>
+          </div>
+
+          <sc-if value="{{ home.hasProgress }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ home.onContinue }}" style="display:flex; align-items:center; gap:13px; width:100%; box-sizing:border-box; text-align:left; margin:0 0 20px; padding:13px 16px; border-radius:12px; border:1px solid rgba(99,102,241,0.4); background:var(--accent-tint); color:var(--text); cursor:pointer; font-family:'Inter',sans-serif;" style-hover="border-color:var(--accent);">
+              <span style="width:34px; height:34px; flex:0 0 auto; border-radius:9px; display:grid; place-items:center; font-size:16px; background:var(--panel); border:1px solid rgba(99,102,241,0.35);">↩</span>
+              <span style="min-width:0; flex:1 1 auto;">
+                <span style="display:block; font-size:14px; font-weight:700;">{{ home.continueTitle }}</span>
+                <span style="display:block; font-size:12.5px; color:var(--text-muted); margin-top:2px;">{{ home.continueDesc }}</span>
+              </span>
+              <span style="flex:0 0 auto; color:var(--accent); font-size:18px;">→</span>
+            </button>
+          </sc-if>
+
+          <div class="home-cards" style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;">
+            <sc-for list="{{ home.cards }}" as="hc" hint-placeholder-count="3">
+              <button onClick="{{ hc.onClick }}" style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:0; padding:22px 20px 20px; border-radius:16px; border:1px solid {{ hc.border }}; background:{{ hc.bg }}; color:var(--text); cursor:pointer; font-family:'Inter',sans-serif; transition:transform .16s, border-color .16s, box-shadow .16s; box-shadow:var(--card-shadow);" style-hover="{{ hc.hoverStyle }}">
+                <span style="width:44px; height:44px; border-radius:13px; display:grid; place-items:center; font-size:21px; background:{{ hc.iconBg }}; border:1px solid {{ hc.iconBorder }}; margin-bottom:14px;">{{ hc.icon }}</span>
+                <span style="font-size:17px; font-weight:700; letter-spacing:-0.01em; margin-bottom:6px;">{{ hc.title }}</span>
+                <span style="font-size:13px; color:var(--text-muted); line-height:1.55; margin-bottom:14px;">{{ hc.desc }}</span>
+                <span style="margin-top:auto; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:{{ hc.metaColor }};">{{ hc.meta }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; margin-top:30px; padding-top:20px; border-top:1px solid var(--border);">
+            <sc-for list="{{ home.stats }}" as="hs" hint-placeholder-count="4">
+              <div style="text-align:center;">
+                <div style="font-family:'Inter',sans-serif; font-size:19px; font-weight:800; letter-spacing:-0.02em; color:var(--text);">{{ hs.value }}</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-faint); margin-top:2px;">{{ hs.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- SUB-NAV (vistas dentro de un grupo) -->
+      <sc-if value="{{ subnavShow }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:-4px -4px 16px; padding-left:4px;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-right:2px;">{{ subnavLabel }}</span>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <sc-for list="{{ subnav }}" as="sv" hint-placeholder-count="6">
+              <button onClick="{{ sv.onClick }}" aria-current="{{ sv.current }}" style="display:flex; align-items:center; gap:6px; border:1px solid {{ sv.border }}; background:{{ sv.bg }}; color:{{ sv.color }}; padding:6px 12px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; white-space:nowrap; transition:all .14s;" style-hover="{{ sv.hoverStyle }}"><span style="font-size:13px; line-height:1;">{{ sv.icon }}</span>{{ sv.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
 
       <!-- MISSION PICKER -->
       <sc-if value="{{ showMissionPicker }}" hint-placeholder-val="{{ false }}">
@@ -276,7 +327,7 @@
 
       <!-- QUIZ -->
       <sc-if value="{{ showQuiz }}" hint-placeholder-val="{{ false }}">
-        <div style="max-width:560px; margin:12px auto;">
+        <div style="max-width:560px; margin:0 auto; min-height:calc(100vh - 220px); display:flex; flex-direction:column; justify-content:center;">
           <sc-if value="{{ quiz.done }}" hint-placeholder-val="{{ false }}">
             <div style="border-radius:16px; border:1px solid var(--border-strong); background:var(--panel); padding:32px 26px; text-align:center; animation:fadeUp .3s ease both;">
               <div style="font-family:'Inter',sans-serif; font-size:19px; font-weight:700; margin-bottom:10px;">{{ t.quizDoneT }}</div>
@@ -332,7 +383,7 @@
 
       <!-- PHYSICAL MAP -->
       <sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; overflow:hidden;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow:hidden;">
           <div onWheel="{{ map.onWheel }}" onMouseDown="{{ map.onDown }}" onMouseMove="{{ map.onMove }}" onMouseUp="{{ map.onUp }}" onMouseLeave="{{ map.onUp }}"
                style="position:absolute; inset:0; overflow:hidden; cursor:{{ map.cursor }}; background:radial-gradient(circle at 50% 38%, rgba(99,102,241,0.05), transparent 62%);">
             <div style="position:absolute; left:0; top:0; transform:{{ map.transform }}; transform-origin:0 0; width:{{ map.world.w }}px; height:{{ map.world.h }}px;">
@@ -414,7 +465,7 @@
 
       <!-- INTERACTIVE TERMINAL -->
       <sc-if value="{{ showTerminal }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; padding:16px 22px; display:flex; flex-direction:column;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; padding:16px 22px; display:flex; flex-direction:column;">
           <div style="flex:1 1 auto; display:flex; flex-direction:column; min-height:0; border-radius:12px; overflow:hidden; border:1px solid #24344f; background:#060911; box-shadow:var(--card-shadow);">
             <div style="display:flex; align-items:center; gap:6px; padding:9px 13px; background:#0c1320; border-bottom:1px solid #24344f; flex:0 0 auto;">
               <span style="width:11px; height:11px; border-radius:50%; background:#ff5f56;"></span>
@@ -440,7 +491,7 @@
 
       <!-- LIVE METRICS DASHBOARD -->
       <sc-if value="{{ showMetrics }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:18px 24px;">
           <div style="max-width:920px; margin:0 auto;">
             <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.metTitle }}</div>
             <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">{{ t.metLoadHint }}</div>
@@ -477,7 +528,7 @@
       </sc-if>
 
       <sc-if value="{{ showHttp }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:18px 24px;">
           <div style="max-width:860px; margin:0 auto;">
             <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.httpTitle }}</div>
             <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">{{ t.httpHint }}</div>
@@ -532,7 +583,7 @@
       </sc-if>
 
       <sc-if value="{{ showDeploy }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:18px 24px;">
           <div style="max-width:860px; margin:0 auto;">
             <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.depTitle }}</div>
             <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:14px;">{{ t.depHint }}</div>
@@ -590,7 +641,7 @@
       </sc-if>
 
       <sc-if value="{{ showIncident }}" hint-placeholder-val="{{ false }}">
-        <div style="position:absolute; inset:0; overflow-y:auto; padding:18px 24px;">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:18px 24px;">
           <div style="max-width:820px; margin:0 auto;">
             <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:17px; margin-bottom:4px;">{{ t.incTitle }}</div>
             <div style="font-size:12.5px; color:var(--text-muted); margin-bottom:16px;">{{ t.incHint }}</div>
@@ -692,9 +743,15 @@
 
       <sc-if value="{{ showTree }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; position:sticky; top:0; z-index:3; background:linear-gradient(var(--bg), var(--bg) 72%, transparent); padding:4px 0 10px; margin:-16px -4px 6px; padding-left:4px;">
-        <div style="font-family:'Inter',sans-serif; font-size:15px; font-weight:600;">{{ t.canvasTitle }}</div>
+        <div style="min-width:0;">
+          <div style="font-family:'Inter',sans-serif; font-size:15px; font-weight:600; line-height:1.2;">{{ t.canvasTitle }}</div>
+          <div style="font-size:11.5px; color:var(--text-faint); margin-top:2px;">{{ t.canvasSub }}</div>
+        </div>
         <div style="flex:1 1 auto;"></div>
-        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ layersDoneLabel }}</div>
+        <div style="display:flex; border:1px solid var(--border-strong); border-radius:9px; overflow:hidden; font-family:'Inter',sans-serif; font-size:12px; font-weight:600;">
+          <button onClick="{{ setCompact }}" title="{{ t.densCompactHint }}" style="border:none; padding:7px 12px; cursor:pointer; background:{{ densCBg }}; color:{{ densCColor }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.densCompact }}</button>
+          <button onClick="{{ setDetail }}" title="{{ t.densDetailHint }}" style="border:none; border-left:1px solid var(--border-strong); padding:7px 12px; cursor:pointer; background:{{ densDBg }}; color:{{ densDColor }}; font-family:inherit; font-size:inherit; font-weight:inherit;">{{ t.densDetail }}</button>
+        </div>
         <button onClick="{{ runFlow }}" disabled="{{ flowDisabled }}"
           style="display:flex; align-items:center; gap:8px; border:1px solid {{ flowBorder }}; background:{{ flowBg }}; color:{{ flowColor }}; padding:8px 16px; border-radius:10px; cursor:{{ flowCursor }}; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; transition:all .15s;"
           style-hover="{{ flowHover }}">
@@ -713,11 +770,11 @@
       </sc-if>
 
       <sc-if value="{{ showPresets }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; max-width:880px; margin:14px auto 14px;">
-        <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-right:2px;">{{ examplesLabel }}</span>
+      <div style="display:flex; align-items:center; gap:8px; max-width:900px; margin:10px auto 12px; overflow-x:auto; padding-bottom:2px;">
+        <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-right:2px;">{{ examplesLabel }}</span>
         <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3">
           <button onClick="{{ p.onClick }}" title="{{ p.desc }}"
-            style="display:flex; align-items:center; gap:7px; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text); padding:7px 13px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:500; transition:all .15s;"
+            style="display:flex; flex:0 0 auto; align-items:center; gap:7px; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text); padding:7px 13px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:500; transition:all .15s;"
             style-hover="border-color:var(--accent-b); background:var(--accent-tint); color:var(--text);">
             <span style="width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>{{ p.name }}
           </button>
@@ -730,74 +787,95 @@
           <span style="font-size:13px; color:var(--text); line-height:1.45;">{{ flowCaption }}</span>
         </div>
       </sc-if>
-      <div style="position:relative; max-width:880px; margin:0 auto;">
-        <div style="display:flex; gap:12px; align-items:stretch;">
-          <!-- stack -->
-          <div style="flex:1 1 auto; position:relative; display:flex; flex-direction:column; gap:22px;">
-            <sc-if value="{{ flowing }}" hint-placeholder-val="{{ false }}">
-              <div style="position:absolute; left:0; right:0; top:0; bottom:0; z-index:6; pointer-events:none; overflow:hidden; border-radius:14px;">
-                <div style="position:absolute; left:0; right:0; height:64px; background:linear-gradient(0deg, transparent, rgba(99,102,241,0.16), transparent); border-top:1px solid rgba(99,102,241,0.6); animation:scanSweep 3.2s cubic-bezier(.4,0,.5,1) forwards; top:100%;"></div>
-                <div style="position:absolute; left:22px; width:12px; height:12px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px 3px var(--accent); animation:flowDot 3.2s cubic-bezier(.4,0,.5,1) forwards;"></div>
-              </div>
-            </sc-if>
+      <div style="position:relative; max-width:900px; margin:0 auto;">
+        <div style="position:relative; display:flex; flex-direction:column; gap:{{ planeGap }};">
+          <sc-if value="{{ flowing }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute; left:0; right:0; top:0; bottom:0; z-index:6; pointer-events:none; overflow:hidden; border-radius:14px;">
+              <div style="position:absolute; left:0; right:0; height:64px; background:linear-gradient(0deg, transparent, rgba(99,102,241,0.16), transparent); border-top:1px solid rgba(99,102,241,0.6); animation:scanSweep 3.2s cubic-bezier(.4,0,.5,1) forwards; top:100%;"></div>
+              <div style="position:absolute; left:22px; width:12px; height:12px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px 3px var(--accent); animation:flowDot 3.2s cubic-bezier(.4,0,.5,1) forwards;"></div>
+            </div>
+          </sc-if>
 
-            <sc-for list="{{ layers }}" as="layer" hint-placeholder-count="9">
-              <div role="button" tabindex="0" onKeyDown="{{ layer.onKey }}" aria-label="{{ layer.aria }}" onDragOver="{{ layer.onDragOver }}" onDragLeave="{{ layer.onDragLeave }}" onDrop="{{ layer.onDrop }}" onClick="{{ layer.onClick }}"
-                style="position:relative; border-radius:16px; padding:14px 16px; border:1px solid {{ layer.borderColor }}; background:{{ layer.bg }}; box-shadow:{{ layer.cardShadow }}; transition:border-color .18s, background .18s, transform .14s, box-shadow .18s; animation:{{ layer.anim }}; cursor:{{ layer.cursor }};"
-                style-hover="{{ layer.hoverStyle }}">
-                <sc-if value="{{ layer.showArrow }}" hint-placeholder-val="{{ false }}">
-                  <svg width="14" height="20" viewBox="0 0 14 20" fill="none" stroke="var(--text-faint)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; top:-20px; left:22px; opacity:0.6;"><path d="M7 19V4M2.5 8.5 7 4l4.5 4.5" stroke-dasharray="2 2"></path></svg>
-                </sc-if>
-                <div style="display:flex; align-items:center; gap:13px;">
-                  <div style="width:44px; height:44px; flex:0 0 auto; border-radius:12px; display:grid; place-items:center; color:{{ layer.color }}; background:{{ layer.numTint }};">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ layer.iconPath }}"></path></svg>
-                  </div>
-                  <div style="min-width:0; flex:1 1 auto;">
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                      <span style="font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:var(--text); letter-spacing:-0.01em;">{{ layer.name }}</span>
-                      <sc-if value="{{ layer.done }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; font-family:'JetBrains Mono',monospace; color:#22c55e; background:rgba(34,197,94,0.12); border-radius:99px; padding:2px 8px; font-weight:600;">OK</span></sc-if>
-                      <sc-if value="{{ layer.hintTagShow }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px; font-family:'JetBrains Mono',monospace; color:{{ layer.hintTagColor }}; border:1px solid {{ layer.hintTagColor }}; border-radius:99px; padding:2px 8px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">{{ layer.hintTag }}</span></sc-if>
+          <sc-for list="{{ planes }}" as="pl" hint-placeholder-count="5">
+            <div style="position:relative; border-left:2px solid {{ pl.color }}; padding-left:15px;">
+              <div style="display:flex; align-items:center; gap:8px; margin:0 0 7px;">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; color:{{ pl.color }};">{{ pl.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint);">{{ pl.count }}</span>
+                <span style="flex:1 1 auto;"></span>
+                <span style="font-size:11.5px; color:var(--text-faint); text-align:right;">{{ pl.role }}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:{{ layerGap }};">
+                <sc-for list="{{ pl.layers }}" as="layer" hint-placeholder-count="2">
+                  <div role="button" tabindex="0" onKeyDown="{{ layer.onKey }}" aria-label="{{ layer.aria }}" onDragOver="{{ layer.onDragOver }}" onDragLeave="{{ layer.onDragLeave }}" onDrop="{{ layer.onDrop }}" onClick="{{ layer.onClick }}"
+                    style="position:relative; border-radius:12px; padding:{{ layer.pad }}; border:1px solid {{ layer.borderColor }}; background:{{ layer.bg }}; box-shadow:{{ layer.cardShadow }}; transition:border-color .18s, background .18s, transform .14s, box-shadow .18s; animation:{{ layer.anim }}; cursor:{{ layer.cursor }};"
+                    style-hover="{{ layer.hoverStyle }}">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <span style="flex:0 0 auto; width:20px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:{{ layer.color }}; opacity:0.65;">{{ layer.num }}</span>
+                      <div style="width:{{ layer.iconBox }}; height:{{ layer.iconBox }}; flex:0 0 auto; border-radius:10px; display:grid; place-items:center; color:{{ layer.color }}; background:{{ layer.numTint }};">
+                        <svg width="{{ layer.iconSz }}" height="{{ layer.iconSz }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ layer.iconPath }}"></path></svg>
+                      </div>
+                      <div style="min-width:0; flex:1 1 auto;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                          <span style="font-family:'Inter',sans-serif; font-weight:600; font-size:14px; color:var(--text); letter-spacing:-0.01em;">{{ layer.name }}</span>
+                          <sc-if value="{{ layer.done }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px; color:#22c55e; line-height:1;">✓</span></sc-if>
+                          <sc-if value="{{ layer.hintTagShow }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px; font-family:'JetBrains Mono',monospace; color:{{ layer.hintTagColor }}; border:1px solid {{ layer.hintTagColor }}; border-radius:99px; padding:2px 8px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">{{ layer.hintTag }}</span></sc-if>
+                        </div>
+                        <sc-if value="{{ layer.showHint }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size:12px; color:var(--text-muted); line-height:1.45; margin-top:3px;">{{ layer.hint }}</div>
+                        </sc-if>
+                      </div>
+                      <sc-if value="{{ layer.compactChips }}" hint-placeholder-val="{{ false }}">
+                        <div style="flex:0 0 auto; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; max-width:52%;">
+                          <sc-for list="{{ layer.placedBlocks }}" as="pb" hint-placeholder-count="2">
+                            <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}"
+                              style="display:flex; align-items:center; gap:5px; padding:3px 8px; border-radius:8px; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; font-size:11px; font-weight:500; font-family:inherit; appearance:none; animation:chipIn .25s ease both; white-space:nowrap;"
+                              style-hover="filter:brightness(1.15);">{{ pb.name }}<span style="opacity:0.5; font-family:'JetBrains Mono',monospace; font-size:10px;">✕</span></button>
+                          </sc-for>
+                        </div>
+                      </sc-if>
                     </div>
-                    <div style="font-size:12px; color:var(--text-muted); line-height:1.4; margin-top:3px;">{{ layer.hint }}</div>
+                    <sc-if value="{{ layer.detailChips }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:11px; padding-left:64px;">
+                        <sc-for list="{{ layer.placedBlocks }}" as="pb" hint-placeholder-count="2">
+                          <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}"
+                            style="display:flex; align-items:center; gap:6px; padding:5px 8px 5px 6px; border-radius:8px; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; font-size:11.5px; font-weight:500; font-family:inherit; appearance:none; animation:chipIn .25s ease both;"
+                            style-hover="filter:brightness(1.15);">
+                            <span style="width:20px; height:20px; border-radius:6px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:600; background:var(--badge-inner); color:{{ pb.color }};">{{ pb.code }}</span>
+                            {{ pb.name }}
+                            <span style="opacity:0.55; margin-left:1px; font-family:'JetBrains Mono',monospace;">✕</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
                   </div>
-                  <div style="flex:0 0 auto; font-family:'Inter',sans-serif; font-weight:800; font-size:26px; line-height:1; color:{{ layer.color }}; opacity:0.28; letter-spacing:-0.02em;">{{ layer.num }}</div>
-                </div>
-                <sc-if value="{{ layer.hasBlocks }}" hint-placeholder-val="{{ false }}">
-                  <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; padding-left:57px;">
-                    <sc-for list="{{ layer.placedBlocks }}" as="pb" hint-placeholder-count="2">
-                      <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}"
-                        style="display:flex; align-items:center; gap:6px; padding:5px 8px 5px 6px; border-radius:8px; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; font-size:11.5px; font-weight:500; font-family:inherit; appearance:none; animation:chipIn .25s ease both;"
-                        style-hover="filter:brightness(1.15);">
-                        <span style="width:20px; height:20px; border-radius:6px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:600; background:var(--badge-inner); color:{{ pb.color }};">{{ pb.code }}</span>
-                        {{ pb.name }}
-                        <span style="opacity:0.55; margin-left:1px; font-family:'JetBrains Mono',monospace;">✕</span>
-                      </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- cinturón transversal: atraviesa todas las capas -->
+        <div style="margin-top:15px; padding-top:12px; border-top:1.5px dashed var(--border-strong);">
+          <div style="display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; margin:0 0 10px;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; font-weight:700; color:var(--text-muted);">{{ pillarsLabel }}</span>
+            <span style="font-size:11.5px; color:var(--text-faint);">{{ pillarsHint }}</span>
+          </div>
+          <div class="pillar-belt" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(108px, 1fr)); gap:8px;">
+            <sc-for list="{{ transversals }}" as="tr" hint-placeholder-count="7">
+              <div role="button" tabindex="0" onKeyDown="{{ tr.onKey }}" aria-label="{{ tr.aria }}" onDragOver="{{ tr.onDragOver }}" onDragLeave="{{ tr.onDragLeave }}" onDrop="{{ tr.onDrop }}" onClick="{{ tr.onClick }}"
+                style="border-radius:12px; border:1px dashed {{ tr.borderColor }}; background:{{ tr.bg }}; padding:10px 11px; cursor:{{ tr.cursor }}; transition:all .16s; animation:{{ tr.anim }};"
+                style-hover="{{ tr.hoverStyle }}">
+                <span style="width:26px; height:26px; border-radius:8px; display:grid; place-items:center; color:{{ tr.color }}; background:{{ tr.numBg }};"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tr.iconPath }}"></path></svg></span>
+                <div style="font-family:'Inter',sans-serif; font-weight:600; font-size:11.5px; color:var(--text); line-height:1.3; margin-top:7px;">{{ tr.name }}</div>
+                <sc-if value="{{ tr.hasBlocks }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+                    <sc-for list="{{ tr.placedBlocks }}" as="pb" hint-placeholder-count="0">
+                      <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}" style="padding:3px 7px; border-radius:7px; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; appearance:none; animation:chipIn .25s ease both;" style-hover="filter:brightness(1.15);">{{ pb.code }}</button>
                     </sc-for>
                   </div>
                 </sc-if>
               </div>
             </sc-for>
-          </div>
-
-          <!-- transversal pillars: security, ci/cd, iac, monitoring -->
-          <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px; padding-left:14px; border-left:1.5px dashed var(--border-strong);">
-            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); text-align:center; margin-bottom:2px;">{{ pillarsLabel }}</div>
-            <div style="display:flex; gap:9px; align-items:stretch; flex:1 1 auto;">
-              <sc-for list="{{ transversals }}" as="tr" hint-placeholder-count="4">
-                <div role="button" tabindex="0" onKeyDown="{{ tr.onKey }}" aria-label="{{ tr.aria }}" onDragOver="{{ tr.onDragOver }}" onDragLeave="{{ tr.onDragLeave }}" onDrop="{{ tr.onDrop }}" onClick="{{ tr.onClick }}"
-                  style="flex:0 0 82px; border-radius:15px; border:1px dashed {{ tr.borderColor }}; background:{{ tr.bg }}; box-shadow:var(--card-shadow); display:flex; flex-direction:column; align-items:center; padding:13px 6px; gap:9px; cursor:{{ tr.cursor }}; transition:all .16s; animation:{{ tr.anim }};"
-                  style-hover="{{ tr.hoverStyle }}">
-                  <div style="width:38px; height:38px; border-radius:11px; display:grid; place-items:center; color:{{ tr.color }}; background:{{ tr.numBg }};"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ tr.iconPath }}"></path></svg></div>
-                  <div style="writing-mode:vertical-rl; transform:rotate(180deg); font-family:'Inter',sans-serif; font-weight:700; font-size:12.5px; color:var(--text); letter-spacing:0.01em;">{{ tr.name }}</div>
-                  <div style="flex:1 1 auto;"></div>
-                  <div style="display:flex; flex-direction:column; gap:5px; width:100%; align-items:center;">
-                    <sc-for list="{{ tr.placedBlocks }}" as="pb" hint-placeholder-count="0">
-                      <button type="button" onClick="{{ pb.onClick }}" title="{{ pb.removeTip }}" aria-label="{{ pb.aria }}" style="width:44px; height:32px; border-radius:9px; display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600; background:{{ pb.bg }}; border:1px solid {{ pb.border }}; color:{{ pb.color }}; cursor:pointer; appearance:none; animation:chipIn .25s ease both;" style-hover="filter:brightness(1.15);">{{ pb.code }}</button>
-                    </sc-for>
-                  </div>
-                </div>
-              </sc-for>
-            </div>
           </div>
         </div>
       </div>
@@ -805,7 +883,8 @@
     </main>
 
     <!-- GUIDE / DETAIL -->
-    <aside style="border-left:1px solid var(--border); background:var(--panel); overflow-y:auto; padding:0;">
+    <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+    <aside class="rail-right" style="border-left:1px solid var(--border); background:var(--panel); overflow-y:auto; padding:0;">
       <sc-if value="{{ feedback.show }}" hint-placeholder-val="{{ false }}">
         <div style="margin:16px 16px 0; border-radius:12px; padding:12px 14px; border:1px solid {{ feedback.border }}; background:{{ feedback.bg }}; animation:fadeUp .25s ease both;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
@@ -931,7 +1010,7 @@
         <div style="padding:16px;">
           <sc-if value="{{ analysisShow }}" hint-placeholder-val="{{ false }}">
             <div style="border-radius:13px; border:1px solid var(--border); background:var(--panel-alt); padding:14px; margin-bottom:16px; animation:fadeUp .25s ease both;">
-              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:9px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:9px;">
                 <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px;">{{ t.analysisTitle }}</div>
                 <div style="display:flex; align-items:center; gap:7px;"><span style="font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);">{{ t.analysisRobust }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:{{ analysis.scoreColor }};">{{ analysis.scorePct }}</span></div>
               </div>
@@ -964,7 +1043,7 @@
               </div>
             </div>
           </sc-if>
-          <sc-if value="{{ analysisEmpty }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ showWelcome }}" hint-placeholder-val="{{ true }}">
           <div style="border-radius:13px; border:1px solid var(--border); background:linear-gradient(160deg,var(--panel-alt),var(--panel-2)); padding:16px; margin-bottom:16px;">
             <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:16px; margin-bottom:6px;">{{ t.guideTitle }}</div>
             <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0 0 14px;">{{ t.guideIntro }}</p>
@@ -979,26 +1058,33 @@
           </div>
           </sc-if>
 
+          <sc-if value="{{ showChecklist }}" hint-placeholder-val="{{ true }}">
           <div style="border-radius:13px; border:1px solid var(--border); background:var(--panel-alt); padding:14px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:11px;">
-              <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px;">{{ t.checklist }}</div>
-              <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700; color:var(--text-muted);">{{ layersDoneShort }}</span>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+              <div style="font-family:'Inter',sans-serif; font-weight:700; font-size:14px;">{{ t.progressTitle }}</div>
+              <span style="font-family:'Inter',sans-serif; font-size:15px; font-weight:800; letter-spacing:-0.02em; color:var(--accent);">{{ barWidth }}</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:6px;">
-              <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="10">
-                <div style="display:flex; align-items:center; gap:10px; padding:8px 11px; border-radius:9px; border:1px solid {{ c.border }}; background:{{ c.bg }};">
-                  <span style="width:16px; height:16px; flex:0 0 auto; border-radius:5px; display:grid; place-items:center; font-size:11px; font-weight:700; color:{{ c.checkColor }}; background:{{ c.checkBg }}; border:1px solid {{ c.checkBorder }};">{{ c.mark }}</span>
-                  <span style="width:8px; height:8px; border-radius:2px; background:{{ c.color }};"></span>
-                  <span style="font-size:12.5px; color:{{ c.textColor }}; font-weight:500;">{{ c.name }}</span>
-                  <span style="flex:1 1 auto;"></span>
-                  <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ c.count }}</span>
+            <div style="height:6px; border-radius:99px; background:var(--panel-2); overflow:hidden; margin-bottom:12px;">
+              <div style="height:100%; width:{{ barWidth }}; background:linear-gradient(90deg,var(--accent),var(--accent-2)); border-radius:99px; transition:width .4s;"></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:11px;">
+              <sc-for list="{{ progressParts }}" as="pp" hint-placeholder-count="2">
+                <div style="flex:1 1 0; min-width:0; border-radius:9px; border:1px solid var(--border); background:var(--panel); padding:9px 11px;">
+                  <div style="font-family:'Inter',sans-serif; font-size:15px; font-weight:700; letter-spacing:-0.01em; color:{{ pp.color }};">{{ pp.value }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint); margin-top:2px;">{{ pp.label }}</div>
                 </div>
               </sc-for>
             </div>
+            <div style="display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:9px; border:1px solid {{ nextStep.border }}; background:{{ nextStep.bg }};">
+              <span style="width:8px; height:8px; flex:0 0 auto; border-radius:2px; background:{{ nextStep.color }};"></span>
+              <span style="font-size:12.5px; color:var(--text-muted); line-height:1.4;">{{ nextStep.text }}</span>
+            </div>
           </div>
+          </sc-if>
         </div>
       </sc-if>
     </aside>
+    </sc-if>
   </div>
 
   <footer class="theme-dark" style="flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:8px 16px; flex-wrap:wrap; padding:9px 22px; background:#0f172a; color:var(--text); border-top:1px solid var(--border); font-family:'Inter',sans-serif; font-size:11.5px; text-align:center;">
@@ -1231,7 +1317,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'sandbox', placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
+  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   catsBase() {
@@ -1596,13 +1682,13 @@ class Component extends DCLogic {
       themeDark:'Modo oscuro', themeLight:'Modo claro',
       whyLayer:'¿Por qué esta capa?', ifMissing:'¿Qué pasa si falta?', analogy:'Analogía', belongs:'Qué colocar aquí', layerInfoHint:'Toca una capa vacía para leer su explicación.',
       suggestedTag:'empieza aquí', targetTag:'aquí va',
-      modeFree:'Libre', modeMission:'Misión', modeQuiz:'Quiz',
+      modeFree:'Aprender', modeMission:'Misión', modeQuiz:'Quiz',
       missionPick:'Elige un reto y móntalo en el árbol', missionGoals:'Objetivos', missionCheck:'Evaluar reto', missionExit:'Cambiar de reto',
       lvlBasic:'Básico', lvlInter:'Intermedio', lvlAdv:'Avanzado',
       missionMet:'cumplidos', missionDoneT:'¡Reto superado!', missionPartialT:'Casi… revisa lo que falta', missionMissLabel:'Te falta:',
       quizTitle:'Pon a prueba lo que sabes', quizQ:'¿A qué capa pertenece esta pieza?', quizNext:'Siguiente', quizResult:'Ver resultado',
       quizScore:'Aciertos', quizRestart:'Repetir quiz', quizRight:'¡Correcto!', quizWrong:'No exactamente', quizDoneT:'Quiz completado', quizStart:'Empezar quiz', quizQuestion:'Pregunta',
-      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', modeHttp:'Petición', simGroup:'Simuladores', navModes:'Modos de aprendizaje', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha', mapDemo:'Ejemplo — monta tu stack en «Libre» para ver el tuyo', mapPieces:'piezas',
+      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', modeHttp:'Petición', simGroup:'Simuladores', navModes:'Modos de aprendizaje', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha', mapDemo:'Ejemplo — monta tu stack en «Aprender» para ver el tuyo', mapPieces:'piezas',
       httpTitle:'Petición HTTP — recorrido', httpHint:'Sigue una petición salto a salto por tu stack y mira dónde se va el tiempo (modelo didáctico, no medición real).', httpRelaunch:'Relanzar petición', httpTotal:'Tiempo total', httpTapHint:'Toca un salto para simular su caída y ver cómo falla la petición.', httpNotesLabel:'Avisos', httpHopsLabel:'saltos', httpClearFail:'Quitar caída simulada',
       modeDeploy:'Despliegue', depTitle:'Simulador de despliegue', depHint:'Compara estrategias para publicar una versión nueva (v1 → v2) y observa cómo cambia el tráfico, sin cortar el servicio.', depTraffic:'Reparto de tráfico', depDowntime:'Downtime', depStep:'Paso', depReset:'Reiniciar', depRollback:'Rollback', depNext:'Siguiente', depPrev:'Anterior', depDoneTag:'Completo', depV1:'v1 (actual)', depV2:'v2 (nueva)', depUpd:'actualizando',
       modeIncident:'Incidente', incTitle:'Sala de incidentes', incHint:'Diagnostica una avería real: reúne pistas, identifica la causa raíz y aplica el arreglo correcto.', incPickHint:'Elige un incidente para resolver:', incSymptom:'Síntoma', incStartBtn:'Empezar a investigar', incChecks:'Comprobaciones', incChecksHint:'Toca una comprobación para ver su salida.', incToDiagnose:'Ya tengo una hipótesis →', incDiagnoseTitle:'¿Cuál es la causa raíz?', incConfirmCause:'Confirmar causa', incBackInvestigate:'← Volver a investigar', incFixTitle:'¿Cómo lo arreglas?', incApplyFix:'Aplicar arreglo', incResolvedTag:'Incidente resuelto', incLearnLabel:'Aprendizaje', incAnother:'Elegir otro incidente', incRetry:'Reintentar', incPhInvestigate:'Investigar', incPhDiagnose:'Diagnosticar', incPhFix:'Arreglar', incExit:'Salir',
@@ -1620,6 +1706,22 @@ class Component extends DCLogic {
       stackExport:'Exportar stack (.json)', stackImport:'Importar stack (.json)',
       pathTitle:'Ruta de aprendizaje', pathSubtitle:'Un camino guiado de 0 a arquitecto: teoría, retos y quiz en orden.', pathRead:'Leer', pathHide:'Ocultar', pathMarkRead:'Marcar como leído', pathStart:'Empezar reto', pathDoQuiz:'Hacer quiz', pathGo:'Ir', pathCurrent:'Siguiente paso',
       glTitle:'Glosario', glSubtitle:'Todos los términos con su definición. Busca y toca uno para ampliarlo.', glSearch:'Buscar término…', glCat:'Categoría', glView:'Ver ficha', glResults:'términos', glEmpty:'Sin resultados',
+      homeBack:'Volver al inicio', moreBtn:'Más',
+      navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar',
+      navBuildHint:'Monta tu stack pieza a pieza y entiende cada capa', navPracticeHint:'Retos con objetivos y quiz de repaso', navExploreHint:'Mira tu stack desde otros ángulos: mapa, petición, despliegue…',
+      homeKicker:'Taller visual de infraestructura', homeTitle:'¿Qué quieres hacer hoy?',
+      homeLead:'Aprende cómo se monta la infraestructura de un sistema real: capa por capa, entendiendo por qué existe cada una. Elige por dónde empezar.',
+      homeContinue:'Seguir donde lo dejaste', homeContinueDesc:'Vuelve a tu stack y sigue montando.',
+      cardLearnT:'Aprender', cardLearnD:'Monta un stack completo de abajo hacia arriba. Cada pieza que colocas te explica qué hace y por qué va ahí.', cardLearnM:'Empieza aquí si es tu primera vez',
+      cardPracticeT:'Practicar', cardPracticeD:'Retos con objetivos concretos y presupuesto, y un quiz que insiste donde fallas.', cardPracticeM:'Retos · Quiz adaptativo',
+      cardExploreT:'Explorar', cardExploreD:'Tu stack visto como datacenter, como petición HTTP, como despliegue, como métricas o desde la terminal.', cardExploreM:'6 vistas · simuladores',
+      statPieces:'tecnologías', statLayers:'capas', statMissions:'retos', statModes:'vistas',
+      subnavLabel:'Vista', canvasSub:'De abajo hacia arriba: primero la red, al final la nube.',
+      densCompact:'Compacto', densDetail:'Detalle', densCompactHint:'Ver el stack entero de un vistazo', densDetailHint:'Ver la explicación de cada capa',
+      progressTitle:'Tu progreso', progLayers:'capas', progPillars:'pilares',
+      nextStepLbl:'Siguiente:', allDoneMsg:'Stack completo. Pulsa «Simular flujo» para verlo funcionar.', emptyStepMsg:'Empieza por abajo: coloca algo en Redes.',
+      pillarsHint:'atraviesan todas las capas, no viven dentro de una',
+      planeRoles:{ cloud:'servicios de terceros, bajo demanda', data:'dónde vive el estado', app:'dónde corre tu código', plat:'convierte el hierro en recursos', phys:'el hierro y los cables' },
       printTitle:'Resumen de arquitectura — LabStack', printStack:'Stack montado', printRobust:'Robustez', printCost:'Coste estimado', printEmpty:'No hay piezas montadas.',
     };
     const en = {
@@ -1634,13 +1736,13 @@ class Component extends DCLogic {
       themeDark:'Dark mode', themeLight:'Light mode',
       whyLayer:'Why this layer?', ifMissing:'What if it is missing?', analogy:'Analogy', belongs:'What goes here', layerInfoHint:'Tap an empty layer to read its explanation.',
       suggestedTag:'start here', targetTag:'goes here',
-      modeFree:'Free', modeMission:'Mission', modeQuiz:'Quiz',
+      modeFree:'Learn', modeMission:'Mission', modeQuiz:'Quiz',
       missionPick:'Pick a challenge and build it on the tree', missionGoals:'Goals', missionCheck:'Evaluate', missionExit:'Change challenge',
       lvlBasic:'Basic', lvlInter:'Intermediate', lvlAdv:'Advanced',
       missionMet:'met', missionDoneT:'Challenge complete!', missionPartialT:'Almost… check what is missing', missionMissLabel:'Still missing:',
       quizTitle:'Test what you know', quizQ:'Which layer does this piece belong to?', quizNext:'Next', quizResult:'See result',
       quizScore:'Score', quizRestart:'Retry quiz', quizRight:'Correct!', quizWrong:'Not quite', quizDoneT:'Quiz complete', quizStart:'Start quiz', quizQuestion:'Question',
-      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', modeHttp:'Request', simGroup:'Simulators', navModes:'Learning modes', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details', mapDemo:'Example — build your stack in “Free” to see yours', mapPieces:'pieces',
+      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', modeHttp:'Request', simGroup:'Simulators', navModes:'Learning modes', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details', mapDemo:'Example — build your stack in “Learn” to see yours', mapPieces:'pieces',
       httpTitle:'HTTP request — waterfall', httpHint:'Follow a request hop by hop across your stack and see where the time goes (a didactic model, not real measurement).', httpRelaunch:'Relaunch request', httpTotal:'Total time', httpTapHint:'Tap a hop to simulate its failure and see how the request breaks.', httpNotesLabel:'Warnings', httpHopsLabel:'hops', httpClearFail:'Clear simulated failure',
       modeDeploy:'Deploy', depTitle:'Deployment simulator', depHint:'Compare strategies to ship a new version (v1 → v2) and watch traffic shift, with no service interruption.', depTraffic:'Traffic split', depDowntime:'Downtime', depStep:'Step', depReset:'Reset', depRollback:'Rollback', depNext:'Next', depPrev:'Previous', depDoneTag:'Done', depV1:'v1 (current)', depV2:'v2 (new)', depUpd:'updating',
       modeIncident:'Incident', incTitle:'Incident room', incHint:'Diagnose a real outage: gather clues, identify the root cause and apply the right fix.', incPickHint:'Pick an incident to resolve:', incSymptom:'Symptom', incStartBtn:'Start investigating', incChecks:'Checks', incChecksHint:'Tap a check to see its output.', incToDiagnose:'I have a hypothesis →', incDiagnoseTitle:'What is the root cause?', incConfirmCause:'Confirm cause', incBackInvestigate:'← Back to investigating', incFixTitle:'How do you fix it?', incApplyFix:'Apply fix', incResolvedTag:'Incident resolved', incLearnLabel:'Takeaway', incAnother:'Pick another incident', incRetry:'Retry', incPhInvestigate:'Investigate', incPhDiagnose:'Diagnose', incPhFix:'Fix', incExit:'Exit',
@@ -1658,6 +1760,22 @@ class Component extends DCLogic {
       stackExport:'Export stack (.json)', stackImport:'Import stack (.json)',
       pathTitle:'Learning path', pathSubtitle:'A guided path from zero to architect: theory, challenges and quiz in order.', pathRead:'Read', pathHide:'Hide', pathMarkRead:'Mark as read', pathStart:'Start challenge', pathDoQuiz:'Take quiz', pathGo:'Go', pathCurrent:'Next step',
       glTitle:'Glossary', glSubtitle:'Every term with its definition. Search and tap one to expand.', glSearch:'Search term…', glCat:'Category', glView:'View card', glResults:'terms', glEmpty:'No results',
+      homeBack:'Back to start', moreBtn:'More',
+      navBuild:'Learn', navPractice:'Practice', navExplore:'Explore',
+      navBuildHint:'Build your stack piece by piece and understand every layer', navPracticeHint:'Goal-based challenges and a revision quiz', navExploreHint:'See your stack from other angles: map, request, deployment…',
+      homeKicker:'Visual infrastructure workshop', homeTitle:'What do you want to do today?',
+      homeLead:'Learn how the infrastructure of a real system is put together: layer by layer, understanding why each one exists. Pick where to start.',
+      homeContinue:'Pick up where you left off', homeContinueDesc:'Go back to your stack and keep building.',
+      cardLearnT:'Learn', cardLearnD:'Build a full stack from the bottom up. Every piece you place explains what it does and why it goes there.', cardLearnM:'Start here if it is your first time',
+      cardPracticeT:'Practice', cardPracticeD:'Challenges with concrete goals and budgets, plus a quiz that insists where you slip.', cardPracticeM:'Challenges · Adaptive quiz',
+      cardExploreT:'Explore', cardExploreD:'Your stack seen as a datacenter, as an HTTP request, as a deployment, as metrics or from the terminal.', cardExploreM:'6 views · simulators',
+      statPieces:'technologies', statLayers:'layers', statMissions:'challenges', statModes:'views',
+      subnavLabel:'View', canvasSub:'Bottom-up: networking first, cloud last.',
+      densCompact:'Compact', densDetail:'Detail', densCompactHint:'See the whole stack at a glance', densDetailHint:'See the explanation of every layer',
+      progressTitle:'Your progress', progLayers:'layers', progPillars:'pillars',
+      nextStepLbl:'Next:', allDoneMsg:'Stack complete. Hit “Run flow” to watch it work.', emptyStepMsg:'Start at the bottom: place something in Networking.',
+      pillarsHint:'they cut across every layer, they do not live inside one',
+      planeRoles:{ cloud:'third-party services, on demand', data:'where state lives', app:'where your code runs', plat:'turns metal into resources', phys:'the metal and the cables' },
       printTitle:'Architecture summary — LabStack', printStack:'Built stack', printRobust:'Robustness', printCost:'Estimated cost', printEmpty:'No pieces placed.',
     };
     return L==='es'?es:en;
@@ -2050,7 +2168,7 @@ class Component extends DCLogic {
 
   // ---- persistence: autosave + shareable link ----
   storageKey(){ return 'labstack-v1'; }
-  persist(){ try{ localStorage.setItem(this.storageKey(), JSON.stringify({ placed:this.state.placed, lang:this.state.lang, theme:this.state.theme, achievements:this.state.achievements, quizStats:this.state.quizStats, progress:this.state.progress })); }catch(e){} }
+  persist(){ try{ localStorage.setItem(this.storageKey(), JSON.stringify({ placed:this.state.placed, lang:this.state.lang, theme:this.state.theme, density:this.state.density, achievements:this.state.achievements, quizStats:this.state.quizStats, progress:this.state.progress })); }catch(e){} }
   loadLocal(){ try{ const raw=localStorage.getItem(this.storageKey()); return raw? JSON.parse(raw) : null; }catch(e){ return null; } }
   encodeStack(placed){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(placed||{})))); }catch(e){ return ''; } }
   decodeStack(str){ try{ const o=JSON.parse(decodeURIComponent(escape(atob(str)))); return (o && typeof o==='object' && !Array.isArray(o))? o : null; }catch(e){ return null; } }
@@ -2074,9 +2192,9 @@ class Component extends DCLogic {
     const qs=(local && local.quizStats && typeof local.quizStats==='object') ? local.quizStats : {};
     const prog=(local && local.progress && typeof local.progress==='object') ? local.progress : { missions:{}, lessons:{}, quizAce:false };
     const fromUrl=this.readUrlStack();
-    if(fromUrl){ try{ history.replaceState(null,'',window.location.pathname+window.location.search); }catch(e){} this.setState({ placed:fromUrl, achievements:ach, quizStats:qs, progress:prog, feedback:{ type:'info', title:(this.state.lang==='es'?'Stack cargado':'Stack loaded'), msg:(this.state.lang==='es'?'Se ha cargado un stack compartido por enlace.':'A shared stack was loaded from the link.') } }); return; }
+    if(fromUrl){ try{ history.replaceState(null,'',window.location.pathname+window.location.search); }catch(e){} this.setState({ mode:'sandbox', placed:fromUrl, achievements:ach, quizStats:qs, progress:prog, feedback:{ type:'info', title:(this.state.lang==='es'?'Stack cargado':'Stack loaded'), msg:(this.state.lang==='es'?'Se ha cargado un stack compartido por enlace.':'A shared stack was loaded from the link.') } }); return; }
     const p={ achievements:ach, quizStats:qs, progress:prog };
-    if(local){ if(local.placed && typeof local.placed==='object') p.placed=local.placed; if(local.lang) p.lang=local.lang; if(local.theme) p.theme=local.theme; }
+    if(local){ if(local.placed && typeof local.placed==='object') p.placed=local.placed; if(local.lang) p.lang=local.lang; if(local.theme) p.theme=local.theme; if(local.density==='compact'||local.density==='detail') p.density=local.density; }
     this.setState(p);
   }
   componentDidUpdate(){
@@ -2216,7 +2334,7 @@ class Component extends DCLogic {
   learningPath(){
     const F=(es,en)=>({es,en});
     return { id:'zero-to-hero', name:F('De cero a arquitecto','From zero to architect'), steps:[
-      { id:'l-intro', type:'lesson', title:F('¿Qué es la infraestructura?','What is infrastructure?'), body:F('La infraestructura es todo lo que hace que una aplicación funcione: red, servidores, almacenamiento, sistema operativo… Se organiza en capas, de lo físico (abajo) a lo lógico (arriba). En este taller montarás esas capas y verás cómo encajan. Empieza en el modo «Libre».','Infrastructure is everything that makes an app run: network, servers, storage, OS… It is organized in layers, from physical (bottom) to logical (top). In this lab you will build those layers and see how they fit. Start in “Free” mode.') },
+      { id:'l-intro', type:'lesson', title:F('¿Qué es la infraestructura?','What is infrastructure?'), body:F('La infraestructura es todo lo que hace que una aplicación funcione: red, servidores, almacenamiento, sistema operativo… Se organiza en capas, de lo físico (abajo) a lo lógico (arriba). En este taller montarás esas capas y verás cómo encajan. Empieza en el modo «Aprender».','Infrastructure is everything that makes an app run: network, servers, storage, OS… It is organized in layers, from physical (bottom) to logical (top). In this lab you will build those layers and see how they fit. Start in “Learn” mode.') },
       { id:'m-first', type:'mission', ref:'first', title:F('Monta tu primer servidor','Build your first server'), desc:F('Red + hardware + almacenamiento + SO','Network + hardware + storage + OS') },
       { id:'l-virt', type:'lesson', title:F('Virtualización y contenedores','Virtualization and containers'), body:F('Un servidor físico desaprovecha recursos. La virtualización lo divide en varias máquinas virtuales. Los contenedores van más allá: empaquetan solo la app y sus dependencias, comparten el kernel del SO y arrancan en milisegundos. Por eso son la base de las plataformas modernas.','One physical server wastes resources. Virtualization splits it into VMs. Containers go further: they package only the app and its deps, share the OS kernel and start in milliseconds. That is why they are the base of modern platforms.') },
       { id:'m-obs', type:'mission', ref:'observability', title:F('Observabilidad','Observability'), desc:F('Métricas, paneles, alertas y logs','Metrics, dashboards, alerts and logs') },
@@ -2295,6 +2413,12 @@ class Component extends DCLogic {
     catch(e){ try{ navigator.clipboard.writeText(data); }catch(e2){} }
   }
   toolExportStack(){ this.setState({ showTools:false }); this.exportStack(); }
+  toolTheme(){ this.setState(s=>({ showTools:false, theme: s.theme==='dark'?'light':'dark' })); }
+  toolAch(){ this.setState({ showTools:false, showAchievements:true, achConfirm:false }); }
+  toolShare(){ this.setState({ showTools:false }); this.shareLink(); }
+  toolReset(){ this.setState({ showTools:false }); this.reset(); }
+  goHome(){ this.setMode('home'); }
+  setDensity(d){ this.setState({ density:d }); }
   importStackFile(e){
     const es=this.state.lang==='es';
     try{ const f=e&&e.target&&e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader();
@@ -2456,7 +2580,7 @@ class Component extends DCLogic {
       case 'man': L=this.manPage(sub, es); break;
       case 'clear': return { clear:true };
       case 'stack': { const order=['red','computo','almacenamiento','virtualizacion','hci','so','contenedores','orquestacion','datos','nube','seguridad','cicd','iac','monitorizacion','gobernanza']; const pr=order.filter(has);
-        if(!pr.length){ L=[E(es?'No hay nada desplegado. Ve a «Libre» y arrastra piezas.':'Nothing deployed. Go to “Free” and drag pieces.')]; break; }
+        if(!pr.length){ L=[E(es?'No hay nada desplegado. Ve a «Aprender» y arrastra piezas.':'Nothing deployed. Go to “Learn” and drag pieces.')]; break; }
         L=[D(es?'Infraestructura desplegada:':'Deployed infrastructure:')]; pr.forEach(c=>{ const nm=placed[c].map(id=>{const b=this.blockById(id);return b?this.loc(b.name):id;}).join(', '); L.push(O('  '+this.loc(this.catById(c).name)+': '+nm)); }); break; }
       // ---- filesystem ----
       case 'pwd': L=[O(cwd)]; break;
@@ -2509,7 +2633,7 @@ class Component extends DCLogic {
       case 'docker': L=this.cmdDocker(parts, has, placed, es); break;
       case 'git': L=this.cmdGit(parts, has, es); break;
       case 'terraform': case 'tf': L=this.cmdTerraform(parts, has, placed, es); break;
-      case 'psql': { if(!hasBlk('postgres')){ L=[E('psql: error: connection to server failed: Connection refused. ¿Montaste PostgreSQL en «Libre»?')]; break; } L=[D('psql (16.2)  Type "help" for help.'),O('labdb=# SELECT version();'),O(' PostgreSQL 16.2 on x86_64-pc-linux-gnu'),O('labdb=# \\dt'),O('  public | users  | table | labuser'),O('  public | orders | table | labuser')]; break; }
+      case 'psql': { if(!hasBlk('postgres')){ L=[E('psql: error: connection to server failed: Connection refused. ¿Montaste PostgreSQL en «Aprender»?')]; break; } L=[D('psql (16.2)  Type "help" for help.'),O('labdb=# SELECT version();'),O(' PostgreSQL 16.2 on x86_64-pc-linux-gnu'),O('labdb=# \\dt'),O('  public | users  | table | labuser'),O('  public | orders | table | labuser')]; break; }
       case 'redis-cli': { if(!hasBlk('redis')){ L=[E('Could not connect to Redis at 127.0.0.1:6379: Connection refused')]; break; } L=[O('127.0.0.1:6379> PING'),K('PONG'),O('127.0.0.1:6379> SET clave "hola"'),K('OK'),O('127.0.0.1:6379> GET clave'),O('"hola"')]; break; }
       case 'mongosh': case 'mongo': { if(!hasBlk('mongodb')){ L=[E('MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27017')]; break; } L=[D('Current Mongosh Log ID: '+this.rhex(24)),O('test> show dbs'),O('  admin  40.00 KiB'),O('  labdb 120.00 KiB'),O('test> db.users.countDocuments()'),O('  1284')]; break; }
       case 'mysql': { if(!hasBlk('mysql')){ L=[E('ERROR 2002 (HY000): Can\'t connect to local MySQL server through socket')]; break; } L=[D('Welcome to the MySQL monitor.'),O('mysql> SHOW DATABASES;'),O('+--------------------+'),O('| labdb              |'),O('| information_schema |'),O('+--------------------+')]; break; }
@@ -2524,7 +2648,7 @@ class Component extends DCLogic {
       // ---- kubernetes ecosistema ----
       case 'helm': { if(!has('orquestacion')){ L=[E('Error: Kubernetes cluster unreachable — is your kubeconfig correct?')]; break; } if(sub==='list'||sub==='ls'){ L=[D('NAME  NAMESPACE  REVISION  STATUS    CHART'),O('web   default    3         deployed  web-1.4.2')]; } else if(sub==='install'){ L=[K('NAME: '+(posArgs[1]||'web')),O('STATUS: deployed'),O('REVISION: 1')]; } else if(sub==='status'){ L=[O('NAME: web'),O('LAST DEPLOYED: '+new Date().toDateString()),K('STATUS: deployed')]; } else if(sub==='version'){ L=[O('version.BuildInfo{Version:"v3.14.0", GoVersion:"go1.22"}')]; } else if(sub==='repo'){ L=[D('NAME     URL'),O('bitnami  https://charts.bitnami.com/bitnami')]; } else L=[O('Usage: helm [list|install|status|repo|version]')]; break; }
       // ---- clouds ----
-      case 'aws': { if(!has('nube')){ L=[E('Unable to locate credentials. You can configure credentials by running "aws configure". (o monta «Nube» en «Libre»)')]; break; } if(sub==='s3'){ L=[O('2026-01-01 10:00:00 labstack-assets'),O('2026-01-02 11:00:00 labstack-backups')]; } else if(sub==='ec2'){ L=[D('InstanceId            State    Type'),O('i-'+this.rhex(17)+'  running  t3.medium')]; } else if(sub==='lambda'){ L=[O('web-handler   nodejs20.x   Active')]; } else if(sub==='--version'){ L=[O('aws-cli/2.15.0 Python/3.11.7 linux/x86_64')]; } else L=[O('usage: aws [s3|ec2|lambda|eks|iam] <subcommand>')]; break; }
+      case 'aws': { if(!has('nube')){ L=[E('Unable to locate credentials. You can configure credentials by running "aws configure". (o monta «Nube» en «Aprender»)')]; break; } if(sub==='s3'){ L=[O('2026-01-01 10:00:00 labstack-assets'),O('2026-01-02 11:00:00 labstack-backups')]; } else if(sub==='ec2'){ L=[D('InstanceId            State    Type'),O('i-'+this.rhex(17)+'  running  t3.medium')]; } else if(sub==='lambda'){ L=[O('web-handler   nodejs20.x   Active')]; } else if(sub==='--version'){ L=[O('aws-cli/2.15.0 Python/3.11.7 linux/x86_64')]; } else L=[O('usage: aws [s3|ec2|lambda|eks|iam] <subcommand>')]; break; }
       case 'gcloud': { if(!has('nube')){ L=[E('ERROR: (gcloud) You do not currently have an active account selected. (o monta «Nube»)')]; break; } if(sub==='compute'){ L=[D('NAME       ZONE           STATUS'),O('vm-web-1   us-central1-a  RUNNING')]; } else if(sub==='container'){ L=[O('NAME       LOCATION       STATUS'),O('lab-gke    us-central1    RUNNING')]; } else if(sub==='--version'){ L=[O('Google Cloud SDK 470.0.0')]; } else L=[O('gcloud [compute|container|run|functions] ...')]; break; }
       case 'az': { if(!has('nube')){ L=[E('ERROR: Please run "az login" to setup account. (o monta «Nube»)')]; break; } if(sub==='vm'){ L=[O('Name     ResourceGroup   PowerState'),O('vm-web   lab-rg          VM running')]; } else if(sub==='aks'){ L=[O('Name      Location    Status'),O('lab-aks   westeurope  Succeeded')]; } else L=[O('az [vm|aks|storage|group] ...')]; break; }
       case 'kubectx': L= has('orquestacion')? [O('labstack')] : [E('no context / cluster')]; break;
@@ -2564,15 +2688,15 @@ class Component extends DCLogic {
       case 'telnet': L= has('red')? [O('Trying '+(posArgs[0]||'host')+'...'),K('Connected to '+(posArgs[0]||'host')+'.'),D('(telnet simulado)')] : [E('telnet: Unable to connect: Network is unreachable')]; break;
       case 'route': L=[D('Destination   Gateway     Iface'),O('default       10.0.1.1    eth0'),O('10.0.1.0      0.0.0.0     eth0')]; break;
       case 'arp': L=[D('Address    HWtype  HWaddress            Iface'),O('10.0.1.1   ether   52:54:00:12:34:56    eth0')]; break;
-      case 'iptables': { if(!hasBlk('firewall')){ L=[E('iptables: '+(es?'no hay firewall (monta uno en «Libre»)':'no firewall configured'))]; break; } L=[D('Chain INPUT (policy DROP)'),O('ACCEPT  tcp  --  anywhere  anywhere  tcp dpt:https'),O('ACCEPT  tcp  --  anywhere  anywhere  tcp dpt:ssh'),O('DROP    all  --  anywhere  anywhere')]; break; }
+      case 'iptables': { if(!hasBlk('firewall')){ L=[E('iptables: '+(es?'no hay firewall (monta uno en «Aprender»)':'no firewall configured'))]; break; } L=[D('Chain INPUT (policy DROP)'),O('ACCEPT  tcp  --  anywhere  anywhere  tcp dpt:https'),O('ACCEPT  tcp  --  anywhere  anywhere  tcp dpt:ssh'),O('DROP    all  --  anywhere  anywhere')]; break; }
       case 'ufw': { if(!hasBlk('firewall')){ L=[O('Status: inactive')]; break; } if(sub==='status'||!sub){ L=[O('Status: active'),D('To          Action  From'),O('443/tcp     ALLOW   Anywhere'),O('22/tcp      ALLOW   Anywhere')]; } else L=[O('Firewall rule '+sub+' (simulado)')]; break; }
       case 'nginx': { if(/-t/.test(line)){ L=[K('nginx: configuration file /etc/nginx/nginx.conf test is successful')]; } else if(/-s/.test(line)){ L=[O('nginx: signal '+(posArgs.slice(-1)[0]||'reload')+' sent to master process')]; } else L=[O('nginx version: nginx/1.25.4')]; break; }
-      case 'openssl': { if(sub==='version'){ L=[O('OpenSSL 3.0.13 30 Jan 2024')]; } else if(sub==='s_client'){ if(!hasBlk('tls')){ L=[E('connect: no TLS endpoint (monta TLS en «Libre»)')]; break; } L=[O('CONNECTED(00000003)'),O('subject=CN = labstack.local'),O('issuer=CN = LabStack CA'),K('Verify return code: 0 (ok)')]; } else if(sub==='rand'){ L=[O(this.rhex(32))]; } else L=[O('usage: openssl [version|s_client|rand|x509|req]')]; break; }
+      case 'openssl': { if(sub==='version'){ L=[O('OpenSSL 3.0.13 30 Jan 2024')]; } else if(sub==='s_client'){ if(!hasBlk('tls')){ L=[E('connect: no TLS endpoint (monta TLS en «Aprender»)')]; break; } L=[O('CONNECTED(00000003)'),O('subject=CN = labstack.local'),O('issuer=CN = LabStack CA'),K('Verify return code: 0 (ok)')]; } else if(sub==='rand'){ L=[O(this.rhex(32))]; } else L=[O('usage: openssl [version|s_client|rand|x509|req]')]; break; }
       case 'certbot': { if(!hasBlk('tls')){ L=[E('certbot: '+(es?'no hay TLS/dominio configurado':'no TLS/domain configured'))]; break; } L=[O('Requesting a certificate for labstack.local'),K('Successfully received certificate.'),O('Saved at: /etc/letsencrypt/live/labstack.local/fullchain.pem')]; break; }
       // ---- ansible / prometheus ----
       case 'ansible': { if(!has('iac')){ L=[E('bash: ansible: command not found')]; break; } L=[O('labstack | SUCCESS => {'),O('    "changed": false,'),O('    "ping": "pong"'),O('}')]; break; }
       case 'ansible-playbook': { if(!has('iac')){ L=[E('bash: ansible-playbook: command not found')]; break; } L=[O('PLAY [all] **********************************'),O('TASK [Gathering Facts] ok: [labstack]'),O('TASK [deploy app] changed: [labstack]'),K('PLAY RECAP: labstack : ok=3 changed=1 unreachable=0 failed=0')]; break; }
-      case 'promtool': { if(!hasBlk('prometheus')){ L=[E('promtool: no Prometheus (móntalo en «Libre»)')]; break; } L=[K('SUCCESS: rules OK, config valid')]; break; }
+      case 'promtool': { if(!hasBlk('prometheus')){ L=[E('promtool: no Prometheus (móntalo en «Aprender»)')]; break; } L=[K('SUCCESS: rules OK, config valid')]; break; }
       // ---- utilidades ----
       case 'lscpu': { const sz=this.sizing(placed); L=[O('Architecture:       x86_64'),O('CPU(s):             '+Math.max(1,sz.cpu)),O('Model name:         Intel(R) Xeon(R) (labstack)'),O('Virtualization:     VT-x')]; break; }
       case 'nproc': { const sz=this.sizing(placed); L=[O(''+Math.max(1,sz.cpu))]; break; }
@@ -3057,6 +3181,7 @@ class Component extends DCLogic {
     const cats = this.cats(), blocks = this.blocks(), meta = this.layerMeta(), icons = this.icons();
     const placedCount = id => (S.placed[id]||[]).length;
     const stackIds = ['nube','datos','orquestacion','contenedores','so','hci','virtualizacion','almacenamiento','computo','red'];
+    const compactDens = (S.density !== 'detail');
     const armedBlock = S.armed ? this.blockById(S.armed) : null;
     const _ac = armedBlock ? this.catById(armedBlock.cat).color : '#6366f1';
     const placing = armedBlock
@@ -3125,7 +3250,9 @@ class Component extends DCLogic {
       const isSuggested = id===firstEmpty;
       const isFlow = id===flowActiveId;
       return {
-        num: ('0'+m.num).slice(-2), name:this.loc(c.name), hint:this.loc(m.hint), color:c.color,
+        id, num: ('0'+m.num).slice(-2), name:this.loc(c.name), hint:this.loc(m.hint), color:c.color,
+        pad: compactDens? '8px 13px' : '13px 15px', iconBox: compactDens? '30px' : '40px', iconSz: compactDens? '17' : '21',
+        showHint: !compactDens, compactChips: compactDens && has, detailChips: !compactDens && has,
         iconPath: icons[id], showArrow: idx>0, numTint:this.hexA(c.color,0.14),
         cardShadow: has? 'var(--card-shadow)' : 'none',
         done: has, hasBlocks: has,
@@ -3177,6 +3304,7 @@ class Component extends DCLogic {
         aria: (S.lang==='es'
           ? ('Pilar transversal '+this.loc(sc.name)+'. '+(S.armed?'Pulsa Enter para colocar aquí la pieza seleccionada.':'Pulsa Enter para ver por qué existe.'))
           : ('Cross-cutting pillar '+this.loc(sc.name)+'. '+(S.armed?'Press Enter to place the selected piece here.':'Press Enter to see why it exists.'))),
+        hasBlocks: ids.length>0,
         placedBlocks: ids.map(bid=>{ const b=this.blockById(bid); return { code:b.code, bg:this.hexA(sc.color,0.16), border:this.hexA(sc.color,0.45), color:sc.color, removeTip:this.state.lang==='es'?'Quitar':'Remove', aria:(this.state.lang==='es'?'Quitar ':'Remove ')+this.loc(b.name)+(this.state.lang==='es'?' de ':' from ')+this.loc(sc.name), onClick:(e)=>{ if(e)e.stopPropagation(); this.removePlaced(tid,bid); } }; }),
       };
     });
@@ -3376,6 +3504,94 @@ class Component extends DCLogic {
     const scoreColor = an.score>=80?'#22c55e' : (an.score>=50?'#f97316':'#fb7185');
     const analysis = { empty:an.empty, score:an.score, scorePct:an.score+'%', scoreColor, items:anItems };
     const guideOpen = !hasDetail && !hasLayerDetail;
+
+    // ---- navegación por grupos: aprender · practicar · explorar ----
+    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore' };
+    const navGroup = groupOf[mode] || 'home';
+    const navGroups = [
+      { id:'build', icon:'🧱', label:t.navBuild, hint:t.navBuildHint, to:'sandbox' },
+      { id:'practice', icon:'🎯', label:t.navPractice, hint:t.navPracticeHint, to:'mission' },
+      { id:'explore', icon:'🔭', label:t.navExplore, hint:t.navExploreHint, to:'map' },
+    ].map((g,i)=>{ const on = navGroup===g.id; return {
+      icon:g.icon, label:g.label, hint:g.hint,
+      sep: i===0 ? 'none' : '1px solid var(--border-strong)',
+      bg: on?'var(--sel)':'transparent', color: on?'var(--accent)':'var(--text-faint)',
+      current: on?'page':'false', hoverStyle: on?'':'color:var(--text);',
+      onClick: ()=>{ if(navGroup!==g.id) this.setMode(g.to); },
+    };});
+
+    // ---- sub-navegación: las vistas dentro del grupo activo ----
+    let subDef = [];
+    if(navGroup==='practice') subDef = [ {m:'mission',icon:'🎯',label:t.modeMission}, {m:'quiz',icon:'❓',label:t.modeQuiz} ];
+    if(navGroup==='explore') subDef = [ {m:'map',icon:'🗺',label:t.modeMap}, {m:'http',icon:'🚦',label:t.modeHttp}, {m:'deploy',icon:'🚀',label:t.modeDeploy}, {m:'metrics',icon:'📈',label:t.modeMetrics}, {m:'terminal',icon:'▚',label:t.modeTerminal}, {m:'incident',icon:'🚑',label:t.modeIncident} ];
+    const subnav = subDef.map(x=>{ const on = mode===x.m; return {
+      icon:x.icon, label:x.label, current: on?'page':'false',
+      bg: on?'var(--accent-tint)':'var(--panel)', border: on?'var(--accent)':'var(--border-strong)',
+      color: on?'var(--accent)':'var(--text-muted)',
+      hoverStyle: on?'':'border-color:var(--accent-b); color:var(--text);',
+      onClick: ()=>this.setMode(x.m),
+    };});
+
+    // ---- raíles contextuales: cada modo enseña solo lo que necesita ----
+    const buildingNow = (mode==='sandbox') || (mode==='mission' && mission.hasActive);
+    const needPalette = buildingNow;
+    const needRail = buildingNow || mode==='map';
+    const gridClass = needPalette ? (needRail?'g-lcr':'g-lc') : (needRail?'g-cr':'g-c');
+
+    // ---- planos conceptuales: 10 capas agrupadas en 5 ideas ----
+    const famById = {}; this.families().forEach(f=>{ famById[f.id]=f; });
+    const layerById = {}; layers.forEach(l=>{ layerById[l.id]=l; });
+    const planes = [
+      { fam:'cloud', ids:['nube'] },
+      { fam:'data',  ids:['datos'] },
+      { fam:'app',   ids:['orquestacion','contenedores'] },
+      { fam:'plat',  ids:['so','hci','virtualizacion'] },
+      { fam:'phys',  ids:['almacenamiento','computo','red'] },
+    ].map(pd=>{
+      const f = famById[pd.fam]; const ls = pd.ids.map(i=>layerById[i]).filter(Boolean);
+      const nOk = ls.filter(l=>l.done).length;
+      return { name:this.loc(f.name), color:f.color, count:nOk+'/'+ls.length, role:(t.planeRoles||{})[pd.fam]||'', layers:ls };
+    }).filter(pl=>pl.layers.length>0);
+
+    // ---- progreso compacto (sustituye a la lista de 17 casillas) ----
+    const layerDone = stackIds.filter(id=>placedCount(id)>0).length;
+    const pillarDone = transIds.filter(id=>placedCount(id)>0).length;
+    const progressParts = [
+      { value: layerDone+'/'+stackIds.length, label:t.progLayers, color:'var(--accent)' },
+      { value: pillarDone+'/'+transIds.length, label:t.progPillars, color:'var(--accent-2)' },
+    ];
+    const nextEmptyId = stackBottomUp.find(id=>placedCount(id)===0) || transIds.find(id=>placedCount(id)===0);
+    let nextStep;
+    if(nextEmptyId){ const nc=this.catById(nextEmptyId);
+      nextStep = { text: t.nextStepLbl+' '+this.loc(nc.name), color:nc.color, border:this.hexA(nc.color,0.35), bg:this.hexA(nc.color,0.07) };
+    } else {
+      nextStep = { text: t.allDoneMsg, color:'#22c55e', border:'rgba(34,197,94,0.35)', bg:'rgba(34,197,94,0.08)' };
+    }
+
+    // ---- inicio: una sola puerta de entrada ----
+    const placedTotal = stackIds.concat(transIds).reduce((n,id)=>n+placedCount(id), 0);
+    const home = {
+      kicker:t.homeKicker, title:t.homeTitle, lead:t.homeLead,
+      hasProgress: placedTotal>0,
+      continueTitle: t.homeContinue,
+      continueDesc: placedTotal+' '+(S.lang==='es'?'piezas montadas':'pieces placed')+' · '+t.homeContinueDesc,
+      onContinue: ()=>this.setMode('sandbox'),
+      cards: [
+        { icon:'🧱', title:t.cardLearnT, desc:t.cardLearnD, meta:t.cardLearnM, color:'#6366f1', to:'sandbox' },
+        { icon:'🎯', title:t.cardPracticeT, desc:t.cardPracticeD, meta:t.cardPracticeM, color:'#f59e0b', to:'mission' },
+        { icon:'🔭', title:t.cardExploreT, desc:t.cardExploreD, meta:t.cardExploreM, color:'#38bdf8', to:'map' },
+      ].map(c=>({ icon:c.icon, title:c.title, desc:c.desc, meta:c.meta,
+        border:this.hexA(c.color,0.34), bg:'var(--panel)',
+        iconBg:this.hexA(c.color,0.12), iconBorder:this.hexA(c.color,0.30), metaColor:c.color,
+        hoverStyle:'transform:translateY(-3px); border-color:'+c.color+';',
+        onClick:()=>this.setMode(c.to) })),
+      stats: [
+        { value:String(blocks.length), label:t.statPieces },
+        { value:String(stackIds.length), label:t.statLayers },
+        { value:String(this.missions().length), label:t.statMissions },
+        { value:'6', label:t.statModes },
+      ],
+    };
     const szTot = this.sizing(anPlaced);
     const sizing = { tiles:[
       { label:t.szCost, value:szTot.cost, unit:t.szMonth, color:'#f59e0b' },
@@ -3455,12 +3671,12 @@ class Component extends DCLogic {
     const hasMon=(S.placed['monitorizacion']||[]).length>0; const metAlerts=[];
     if(cpuV>90) metAlerts.push({ t: esL?'CPU saturada: escala horizontalmente o añade cómputo.':'CPU saturated: scale out or add compute.' });
     if(latV>300) metAlerts.push({ t: esL?'Latencia p99 alta: hay un cuello de botella.':'High p99 latency: there is a bottleneck.' });
-    if(!hasMon) metAlerts.push({ t: esL?'Sin monitorización desplegada: en real, vuelas a ciegas (móntala en «Libre»).':'No monitoring deployed: in real life you fly blind (add it in “Free”).' });
+    if(!hasMon) metAlerts.push({ t: esL?'Sin monitorización desplegada: en real, vuelas a ciegas (móntala en «Aprender»).':'No monitoring deployed: in real life you fly blind (add it in “Learn”).' });
 
     return {
       t,
       mode,
-      analysis, analysisShow: guideOpen && !an.empty, analysisEmpty: an.empty,
+      analysis, analysisShow: guideOpen && !an.empty, analysisEmpty: an.empty, showWelcome: an.empty && mode==='sandbox',
       sizing, sizingShow: guideOpen && !an.empty,
       m0Bg: mode==='sandbox'?'var(--sel)':'transparent', m0Color: mode==='sandbox'?'var(--accent)':'var(--text-faint)',
       m1Bg: mode==='mission'?'var(--sel)':'transparent', m1Color: mode==='mission'?'var(--accent)':'var(--text-faint)',
@@ -3516,13 +3732,26 @@ class Component extends DCLogic {
       flowColor: flowDisabled?'var(--text-faint)':'var(--accent)',
       flowCursor: flowDisabled?'not-allowed':'pointer',
       flowHover: flowDisabled?'':'background:rgba(99,102,241,0.2); border-color:var(--accent);',
-      layersDoneLabel: doneLayers+'/'+allIds.length+' '+t.done,
+      layersDoneLabel: layerDone+'/'+stackIds.length+' '+t.done,
       layersDoneShort: doneLayers+'/'+allIds.length,
       hasDetail, detail, feedback, placing,
       liveMsg: (feedback && feedback.show) ? (feedback.title+'. '+feedback.msg) : '',
       hasLayerDetail, layerDetail,
       flowCaption, flowCaptionShow: S.flowing && !!flowCaption,
       showGuide: !hasDetail && !hasLayerDetail, checklist,
+      // --- navegación y raíles contextuales ---
+      goHome:()=>this.goHome(), navGroups, navGroup,
+      subnav, subnavShow: subnav.length>0, subnavLabel: t.subnavLabel,
+      gridClass, showPalette: needPalette, showRail: needRail,
+      showHome: mode==='home', home,
+      showChecklist: buildingNow, progressParts, nextStep,
+      moreBg: S.showTools?'var(--panel-2)':'var(--panel-alt)', moreColor: S.showTools?'var(--text)':'var(--text-muted)',
+      toolTheme:()=>this.toolTheme(), toolAch:()=>this.toolAch(), toolShare:()=>this.toolShare(), toolReset:()=>this.toolReset(),
+      // --- lienzo del stack: planos + densidad ---
+      planes, layerGap: compactDens? '6px' : '14px', planeGap: compactDens? '13px' : '18px', pillarsHint: t.pillarsHint,
+      setCompact:()=>this.setDensity('compact'), setDetail:()=>this.setDensity('detail'),
+      densCBg: compactDens?'var(--sel)':'transparent', densCColor: compactDens?'var(--accent)':'var(--text-faint)',
+      densDBg: compactDens?'transparent':'var(--sel)', densDColor: compactDens?'var(--text-faint)':'var(--accent)',
       examplesLabel: this.state.lang==='es'?'Flujos de ejemplo':'Example flows',
       pillarsLabel: this.state.lang==='es'?'Pilares transversales':'Cross-cutting pillars',
       presets: this.presets().map(p=>({ name:this.loc(p.name), desc:this.loc(p.desc), onClick:()=>this.loadPreset(p.id) })),

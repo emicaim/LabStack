@@ -71,6 +71,16 @@ Un laboratorio educativo **de un solo archivo** (`Laboratorio.dc.html`) que ense
 
 Marcado con ⭐ lo que más recomiendo.
 
+### ✅ Hecho — rediseño didáctico (fases 1 y 2)
+- ✅ **Pantalla de inicio** como modo por defecto: tres puertas (Aprender / Practicar / Explorar) + «seguir donde lo dejaste».
+- ✅ **Cabecera de 13 controles → 4**: marca, 3 grupos por verbo, idioma y un menú «Más» con el resto.
+- ✅ **Los 6 simuladores dejan de ser modos** y pasan a ser vistas dentro de Explorar (sub-navegación en el lienzo).
+- ✅ **Paneles contextuales**: la paleta solo existe donde se colocan piezas y el raíl derecho solo donde aporta. En Quiz se ocultan ambos — la paleta daba la respuesta.
+- ✅ **Transversales en cinturón horizontal** (texto legible) en vez de 7 columnas verticales rotadas; libera ~40% del lienzo.
+- ✅ **Capas agrupadas en los 5 planos** + densidad **Compacto / Detalle**: el stack entero cabe en una pantalla.
+- ✅ **Checklist de 17 casillas → tarjeta de progreso** (porcentaje, capas, pilares y siguiente paso).
+- ✅ **Rejilla por clases CSS** con puntos de ruptura propios: deja de romperse a 1280 px.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 - ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.
@@ -78,6 +88,8 @@ Marcado con ⭐ lo que más recomiendo.
 - **Undo / redo** al montar el stack.
 - **Más misiones**: migración a la nube, big data / analítica, IoT-edge, recuperación ante desastres (DR).
 - **Rutas de aprendizaje**: encadenar misiones + teoría en un currículum con progreso.
+
+- ⭐ **Fase 3 — sistema visual**: tokens de radio (8/12/16 en vez de 18 valores), escala tipográfica (5 tamaños en vez de 23), mono solo para código/terminal/métricas, quitar `gridDrift`/glows/degradados de fondo y hacer que la cabecera respete el tema.
 
 ### Medio plazo (mejoras de producto)
 - ⭐ **Modo profesor**: crear/editar misiones propias y **exportar/importar stacks como archivo** `.json`.

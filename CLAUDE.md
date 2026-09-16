@@ -49,9 +49,20 @@ Every user-facing string is `{ es: '…', en: '…' }`. `this.loc(obj)` returns 
 
 ### Learning modes (`state.mode`)
 
-The app has **nine** modes, switched from the header toggle and driven by `state.mode`. Product-level status and roadmap live in [ROADMAP.md](ROADMAP.md).
+The app has **ten** values of `state.mode`. Product-level status and roadmap live in [ROADMAP.md](ROADMAP.md).
 
-- `'sandbox'` — the original free-build lab (default). Shows the tree + example presets.
+The header does **not** expose ten peers. It exposes **three verb-based groups** (`navGroups` in `renderVals()`), and the modes inside a group are switched from a secondary chip row rendered at the top of the canvas (`subnav`):
+
+| Group (header) | Modes | Where you switch |
+|---|---|---|
+| **Aprender / Learn** | `sandbox` | — |
+| **Practicar / Practice** | `mission`, `quiz` | canvas `subnav` |
+| **Explorar / Explore** | `map`, `http`, `deploy`, `metrics`, `terminal`, `incident` | canvas `subnav` |
+
+`groupOf` maps mode → group. Clicking a group only switches mode when you are not already inside it, so the sub-view you picked is preserved.
+
+- `'home'` — **the default and the single entrance.** Three cards (Aprender / Practicar / Explorar) built in `home.cards`, a "continue where you left off" strip when `placed` is non-empty, and content stats. Reached from the brand button (`goHome()`); `mode` is deliberately **not** persisted, so every session starts here. A stack shared by URL is the exception — it lands straight on `sandbox`.
+- `'sandbox'` — the free-build lab. Shows the tree + example presets.
 - `'mission'` — goal-based challenges from `missions()`. Each mission declares required categories (`need`), specific blocks (`needBlock`), optional `redundant` categories (need 2+ pieces), optional `budget`, and a `level` (1–3). `missionProgress()` / `checkMission()` evaluate the built stack live (goals + budget + zero linter errors) and give feedback. Presets are hidden here.
 - `'quiz'` — retrieval-practice quiz, **adaptive** (`buildQuiz()` weights categories by past mistakes via `quizWeight`/`weightedPick`). State in `state.quiz`; per-category stats in `state.quizStats` (persisted). Result screen shows mastered vs to-review.
 - `'map'` — pan/zoom physical map. `buildMap()` lays categories into physical zones; the world div is transformed via `translate()+scale()` (`state.map`). Node icons come from `pieceIcon()` (per-piece, falling back to category). Has animated request **flow** (`runMapFlow()`), dependency **curves** with animated traffic, linter **alerts** anchored to nodes, and a **chaos** mode (`toggleChaos`/`simulateFailure`/`resilience`/`cascadeFailure`). `effectivePlaced()` centralizes the real-or-demo `placed`.
@@ -67,7 +78,27 @@ The app has **nine** modes, switched from the header toggle and driven by `state
 
 Cutting across all modes: `deps()` declares category-level dependencies (`orquestacion`→`contenedores`→`so`→`computo`/etc, each as a `oneOf` list). `analyzeArch(placed)` runs it plus anti-pattern rules (single point of failure = no load balancer, data without persistence, unencrypted edge = no TLS, no firewall, no observability) and returns `{ errors, warns, oks, score, empty }` — `score` is a 0–100 robustness rating (`100 − errors·25 − warns·10`). It feeds two surfaces from one model: the right-panel **"Análisis de arquitectura"** card (shown in the guide slot when pieces exist; `analysis`/`analysisShow`/`analysisEmpty` in `renderVals`), and the map's **dependency links** (`buildMap()` draws lines between piece groups via `deps()` + `catPt`). The linter analyzes `state.placed` normally, or `effectivePlaced()` in map mode so the demo also gets analyzed.
 
-`renderVals()` computes the per-mode view objects (`mission`, `quiz`, `map`, `analysis`, `sizing`, `metricsTiles`, terminal fields…) and exposes mode flags (`showTree`, `showQuiz`, `showMap`, `showTerminal`, `showMetrics`, `showMissionPicker`, `showMissionGoals`, `showPresets`). To add a mission, append to `missions()`; a quiz variant, extend `buildQuiz()`; a terminal command, add a `case` in `execCmd()` and to `termCmds()`; a piece, edit `blocks()` (+ `extras()`/`pieceIcons()`/`specs()`). There is a Node smoke-test pattern (instantiate `Component` with stubbed `DCLogic`/`React`/`localStorage`/`window`, call `renderVals()` across all nine modes; simulate events with stubbed `currentTarget.getBoundingClientRect`/`e.key`) used to validate logic changes without a browser — every feature above was verified this way.
+`renderVals()` computes the per-mode view objects (`mission`, `quiz`, `map`, `analysis`, `sizing`, `metricsTiles`, `home`, terminal fields…) and exposes mode flags (`showTree`, `showQuiz`, `showMap`, `showTerminal`, `showMetrics`, `showMissionPicker`, `showMissionGoals`, `showPresets`, `showHome`). To add a mission, append to `missions()`; a quiz variant, extend `buildQuiz()`; a terminal command, add a `case` in `execCmd()` and to `termCmds()`; a piece, edit `blocks()` (+ `extras()`/`pieceIcons()`/`specs()`). There is a Node smoke-test pattern (instantiate `Component` with stubbed `DCLogic`/`React`/`localStorage`/`window`, call `renderVals()` across all ten modes; simulate events with stubbed `currentTarget.getBoundingClientRect`/`e.key`) used to validate logic changes without a browser — every feature above was verified this way. A companion check walks every `{{ key }}` in the template and asserts it has a binding in some mode; run it after touching the template.
+
+### Contextual rails (which panels a mode gets)
+
+The three-rail grid is **not** fixed — each mode shows only the panels it needs, which is what keeps the app from feeling like a cockpit:
+
+- `needPalette` = you are placing pieces (`sandbox`, or `mission` with an active mission).
+- `needRail` = `needPalette` or `map` (the right rail carries the linter + sizing, which the map needs).
+- `gridClass` picks the CSS class — `g-lcr` / `g-lc` / `g-cr` / `g-c` — defined in `<helmet>` with their own breakpoints. **Never** put `grid-template-columns` back inline on `.lab-grid`.
+
+This matters pedagogically as well as visually: in `quiz` the palette is hidden **on purpose**, because the palette groups pieces by category and would hand the learner the answer to "which layer does this piece belong to?".
+
+Modes that render into an absolutely-positioned container (`map`, `terminal`, `metrics`, `http`, `deploy`, `incident`) use `top:56px` rather than `inset:0`, to leave room for the `subnav` chip row. If you add another such mode, match that offset.
+
+### The stack canvas: planes and density
+
+The ten stackable layers are rendered grouped into the **five conceptual planes** (`planes` in `renderVals()`, derived from `families()` + a fixed plane→layer map): nube → datos → aplicación → plataforma → física. Each plane draws a coloured left edge, its name, an `n/m` counter and a one-line role from `t.planeRoles`. Grouping turns ten items into five, which is what makes the stack legible at a glance.
+
+`state.density` (`'compact'` default, persisted) drives a per-layer set of precomputed style values (`pad`, `iconBox`, `iconSz`, `showHint`, `compactChips`, `detailChips`) plus `layerGap`/`planeGap`. Compact fits the whole stack on one screen with placed pieces as chips on the right; detail restores the per-layer explanation. Because the template dialect has no ternaries, **both densities share one markup** and differ only by those bound values — add new density-sensitive styling the same way.
+
+The seven transversals render as a horizontal **belt** below the stack (`grid-template-columns:repeat(auto-fit,minmax(108px,1fr))`), not as vertical rails. Their labels are horizontal; do not reintroduce `writing-mode:vertical-rl`.
 
 ## support.js — do not edit by hand
 
