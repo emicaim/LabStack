@@ -9,6 +9,7 @@
 <script src="./contenido/textos.js"></script>
 <script src="./contenido/retos.js"></script>
 <script src="./contenido/kids.js"></script>
+<script src="./contenido/tickets.js"></script>
 <script>if (location.protocol === 'file:') window.__resources = window.__resources || {};</script>
 <script src="./support.js"></script>
 </head>
@@ -59,6 +60,8 @@
   @keyframes kidBob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
   @keyframes kidPop { 0% { transform: scale(0.72); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
   @keyframes kidShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+  @media (max-width:1240px){ .desk-grid{ grid-template-columns:minmax(0,1fr) !important; } }
+  @media (max-width:760px){ .desk-terms{ grid-template-columns:minmax(0,1fr) !important; } }
   @media (max-width:900px){
     .kids-wrap{ grid-template-columns:minmax(0,1fr) !important; }
     .kids-tower{ position:static !important; }
@@ -260,6 +263,144 @@
               </div>
             </sc-for>
           </div>
+        </div>
+      </sc-if>
+
+      <!-- PUESTO: cola de tickets + cuatro sesiones a la vez -->
+      <sc-if value="{{ showDesk }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; top:56px; right:0; bottom:0; left:0; overflow-y:auto; padding:16px 22px 28px;">
+
+          <sc-if value="{{ desk.open }}" hint-placeholder-val="{{ false }}">
+            <div class="desk-grid" style="display:grid; grid-template-columns:352px minmax(0,1fr); gap:18px; align-items:start; max-width:1500px; margin:0 auto;">
+
+              <!-- el ticket -->
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                <button onClick="{{ desk.onBack }}" style="align-self:flex-start; border:1px solid var(--border-strong); background:var(--panel-alt); color:var(--text-muted); padding:6px 12px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12px; font-weight:600;" style-hover="background:var(--panel-2); color:var(--text);">{{ desk.backLabel }}</button>
+
+                <div style="border-radius:14px; border:1px solid var(--border-strong); background:var(--panel); padding:15px 16px;">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--text-faint);">{{ desk.ticket.id }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:{{ desk.ticket.prioColor }}; background:{{ desk.ticket.prioBg }}; border:1px solid {{ desk.ticket.prioColor }}; border-radius:99px; padding:2px 9px;">{{ desk.ticket.prio }}</span>
+                  </div>
+                  <div style="font-family:'Inter',sans-serif; font-size:15.5px; font-weight:700; line-height:1.3; margin-bottom:4px;">{{ desk.ticket.subject }}</div>
+                  <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px;">{{ desk.ticket.from }}</div>
+                  <p style="font-size:13px; line-height:1.6; color:var(--text-muted); margin:0; padding-top:10px; border-top:1px solid var(--border);">{{ desk.ticket.body }}</p>
+                </div>
+
+                <div style="border-radius:14px; border:1px solid var(--border); background:var(--panel-alt); padding:13px 14px;">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:9px;">{{ desk.suggestTitle }}</div>
+                  <div style="display:flex; flex-direction:column; gap:5px;">
+                    <sc-for list="{{ desk.suggest }}" as="ds" hint-placeholder-count="4">
+                      <button onClick="{{ ds.onClick }}" style="text-align:left; border:1px solid var(--border-strong); background:var(--panel); color:var(--accent); padding:6px 10px; border-radius:7px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px;" style-hover="border-color:var(--accent-b); background:var(--accent-tint);">{{ ds.cmd }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{ desk.wrongShow }}" hint-placeholder-val="{{ false }}">
+                  <div role="status" style="display:flex; gap:9px; align-items:flex-start; border-radius:12px; border:1px solid var(--warm-border); background:var(--warm); padding:11px 13px; animation:fadeUp .2s ease both;">
+                    <span style="flex:0 0 auto; font-size:16px; line-height:1.2;">🤔</span>
+                    <span style="font-size:12.5px; line-height:1.5; color:var(--text);">{{ desk.wrongMsg }}</span>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ desk.phaseWork }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ desk.onDiagnose }}" style="border:1px solid rgba(99,102,241,0.5); background:rgba(99,102,241,0.14); color:var(--accent); padding:11px 16px; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700;" style-hover="background:rgba(99,102,241,0.24); border-color:var(--accent);">{{ desk.diagnoseLabel }}</button>
+                </sc-if>
+
+                <sc-if value="{{ desk.showCauses }}" hint-placeholder-val="{{ false }}">
+                  <div style="border-radius:14px; border:1px solid rgba(99,102,241,0.4); background:var(--accent-tint); padding:14px 15px;">
+                    <div style="font-family:'Inter',sans-serif; font-size:14px; font-weight:700; margin-bottom:10px;">{{ desk.causeTitle }}</div>
+                    <div style="display:flex; flex-direction:column; gap:7px;">
+                      <sc-for list="{{ desk.causes }}" as="dc" hint-placeholder-count="4">
+                        <button onClick="{{ dc.onClick }}" style="text-align:left; border:1px solid {{ dc.border }}; background:{{ dc.bg }}; color:var(--text); padding:10px 12px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; line-height:1.45; animation:{{ dc.anim }};" style-hover="border-color:var(--accent-b);">{{ dc.text }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ desk.showFixes }}" hint-placeholder-val="{{ false }}">
+                  <div style="border-radius:14px; border:1px solid rgba(34,197,94,0.4); background:rgba(34,197,94,0.08); padding:14px 15px;">
+                    <div style="font-family:'Inter',sans-serif; font-size:14px; font-weight:700; margin-bottom:10px;">{{ desk.fixTitle }}</div>
+                    <div style="display:flex; flex-direction:column; gap:7px;">
+                      <sc-for list="{{ desk.fixes }}" as="df" hint-placeholder-count="3">
+                        <button onClick="{{ df.onClick }}" style="text-align:left; border:1px solid {{ df.border }}; background:{{ df.bg }}; color:var(--text); padding:10px 12px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; line-height:1.45; animation:{{ df.anim }};" style-hover="border-color:#22c55e;">{{ df.text }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ desk.showDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="border-radius:14px; border:1px solid rgba(34,197,94,0.45); background:rgba(34,197,94,0.10); padding:15px 16px; animation:fadeUp .25s ease both;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:9px;">
+                      <span style="font-size:18px; line-height:1;">✅</span>
+                      <span style="font-family:'Inter',sans-serif; font-size:15px; font-weight:800; color:#16a34a;">{{ desk.doneTitle }}</span>
+                    </div>
+                    <p style="font-size:13px; line-height:1.6; color:var(--text); margin:0 0 12px;">{{ desk.solvedText }}</p>
+                    <div style="padding-top:11px; border-top:1px solid rgba(34,197,94,0.3);">
+                      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-faint); margin-bottom:5px;">{{ desk.lessonLabel }}</div>
+                      <p style="font-size:12.5px; line-height:1.6; color:var(--text-muted); margin:0;">{{ desk.lessonText }}</p>
+                    </div>
+                    <button onClick="{{ desk.onBack }}" style="margin-top:13px; border:1px solid var(--border-strong); background:var(--panel); color:var(--text); padding:9px 15px; border-radius:9px; cursor:pointer; font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600;" style-hover="border-color:var(--accent-b);">{{ desk.nextTicketLabel }}</button>
+                  </div>
+                </sc-if>
+              </div>
+
+              <!-- las cuatro sesiones -->
+              <div class="desk-terms" style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px;">
+                <sc-for list="{{ desk.terms }}" as="dt" hint-placeholder-count="4">
+                  <div onClick="{{ dt.onFocus }}" style="display:flex; flex-direction:column; height:302px; border-radius:13px; border:2px solid {{ dt.border }}; box-shadow:{{ dt.glow }}; background:#0b1020; overflow:hidden; transition:border-color .15s, box-shadow .15s;">
+                    <div style="flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                      <span style="width:9px; height:9px; border-radius:50%; background:{{ dt.color }}; box-shadow:0 0 8px {{ dt.color }};"></span>
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#e6edf7;">{{ dt.host }}</span>
+                      <span style="font-size:11px; color:#8a97ad; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ dt.role }}</span>
+                    </div>
+                    <div style="flex:1 1 auto; display:flex; flex-direction:column-reverse; overflow-y:auto; padding:10px 12px; font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.55;">
+                      <sc-for list="{{ dt.lines }}" as="dl" hint-placeholder-count="0">
+                        <div style="color:{{ dl.color }}; white-space:pre-wrap; word-break:break-word;">{{ dl.t }}</div>
+                      </sc-for>
+                    </div>
+                    <div style="flex:0 0 auto; display:flex; align-items:center; gap:6px; padding:8px 12px; border-top:1px solid rgba(255,255,255,0.08);">
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:{{ dt.color }}; white-space:nowrap;">{{ dt.prompt }}</span>
+                      <input value="{{ dt.input }}" onInput="{{ dt.onInput }}" onKeyDown="{{ dt.onKey }}" onFocus="{{ dt.onFocus }}" spellcheck="false" autocomplete="off"
+                        style="flex:1 1 auto; min-width:0; background:transparent; border:none; outline:none; color:#e6edf7; font-family:'JetBrains Mono',monospace; font-size:11.5px;" />
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- la cola -->
+          <sc-if value="{{ desk.closed }}" hint-placeholder-val="{{ true }}">
+            <div style="max-width:860px; margin:0 auto;">
+              <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px;">
+                <span style="font-family:'Inter',sans-serif; font-size:17px; font-weight:700;">{{ desk.queueTitle }}</span>
+                <span style="flex:1 1 auto;"></span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-muted);">{{ desk.queueCount }}</span>
+              </div>
+              <p style="font-size:13px; line-height:1.55; color:var(--text-muted); margin:0 0 14px;">{{ desk.queueHint }}</p>
+
+              <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px;">
+                <sc-for list="{{ desk.hosts }}" as="dh" hint-placeholder-count="4">
+                  <span style="display:flex; align-items:center; gap:6px; border:1px solid var(--border-strong); background:var(--panel); border-radius:99px; padding:5px 12px; font-size:11.5px; color:var(--text-muted);"><span style="width:8px; height:8px; border-radius:50%; background:{{ dh.color }};"></span><b style="font-family:'JetBrains Mono',monospace; color:var(--text);">{{ dh.name }}</b>{{ dh.role }}</span>
+                </sc-for>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:9px;">
+                <sc-for list="{{ desk.queue }}" as="dq" hint-placeholder-count="5">
+                  <button onClick="{{ dq.onClick }}" style="display:flex; align-items:center; gap:13px; text-align:left; border:1px solid var(--border-strong); background:var(--panel); color:var(--text); padding:13px 15px; border-radius:13px; cursor:pointer; font-family:'Inter',sans-serif; opacity:{{ dq.op }}; transition:all .15s;" style-hover="border-color:var(--accent-b); background:var(--accent-tint);">
+                    <span style="flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; color:{{ dq.markColor }}; border:1.5px solid {{ dq.markColor }};">{{ dq.mark }}</span>
+                    <span style="min-width:0; flex:1 1 auto;">
+                      <span style="display:block; font-size:14px; font-weight:700; line-height:1.3;">{{ dq.subject }}</span>
+                      <span style="display:block; font-size:12px; color:var(--text-muted); margin-top:2px;">{{ dq.from }}</span>
+                    </span>
+                    <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:{{ dq.prioColor }}; background:{{ dq.prioBg }}; border:1px solid {{ dq.prioColor }}; border-radius:99px; padding:3px 10px;">{{ dq.prio }}</span>
+                    <span style="flex:0 0 auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-faint);">{{ dq.id }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
         </div>
       </sc-if>
 
@@ -1529,7 +1670,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { part: null, step: 0, phase: 'ask', wrong: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
+  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { part: null, step: 0, phase: 'ask', wrong: null }, desk: { ticket: null, focus: 0, phase: 'work', cause: null, fix: null, wrong: null, solved: {}, terms: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   // El contenido vive en contenido/*.js y se carga con <script src> antes que
@@ -2429,11 +2570,14 @@ class Component extends DCLogic {
   neofetch(placed, es){ const O=(t,c)=>({t,c:c||'out'}); const sz=this.sizing(placed), n=Object.values(placed).reduce((s,a)=>s+a.length,0);
     return [ O('   #######    labuser@labstack','ok'), O('   #     #    ----------------','ok'), O('   #  L  #    OS: LabStack Linux 1.0 x86_64'), O('   #     #    Kernel: 6.5.0-labstack','ok'), O('   #######    Shell: labsh 1.0'), O('   #     #    CPU: '+Math.max(1,sz.cpu)+' vCPU','ok'), O('   #######    Memory: '+Math.max(2,sz.ram)+' GiB'), O('              '+(es?'Piezas desplegadas: ':'Pieces deployed: ')+n,'ok') ];
   }
-  execCmd(raw){
+  execCmd(raw, sess){
     const es=this.state.lang==='es', line=(raw||'').trim();
     if(!line) return { lines:[] };
     const parts=line.split(/\s+/), cmd=parts[0], sub=parts[1]||'', arg=parts.slice(1).join(' ');
-    const placed=this.state.placed, cwd=(this.state.term&&this.state.term.cwd)||'/home/labuser';
+    const placed=this.state.placed;
+    // El puesto pasa su propia sesión: mismo intérprete, otro directorio y otro equipo.
+    const cwd=(sess && sess.cwd) || (this.state.term&&this.state.term.cwd) || '/home/labuser';
+    const host=(sess && sess.host) || 'labstack';
     const has=c=>((placed[c]||[]).length>0), hasBlk=id=>Object.values(placed).some(a=>a.indexOf(id)>=0);
     const O=(t,c)=>({t, c:c||'out'}), E=t=>({t,c:'err'}), K=t=>({t,c:'ok'}), D=t=>({t,c:'dim'});
     const flags=parts.filter(x=>x[0]==='-'), posArgs=parts.slice(1).filter(x=>x[0]!=='-');
@@ -2475,7 +2619,7 @@ class Component extends DCLogic {
       // ---- sistema ----
       case 'whoami': L=[O('labuser')]; break;
       case 'id': L=[O('uid=1000(labuser) gid=1000(labuser) groups=1000(labuser),27(sudo),999(docker)')]; break;
-      case 'hostname': L=[O('labstack')]; break;
+      case 'hostname': if(sess && sess.host){ L=[O(host)]; break; } L=[O('labstack')]; break;
       case 'uname': L=[O(flags.some(f=>f.indexOf('a')>=0)?'Linux labstack 6.5.0-labstack #1 SMP x86_64 GNU/Linux':'Linux')]; break;
       case 'uptime': L=[O(' '+new Date().toTimeString().slice(0,5)+' up 4 days,  2:11,  1 user,  load average: 0.28, 0.42, 0.39')]; break;
       case 'date': L=[O(new Date().toString())]; break;
@@ -2814,6 +2958,138 @@ class Component extends DCLogic {
   }
   termColor(c){ return c==='in'?'var(--accent)': c==='ok'?'#4ade80': c==='err'?'#fb7185': c==='dim'?'#5a6a85': c==='sys'?'var(--text-muted)':'#c9d3e3'; }
 
+  // ================= PUESTO DE TRABAJO =================
+  // Cuatro sesiones abiertas a la vez y una cola de tickets. La gracia
+  // didáctica es que el mismo comando contesta distinto según el equipo:
+  // hay que elegir dónde mirar, no sólo qué escribir.
+  deskHosts(){ return this.content('equipos', []); }
+  tickets(){ return this.content('tickets', []); }
+  deskState(){
+    const d=this.state.desk||{};
+    return { ticket:d.ticket||null, focus:d.focus||0, phase:d.phase||'work',
+      cause:d.cause||null, fix:d.fix||null, wrong:d.wrong||null, solved:d.solved||{}, terms:d.terms||null };
+  }
+  deskNewTerms(){
+    const es=this.state.lang==='es';
+    return this.deskHosts().map(h=>({ host:h.id, input:'', cwd:'/root', cmdHistory:[], histIdx:-1,
+      history:[ { t:(es?'Conectado a ':'Connected to ')+h.id+' — '+this.loc(h.role), c:'sys' } ] }));
+  }
+  deskTerms(){ const d=this.deskState(); return d.terms || this.deskNewTerms(); }
+  deskPrompt(host, cwd){ return 'root@'+host+':'+((cwd||'/root').replace('/root','~'))+'# '; }
+  deskSet(patch){ const d=this.deskState(); this.setState({ desk:{ ...d, ...patch } }); }
+  deskOpen(id){ this.deskSet({ ticket:id, phase:'work', cause:null, fix:null, wrong:null, terms:this.deskNewTerms(), focus:0 }); }
+  deskBack(){ this.deskSet({ ticket:null, phase:'work', cause:null, fix:null, wrong:null }); }
+  deskFocus(i){ this.deskSet({ focus:i }); }
+  deskInput(i,e){ const v=(e&&e.target)?e.target.value:''; const terms=this.deskTerms().slice();
+    terms[i]={ ...terms[i], input:v }; this.deskSet({ terms, focus:i }); }
+  deskKey(i,e){
+    if(!e) return;
+    if(e.key==='Enter'){ if(e.preventDefault)e.preventDefault(); this.deskSubmit(i); return; }
+    if(e.key==='ArrowUp'||e.key==='ArrowDown'){ if(e.preventDefault)e.preventDefault(); this.deskNav(i, e.key==='ArrowUp'?-1:1); return; }
+  }
+  deskNav(i,dir){
+    const terms=this.deskTerms().slice(), t=terms[i], h=t.cmdHistory||[]; if(!h.length) return;
+    let idx=(t.histIdx===-1? h.length : t.histIdx)+dir;
+    if(idx<0) idx=0;
+    if(idx>=h.length){ terms[i]={ ...t, input:'', histIdx:-1 }; } else { terms[i]={ ...t, input:h[idx], histIdx:idx }; }
+    this.deskSet({ terms });
+  }
+  // La evidencia del ticket manda sobre la terminal normal: así un mismo
+  // comando cuenta la historia de ESTE ticket en el equipo que toca.
+  deskEvidence(host, raw){
+    const d=this.deskState(); if(!d.ticket) return null;
+    const tk=this.tickets().find(x=>x.id===d.ticket); if(!tk) return null;
+    const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const line=norm(raw); if(!line) return null;
+    const hit=(tk.evidence||[]).find(ev=>ev.host===host && (ev.cmd||[]).some(c=>line===norm(c)||line.indexOf(norm(c))===0));
+    return hit ? hit.lines.map(l=>({ t:l[0], c:l[1]||'out' })) : null;
+  }
+  deskSubmit(i){
+    const terms=this.deskTerms().slice(), t=terms[i], input=t.input, host=t.host;
+    const cmdHist = input.trim()? [...(t.cmdHistory||[]), input] : (t.cmdHistory||[]);
+    const echo={ t:this.deskPrompt(host,t.cwd)+input, c:'in' };
+    const ev=this.deskEvidence(host, input);
+    const r = ev ? { lines:ev } : this.execCmd(input, { cwd:t.cwd, host });
+    if(r.clear){ terms[i]={ ...t, input:'', history:[], cmdHistory:cmdHist, histIdx:-1 }; this.deskSet({ terms, focus:i }); return; }
+    const hist=[...t.history, echo, ...(r.lines||[])];
+    terms[i]={ ...t, input:'', histIdx:-1, cmdHistory:cmdHist,
+      cwd: r.cwd || t.cwd, history: hist.length>200? hist.slice(hist.length-200) : hist };
+    this.deskSet({ terms, focus:i });
+  }
+  deskRun(cmd){ const d=this.deskState(), i=d.focus||0, terms=this.deskTerms().slice();
+    terms[i]={ ...terms[i], input:cmd }; this.deskSet({ terms }); }
+  deskDiagnose(){ this.deskSet({ phase:'cause', wrong:null }); }
+  deskPickCause(id){
+    const d=this.deskState(), tk=this.tickets().find(x=>x.id===d.ticket); if(!tk) return;
+    const c=(tk.causes||[]).find(x=>x.id===id);
+    if(c && c.correct) this.deskSet({ cause:id, phase:'fix', wrong:null });
+    else this.deskSet({ wrong:id });
+  }
+  deskPickFix(id){
+    const d=this.deskState(), tk=this.tickets().find(x=>x.id===d.ticket); if(!tk) return;
+    const f=(tk.fixes||[]).find(x=>x.id===id);
+    if(f && f.correct){
+      const solved={ ...(d.solved||{}) }; solved[tk.id]=1;
+      this.fireConfetti();
+      this.setState({ desk:{ ...d, fix:id, phase:'done', wrong:null, solved } });
+    } else this.deskSet({ wrong:id });
+  }
+  deskView(){
+    const d=this.deskState(), es=this.state.lang==='es', T=(a,b)=>es?a:b, t0=this.strings();
+    const all=this.tickets(), hosts=this.deskHosts();
+    const prioOf=p=>({ critica:{ c:'#fb7185', n:T('Crítica','Critical') }, alta:{ c:'#f97316', n:T('Alta','High') },
+      media:{ c:'#eab308', n:T('Media','Medium') }, baja:{ c:'#38bdf8', n:T('Baja','Low') } })[p] || { c:'var(--text-faint)', n:p };
+    const nSolved=Object.keys(d.solved||{}).length;
+    const queue=all.map(tk=>{ const p=prioOf(tk.prio), done=!!(d.solved||{})[tk.id];
+      return { id:tk.id, subject:this.loc(tk.subject), from:this.loc(tk.from),
+        prio:p.n, prioColor:p.c, prioBg:this.hexA(p.c,0.14),
+        done, mark:done?'✓':'', markColor:done?'#22c55e':'var(--text-faint)',
+        op:done?'0.55':'1', onClick:()=>this.deskOpen(tk.id) };});
+
+    if(!d.ticket){
+      return { show:true, open:false, closed:true, phaseWork:false, lessonLabel:'', nextTicketLabel:'',
+        queueTitle:T('Cola de tickets','Ticket queue'),
+        queueHint:T('Elige un aviso. Se abren cuatro sesiones y tienes que averiguar qué pasa mirando en el equipo correcto.',
+                    'Pick a ticket. Four sessions open and you have to work out what is wrong by looking on the right box.'),
+        queueCount:nSolved+' / '+all.length+' '+T('resueltos','solved'), queue, hosts:hosts.map(h=>({ name:h.name, role:this.loc(h.role), color:(this.catById(h.cat)||{color:'var(--accent)'}).color })),
+        terms:[], ticket:null, backLabel:'', onBack:()=>{}, phase:'', suggest:[],
+        causes:[], fixes:[], showCauses:false, showFixes:false, showDone:false,
+        wrongShow:false, wrongMsg:'', diagnoseLabel:'', onDiagnose:()=>{}, solvedText:'', lessonText:'',
+        causeTitle:'', fixTitle:'', doneTitle:'', suggestTitle:'' };
+    }
+
+    const tk=all.find(x=>x.id===d.ticket)||all[0], p=prioOf(tk.prio);
+    const terms=this.deskTerms().map((t,i)=>{ const h=hosts.find(x=>x.id===t.host)||{}, col=(this.catById(h.cat)||{color:'var(--accent)'}).color;
+      const active=(d.focus||0)===i;
+      return { host:t.host, role:this.loc(h.role||{es:'',en:''}), color:col,
+        border: active? col : 'var(--border-strong)',
+        glow: active? ('0 0 0 3px '+this.hexA(col,0.18)) : 'none',
+        prompt:this.deskPrompt(t.host,t.cwd), input:t.input,
+        lines:(t.history||[]).slice().reverse().map(l=>({ t:l.t, color:this.termColor(l.c) })),
+        onFocus:()=>this.deskFocus(i), onInput:(e)=>this.deskInput(i,e), onKey:(e)=>this.deskKey(i,e) };});
+    const wrongItem = d.wrong ? ((tk.causes||[]).concat(tk.fixes||[])).find(x=>x.id===d.wrong) : null;
+    const opt=(x,kind)=>({ text:this.loc(x.text), onClick:()=> kind==='cause'? this.deskPickCause(x.id) : this.deskPickFix(x.id),
+      border: d.wrong===x.id? '#f97316' : 'var(--border-strong)', bg: d.wrong===x.id? 'var(--warm)' : 'var(--panel)',
+      anim: d.wrong===x.id? 'kidShake .4s ease' : 'none' });
+
+    return { show:true, open:true, closed:false, phaseWork:(d.phase==='work'),
+      lessonLabel:t0.deskLesson, nextTicketLabel:t0.deskNext,
+      ticket:{ id:tk.id, subject:this.loc(tk.subject), from:this.loc(tk.from), body:this.loc(tk.body),
+        prio:p.n, prioColor:p.c, prioBg:this.hexA(p.c,0.14) },
+      backLabel:T('← Volver a la cola','← Back to the queue'), onBack:()=>this.deskBack(),
+      suggestTitle:T('Por dónde empezar','Where to start'),
+      suggest:(tk.suggest||[]).map(c=>({ cmd:c, onClick:()=>this.deskRun(c) })),
+      terms, phase:d.phase,
+      diagnoseLabel:T('Ya sé qué pasa →','I know what is wrong →'), onDiagnose:()=>this.deskDiagnose(),
+      showCauses:d.phase==='cause', causeTitle:T('¿Cuál es la causa?','What is the cause?'),
+      causes:(tk.causes||[]).map(x=>opt(x,'cause')),
+      showFixes:d.phase==='fix', fixTitle:T('¿Cómo lo arreglas?','How do you fix it?'),
+      fixes:(tk.fixes||[]).map(x=>opt(x,'fix')),
+      showDone:d.phase==='done', doneTitle:T('Ticket resuelto','Ticket solved'),
+      solvedText:this.loc(tk.solved), lessonText:this.loc(tk.lesson),
+      wrongShow:!!wrongItem, wrongMsg: wrongItem? T('Eso no cuadra con lo que dicen las terminales. Vuelve a mirar y prueba otra vez.','That does not match what the terminals are telling you. Look again and try once more.') : '',
+      queueTitle:'', queueHint:'', queueCount:'', queue:[], hosts:[] };
+  }
   // ---- live metrics dashboard (SVG sparklines, no libs) ----
   tickMetrics(){
     const m=this.state.metrics||{load:55,cpu:[],ram:[],rps:[],lat:[]}, load=m.load;
@@ -3626,7 +3902,7 @@ class Component extends DCLogic {
     const guideOpen = !hasDetail && !hasLayerDetail;
 
     // ---- navegación por grupos: aprender · practicar · explorar ----
-    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore', kids:'kids' };
+    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore', desk:'explore', kids:'kids' };
     const navGroup = groupOf[mode] || 'home';
     const navGroups = [
       { id:'build', icon:'🧱', label:t.navBuild, hint:t.navBuildHint, to:'sandbox' },
@@ -3644,7 +3920,7 @@ class Component extends DCLogic {
     // ---- sub-navegación: las vistas dentro del grupo activo ----
     let subDef = [];
     if(navGroup==='practice') subDef = [ {m:'mission',icon:'🎯',label:t.modeMission}, {m:'quiz',icon:'❓',label:t.modeQuiz} ];
-    if(navGroup==='explore') subDef = [ {m:'map',icon:'🗺',label:t.modeMap}, {m:'http',icon:'🚦',label:t.modeHttp}, {m:'deploy',icon:'🚀',label:t.modeDeploy}, {m:'metrics',icon:'📈',label:t.modeMetrics}, {m:'terminal',icon:'▚',label:t.modeTerminal}, {m:'incident',icon:'🚑',label:t.modeIncident} ];
+    if(navGroup==='explore') subDef = [ {m:'map',icon:'🗺',label:t.modeMap}, {m:'http',icon:'🚦',label:t.modeHttp}, {m:'deploy',icon:'🚀',label:t.modeDeploy}, {m:'metrics',icon:'📈',label:t.modeMetrics}, {m:'terminal',icon:'▚',label:t.modeTerminal}, {m:'incident',icon:'🚑',label:t.modeIncident}, {m:'desk',icon:'🎧',label:t.modeDesk} ];
     const subnav = subDef.map(x=>{ const on = mode===x.m; return {
       icon:x.icon, label:x.label, current: on?'page':'false',
       bg: on?'var(--accent-tint)':'var(--panel)', border: on?'var(--accent)':'var(--border-strong)',
@@ -3711,7 +3987,7 @@ class Component extends DCLogic {
         { value:String(blocks.length), label:t.statPieces },
         { value:String(stackIds.length), label:t.statLayers },
         { value:String(this.missions().length), label:t.statMissions },
-        { value:'6', label:t.statModes },
+        { value:'7', label:t.statModes },
       ],
     };
     const szTot = this.sizing(anPlaced);
@@ -3867,6 +4143,7 @@ class Component extends DCLogic {
       gridClass, showPalette: needPalette, showRail: needRail,
       showHome: mode==='home', home,
       showKids: mode==='kids', kids: this.kidsView(),
+      showDesk: mode==='desk', desk: this.deskView(),
       showChecklist: buildingNow, progressParts, nextStep,
       moreBg: S.showTools?'var(--panel-2)':'var(--panel-alt)', moreColor: S.showTools?'var(--text)':'var(--text-muted)',
       toolTheme:()=>this.toolTheme(), toolAch:()=>this.toolAch(), toolShare:()=>this.toolShare(), toolReset:()=>this.toolReset(),

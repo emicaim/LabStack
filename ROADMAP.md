@@ -124,6 +124,13 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Si falta un fichero, avisa en consola con un mensaje claro en vez de quedarse en blanco.
 - ✅ Verificado comparando **método a método contra el original**: contenido idéntico byte a byte en ES y EN.
 
+### ✅ Hecho — modo Puesto (guardia con tickets)
+- ✅ **Cuatro terminales a la vez**, una por equipo (fw01, sw-core, web01, db01), con su prompt y su color. Historial independiente por sesión.
+- ✅ **Cola de 5 tickets** con remitente, prioridad y texto de usuario real, y flujo investigar → causa → arreglo con aprendizaje al cerrar.
+- ✅ La gracia didáctica: **el mismo comando contesta distinto según el equipo**. Hay que elegir dónde mirar, no sólo qué escribir. Cada ticket trae falsas pistas que descartan cosas.
+- ✅ Reutiliza `execCmd` (los ~148 comandos) pasándole la sesión; no hay un segundo intérprete.
+- Pendiente si se quiere: más tickets, y que el puesto use el stack que has montado en vez de equipos fijos.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

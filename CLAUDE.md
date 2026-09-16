@@ -120,6 +120,17 @@ Flow: `state.kids = { step, phase: 'ask' | 'ok' | 'end', wrong }`; `kidsPick()` 
 
 Colour is deliberate: each option carries **its own family colour**. At step 1 that means nothing to the child; by step 5 the colour itself has become a cue. That is the intended effect — don't neutralise it.
 
+### Desk mode (`mode === 'desk'`) — four sessions at once
+
+A ticket queue plus **four simultaneous terminals**, one per host (`fw01`, `sw-core`, `web01`, `db01`, from `contenido/tickets.js`). The teaching point is not typing commands — the Terminal mode already does that — it is that **the same command answers differently depending on where you run it**, so you have to pick the right box.
+
+- `state.desk.terms` is an array of independent sessions (`host`, `input`, `history`, `cwd`, `cmdHistory`). They never share history; `desk-test.js` asserts that.
+- `execCmd(raw, sess)` gained an optional session (`{cwd, host}`). Same interpreter as Terminal mode, different working directory and hostname. Do not fork it.
+- **Ticket evidence overrides the generic terminal.** `deskEvidence(host, raw)` looks up the open ticket's `evidence[]` for a `(host, command)` match and returns those lines instead. Anything not declared falls through to `execCmd` and answers as usual. That is what lets one command tell *this* ticket's story on the box that matters.
+- Resolution reuses the incident pattern: investigate → cause → fix, wrong answers give feedback and never advance.
+
+**Writing a ticket** (`contenido/tickets.js`): give it evidence on **more than one host**, including at least one that rules something out — a firewall that turns out to be fine is as instructive as the broken thing. Keep the distinctive line long enough to be unique: `desk-test.js` matches on the longest line precisely because a short one like `4` collides with generic output.
+
 ### Map artwork (schematic illustrations)
 
 Map nodes are **not** the small line icons used elsewhere. Each node draws a schematic front view of the real device, so a rack, a switch and a database are told apart without reading the label.
