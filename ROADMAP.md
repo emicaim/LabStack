@@ -150,6 +150,13 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Las que sólo servían para **descartar no cambian**: ya estaban bien antes y siguen igual.
 - ✅ Regla de contenido que lo impide en el futuro: una evidencia con línea de error sin su versión sana rompe el test.
 
+### ✅ Hecho — consolidación
+- ✅ **Los modos nuevos cuentan para el progreso**: 4 logros (de guardia, veterano, buen ojo, torre en pie) y 2 pasos más en la ruta, que se marcan solos al trabajar.
+- ✅ **Se guarda lo que cuesta rehacer**: tickets resueltos y eventos cerrados sobreviven a recargar. Kids no, a propósito.
+- ✅ **Accesibilidad en los tres modos nuevos**: regiones con nombre, cada terminal y su salida etiquetadas, filas de evento y filtros con descripción, progreso de Kids anunciado y respuestas como región viva.
+- ✅ **`npm test`**: las cinco comprobaciones de una vez, con la salida entera de la que falle.
+- ✅ **Fase 3, sistema visual**: 30 tamaños de letra → 11, 22 radios → 5, fuera la rejilla animada y los degradados de fondo, y la cabecera respeta el tema.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.
@@ -158,7 +165,6 @@ Marcado con ⭐ lo que más recomiendo.
 - **Más misiones**: migración a la nube, big data / analítica, IoT-edge, recuperación ante desastres (DR).
 - **Rutas de aprendizaje**: encadenar misiones + teoría en un currículum con progreso.
 
-- ⭐ **Fase 3 — sistema visual**: tokens de radio (8/12/16 en vez de 18 valores), escala tipográfica (5 tamaños en vez de 23), mono solo para código/terminal/métricas, quitar `gridDrift`/glows/degradados de fondo y hacer que la cabecera respete el tema.
 
 ### Medio plazo (mejoras de producto)
 - ⭐ **Modo profesor**: crear/editar misiones propias y **exportar/importar stacks como archivo** `.json`.
@@ -177,7 +183,6 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ HECHO **Escenarios de incidente guiados** (runbooks: "el servicio cae, diagnostica y arregla") — modo **Incidente** con 3 escenarios. Ampliable con más casos.
 
 ### Deuda técnica / mantenimiento
-- Convertir los **smoke tests en una suite** ejecutable (`npm test`) reproducible.
 - **Versionado del formato de guardado** en `localStorage` (migraciones si cambia el esquema).
 - **Rendimiento**: revisar el re-render en cada tecleo de inputs (buscador, terminal) — memoizar si hace falta.
 - El archivo crece mucho; valorar **partir contenido/lógica** (ligado a "externalizar a JSON").

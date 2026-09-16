@@ -106,6 +106,65 @@ console.log('— i18n EN —');
   console.log('  ok  home="' + v.home.title + '" nav=' + v.navGroups.map(g=>g.label).join('/'));
 }
 
+console.log('— progreso: los modos nuevos cuentan —');
+{
+  const c = new Component(); c.props = {};
+  const t12 = c.tickets();
+  const resolver = i => {
+    c.setState({ mode: 'desk' });
+    c.deskOpen(t12[i].id);
+    let v = c.renderVals().desk; v.onDiagnose();
+    v = c.renderVals().desk; v.causes[t12[i].causes.findIndex(x => x.correct)].onClick();
+    v = c.renderVals().desk; v.fixes[t12[i].fixes.findIndex(x => x.correct)].onClick();
+    c.evalAchievements();
+  };
+  resolver(0);
+  if (!c.state.achievements.oncall) { console.error('  FAIL resolver un ticket no da el logro «de guardia»'); fail++; }
+  else console.log('  ok  1 ticket resuelto -> logro «de guardia»');
+  for (let i = 1; i < Math.ceil(t12.length / 2); i++) resolver(i);
+  if (!c.state.achievements.veteran) { console.error('  FAIL media cola resuelta no da el logro «veterano»'); fail++; }
+  else console.log('  ok  media cola resuelta -> logro «veterano»');
+
+  c.setState({ mode: 'events' });
+  c.eventos().filter(x => x.noise).forEach(r => {
+    const row = c.renderVals().events.rows.find(x => x.id === r.id);
+    if (row) { row.onClick(); c.renderVals().events.det.onClose(); }
+  });
+  c.evalAchievements();
+  if (!c.state.achievements.triage) { console.error('  FAIL cerrar todo el ruido no da el logro «buen ojo»'); fail++; }
+  else console.log('  ok  ruido cerrado -> logro «buen ojo»');
+
+  c.setState({ kids: { part: 1, step: 11, phase: 'end', wrong: null } });
+  c.evalAchievements();
+  if (!c.state.achievements.tower) { console.error('  FAIL terminar Kids no da el logro «torre en pie»'); fail++; }
+  else console.log('  ok  partida de Kids terminada -> logro «torre en pie»');
+
+  // la ruta de aprendizaje tiene que llevar a los modos nuevos
+  const v = c.renderVals();
+  const refs = v.path.steps.map(s => s.title).join(' | ');
+  const tieneDesk = v.path.steps.some(s => s.statusIcon === '🎧' || s.statusIcon === '✓');
+  if (v.path.steps.length < 12) { console.error('  FAIL la ruta no incorpora los pasos nuevos'); fail++; }
+  else console.log('  ok  ruta de ' + v.path.steps.length + ' pasos, termina en el puesto de guardia');
+}
+
+console.log('— se guarda lo que cuesta rehacer —');
+{
+  const c = new Component(); c.props = {};
+  c.setState({ desk: { ...c.state.desk, solved: { 'T-1042': 1, 'T-1043': 1 } }, events: { ...c.state.events, closed: { 'EV-2056': 1 } } });
+  c.persist();
+  const raw = JSON.parse(localStorage.getItem(c.storageKey()));
+  if (!raw.deskSolved || Object.keys(raw.deskSolved).length !== 2) { console.error('  FAIL no guarda los tickets resueltos'); fail++; }
+  else if (!raw.evClosed || !raw.evClosed['EV-2056']) { console.error('  FAIL no guarda los eventos cerrados'); fail++; }
+  else console.log('  ok  guarda tickets resueltos y eventos cerrados');
+  const c2 = new Component(); c2.props = {}; c2.componentDidMount();
+  if (Object.keys((c2.state.desk || {}).solved || {}).length !== 2) { console.error('  FAIL no restaura los tickets al recargar'); fail++; }
+  else if (!((c2.state.events || {}).closed || {})['EV-2056']) { console.error('  FAIL no restaura los eventos al recargar'); fail++; }
+  else console.log('  ok  los restaura al volver a abrir');
+  // Kids no se guarda a propósito: son partidas cortas
+  if (c2.state.kids.step !== 0 || c2.state.kids.part !== null) { console.error('  FAIL Kids no debería guardarse'); fail++; }
+  else console.log('  ok  el progreso de Kids no se guarda, como está previsto');
+}
+
 // claves {{ x }} de la plantilla presentes en renderVals
 console.log('— claves de plantilla sin binding —');
 {

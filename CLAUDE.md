@@ -240,6 +240,37 @@ The ten stackable layers are rendered grouped into the **five conceptual planes*
 
 The seven transversals render as a horizontal **belt** below the stack (`grid-template-columns:repeat(auto-fit,minmax(108px,1fr))`), not as vertical rails. Their labels are horizontal; do not reintroduce `writing-mode:vertical-rl`.
 
+## Visual system (phase 3 — done, keep it)
+
+Two scales, and **nothing outside them**:
+
+- **Type**: `10 · 11 · 12 · 13 · 15 · 17 · 20 · 26 · 32 · 44 · 58` (was 30 arbitrary values across 456 usages).
+- **Radius**: `6 · 10 · 14 · 20 · 99` (was 22 values). `99` is the pill.
+
+Every `font-size` and `border-radius` lives inline in the template — there are none in the logic — so slipping in an off-scale value is easy and invisible. Resist it: if a new size feels necessary, the answer is almost always an existing step.
+
+Also gone, deliberately: the `gridDrift` background animation, the two radial gradients on `.lab-root`, and the hard-coded dark header. The header now reads `var(--header-solid)` (white in light, `#0f172a` in dark) so it belongs to the theme instead of fighting it. To bring the always-dark header back, that one token is the only edit.
+
+## Progress spans every mode
+
+Kids, Desk and Events are **not** side attractions: `evalAchievements()` unlocks `oncall` / `veteran` (desk tickets), `triage` (all noise events closed) and `tower` (a Kids game finished), and `learningPathExtra()` appends two steps that end the path on the service desk. Those two steps mark themselves done **from real work** — a solved ticket, closed noise — never by hand. Add a mode and it must earn a place here, or nobody will find it.
+
+`persist()` now also stores `deskSolved`, `evAck` and `evClosed`: twelve tickets are hours of work and losing them to a page reload is not acceptable. Kids progress stays unsaved on purpose — short games, and half a game confuses more than it helps.
+
+## Tests
+
+`npm test` (or `node test.js`) runs all five suites and prints one line each:
+
+| Suite | Covers |
+|---|---|
+| `smoke.js` | `renderVals()` in all 12 modes, template bindings, achievements across the new modes, persistence round-trip |
+| `content-test.js` | cross-file references, ES/EN parity, ticket and Kids content rules |
+| `kids-test.js` | both Kids games end to end |
+| `desk-test.js` | 12 tickets, command hints, wrong-host nudge, coherence after resolving |
+| `events-test.js` | correlation, triage, the event to incident bridge |
+
+Nothing to install; `package.json` exists only to hold the scripts.
+
 ## Console noise at load (expected, not a bug)
 
 Opening the app logs **16 `<path> attribute d: Expected moveto…` errors**. They are inherent to the `.dc.html` format and **do not affect rendering**:

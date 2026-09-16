@@ -1,0 +1,14 @@
+{
+  "name": "labstack",
+  "version": "1.0.0",
+  "description": "LabStack · Taller visual de infraestructura. La app no necesita instalar nada: se abre Laboratorio.dc.html en el navegador. Esto es sólo para lanzar los tests.",
+  "private": true,
+  "scripts": {
+    "test": "node test.js",
+    "test:smoke": "node smoke.js",
+    "test:content": "node content-test.js",
+    "test:desk": "node desk-test.js",
+    "test:events": "node events-test.js",
+    "test:kids": "node kids-test.js"
+  }
+}
