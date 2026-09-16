@@ -87,6 +87,13 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Autoencuadre al entrar (`mapAutoFit()`) con escala mínima para que el dibujo siga legible.
 - Pendiente si se quiere: usar la misma ilustración en la **ficha de la pieza** y en la **paleta** (una línea: `paintArt(artKeyFor(id,cat), color)`).
 
+### ✅ Hecho — cableado legible
+- ✅ **Trazado ortogonal** con esquinas redondeadas en vez de curvas Bézier cruzadas.
+- ✅ **Los cables no pasan por encima de ningún grupo**: bandeja bajo las cajas si están en la misma fila, pasillo entre filas si son contiguas, y bus por el margen si hay filas de por medio.
+- ✅ **Tres lenguajes de línea** en vez de uno: camino de la petición (acento, flecha, animado) · necesita debajo (gris discontinuo) · opera sobre (violeta punteado). Con leyenda de los tres.
+- ✅ Los cables salen del **borde** de cada grupo con su conector, no del centro.
+- ✅ Cada cable explica al pasar por encima qué conecta y por qué (cobertura ~67%: la leyenda sigue siendo la explicación principal).
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 - ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

@@ -93,6 +93,34 @@ Map nodes are **not** the small line icons used elsewhere. Each node draws a sch
 
 Node geometry lives in `buildMap()` (`GW=172`, `CELL_H=64`). `mapAutoFit()` runs once per session on first entry to `map` and clamps the scale to a floor (0.78) so the drawings stay legible even if the whole world does not fit; the ⤢ button still does a true fit.
 
+### Map wiring (the cables between groups)
+
+Cables are drawn with **orthogonal routing** (right angles, rounded corners) — the formal language of a network schematic — not free-form Bézier curves. `orthoPath(pts, r)` turns a list of axis-aligned waypoints into a path with quadratic corners; `linkRoute(A, B, lane, ctx)` decides the waypoints; `arrowHead()` and `portMark()` add the end decorations.
+
+**A cable must never run over another group.** `linkRoute` picks one of three trays:
+
+| Case | Route |
+|---|---|
+| Boxes overlap vertically (same row) | dips **below both boxes** and crosses underneath |
+| Adjacent rows | straight corridor through the **gap between rows** |
+| Rows further apart (`ctx.bandGap > 0`) | **vertical bus along the map margin**, clear of everything in between |
+
+`buildMap()` records a `bands[]` entry per row and `catBox[cat]` (the bounding box of each category's column of nodes) to make that possible — anchors sit on **box edges**, never on centroids, so a cable never starts inside a card. `lane` staggers parallel cables so they don't stack.
+
+**Three link kinds, three visual languages** — set in `wire(aCat, bCat, kind, why)`:
+
+| kind | Meaning | Look |
+|---|---|---|
+| `flow` | the request path | accent, solid, 2px, **arrowhead**, animated dashes |
+| `dep` | structural dependency from `deps()` | `--text-faint`, dashed `5 5`, no direction |
+| `ops` | cross-cutting operation (monitoring, CI/CD, IaC, security) | `#9333ea`, dotted `2 6` |
+
+Keep these distinct: `ops` is **not** `dep` — monitoring does not sit *under* the service, it operates *on* it. The legend renders one sample of each line, so any new kind needs a legend entry too.
+
+Each cable carries a `tip` (`<title>` inside a `<g>`, plus a transparent 14px-wide hit path) explaining what it connects and why. Hover coverage is partial — roughly 67% of cable length on the demo stack, since cables pass under node cards, which must stay clickable — so **the tooltip is a bonus, never the only place a meaning lives**; the legend carries the primary explanation. Zone boxes are `pointer-events:none` so they don't steal hover from cables underneath.
+
+The links `<svg>` sits **after the zones and before the labels/nodes** in the DOM: above zone fills (or the cables get washed out) and below node cards (or cables cross the illustrations). Don't reorder it.
+
 ### Contextual rails (which panels a mode gets)
 
 The three-rail grid is **not** fixed — each mode shows only the panels it needs, which is what keeps the app from feeling like a cockpit:

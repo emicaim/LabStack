@@ -387,17 +387,23 @@
           <div onWheel="{{ map.onWheel }}" onMouseDown="{{ map.onDown }}" onMouseMove="{{ map.onMove }}" onMouseUp="{{ map.onUp }}" onMouseLeave="{{ map.onUp }}"
                style="position:absolute; inset:0; overflow:hidden; cursor:{{ map.cursor }}; background:radial-gradient(circle at 50% 38%, rgba(99,102,241,0.05), transparent 62%);">
             <div style="position:absolute; left:0; top:0; transform:{{ map.transform }}; transform-origin:0 0; width:{{ map.world.w }}px; height:{{ map.world.h }}px;">
-              <svg width="{{ map.world.w }}" height="{{ map.world.h }}" style="position:absolute; left:0; top:0; overflow:visible; pointer-events:none;">
-                <sc-for list="{{ map.links }}" as="l" hint-placeholder-count="0">
-                  <path d="{{ l.d }}" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" opacity="0.22"></path>
-                  <path d="{{ l.d }}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="0.1 13" opacity="0.9" style="animation:flowDash 1.5s linear infinite;"></path>
-                </sc-for>
-              </svg>
               <sc-for list="{{ map.zones }}" as="z" hint-placeholder-count="4">
-                <div style="position:absolute; left:{{ z.x }}px; top:{{ z.y }}px; width:{{ z.w }}px; height:{{ z.h }}px; border-radius:18px; border:1.5px {{ z.dashStyle }} {{ z.border }}; background:{{ z.bg }};">
+                <div style="position:absolute; left:{{ z.x }}px; top:{{ z.y }}px; width:{{ z.w }}px; height:{{ z.h }}px; border-radius:18px; border:1.5px {{ z.dashStyle }} {{ z.border }}; background:{{ z.bg }}; pointer-events:none;">
                   <div style="position:absolute; top:-13px; left:16px; display:flex; align-items:center; gap:6px; padding:3px 11px; border-radius:99px; background:var(--panel); border:1px solid var(--border-strong); font-size:11.5px; font-weight:600; color:var(--text-muted); white-space:nowrap;"><span style="font-size:13px;">{{ z.icon }}</span>{{ z.label }}</div>
                 </div>
               </sc-for>
+              <svg width="{{ map.world.w }}" height="{{ map.world.h }}" style="position:absolute; left:0; top:0; overflow:visible; pointer-events:none;">
+                <sc-for list="{{ map.links }}" as="l" hint-placeholder-count="0">
+                  <g style="pointer-events:stroke;"><title>{{ l.tip }}</title><path d="{{ l.d }}" fill="none" stroke="{{ l.stroke }}" stroke-width="{{ l.w }}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="{{ l.dash }}" opacity="{{ l.op }}"></path><path d="{{ l.d }}" fill="none" stroke="transparent" stroke-width="14"></path></g>
+                  <path d="{{ l.ports }}" fill="{{ l.stroke }}" stroke="none" opacity="{{ l.op }}"></path>
+                  <sc-if value="{{ l.hasHead }}" hint-placeholder-val="{{ false }}">
+                    <path d="{{ l.head }}" fill="{{ l.stroke }}" stroke="none" opacity="0.85"></path>
+                  </sc-if>
+                  <sc-if value="{{ l.animated }}" hint-placeholder-val="{{ false }}">
+                    <path d="{{ l.d }}" fill="none" stroke="{{ l.stroke }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 13" opacity="0.95" style="animation:flowDash 1.6s linear infinite;"></path>
+                  </sc-if>
+                </sc-for>
+              </svg>
               <sc-for list="{{ map.labels }}" as="g" hint-placeholder-count="0">
                 <div title="{{ g.alertMsg }}" style="position:absolute; left:{{ g.left }}px; top:{{ g.top }}px; width:{{ g.w }}px; display:flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:{{ g.color }}; white-space:nowrap;">
                   <span style="overflow:hidden; text-overflow:ellipsis;">{{ g.name }}</span>
@@ -460,6 +466,10 @@
           </sc-if>
           <div style="position:absolute; left:16px; bottom:16px; max-width:calc(100% - 230px); display:flex; flex-wrap:wrap; align-items:center; gap:5px 11px; padding:8px 13px; border-radius:12px; background:var(--header-bg); border:1px solid var(--border); pointer-events:none;">
             <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-right:1px;">{{ t.mapLegend }}</span>
+            <span style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted);"><svg width="26" height="9" style="display:block; overflow:visible;"><path d="M1 4.5h17" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" fill="none"></path><path d="M25 4.5 18 1.5 18 7.5Z" fill="var(--accent)"></path></svg>{{ t.legFlow }}</span>
+            <span style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted);"><svg width="26" height="9" style="display:block;"><path d="M1 4.5h24" stroke="var(--text-faint)" stroke-width="1.6" stroke-dasharray="5 5" stroke-linecap="round" fill="none"></path></svg>{{ t.legDep }}</span>
+            <span style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted);"><svg width="26" height="9" style="display:block;"><path d="M1 4.5h24" stroke="#9333ea" stroke-width="1.6" stroke-dasharray="2 6" stroke-linecap="round" fill="none"></path></svg>{{ t.legOps }}</span>
+            <span style="width:1px; height:12px; background:var(--border-strong); margin:0 2px;"></span>
             <sc-for list="{{ map.legend }}" as="lg" hint-placeholder-count="0">
               <span style="display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-muted);"><span style="width:8px; height:8px; border-radius:3px; background:{{ lg.color }}; box-shadow:0 0 6px {{ lg.color }};"></span>{{ lg.name }}</span>
             </sc-for>
@@ -1888,13 +1898,13 @@ class Component extends DCLogic {
       missionMet:'cumplidos', missionDoneT:'¡Reto superado!', missionPartialT:'Casi… revisa lo que falta', missionMissLabel:'Te falta:',
       quizTitle:'Pon a prueba lo que sabes', quizQ:'¿A qué capa pertenece esta pieza?', quizNext:'Siguiente', quizResult:'Ver resultado',
       quizScore:'Aciertos', quizRestart:'Repetir quiz', quizRight:'¡Correcto!', quizWrong:'No exactamente', quizDoneT:'Quiz completado', quizStart:'Empezar quiz', quizQuestion:'Pregunta',
-      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', modeHttp:'Petición', simGroup:'Simuladores', navModes:'Modos de aprendizaje', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha · ⤢ para ver el mapa entero', mapDemo:'Ejemplo — monta tu stack en «Aprender» para ver el tuyo', mapPieces:'piezas',
+      modeMap:'Mapa', modeTerminal:'Terminal', modeMetrics:'Métricas', modeHttp:'Petición', simGroup:'Simuladores', navModes:'Modos de aprendizaje', toolsBtn:'Herramientas', closeLbl:'Cerrar', cmdRefBtn:'Comandos', cmdRefTitle:'Referencia de comandos', cmdRefSubtitle:'Toca un comando para insertarlo en la terminal.', cmdRefSearch:'Buscar comando…', cmdRefResults:'comandos', cmdRefEmpty:'Sin resultados', metTitle:'Métricas en vivo', metLoad:'Carga simulada', metLoadHint:'Sube la carga y observa cómo responde tu stack (modelo, no medición real).', metAlertsLabel:'Alertas', termTitle:'terminal', mapHint:'Rueda: zoom · arrastra: mover · toca una pieza para su ficha · pasa por un cable para ver qué conecta · ⤢ mapa entero', mapDemo:'Ejemplo — monta tu stack en «Aprender» para ver el tuyo', mapPieces:'piezas',
       httpTitle:'Petición HTTP — recorrido', httpHint:'Sigue una petición salto a salto por tu stack y mira dónde se va el tiempo (modelo didáctico, no medición real).', httpRelaunch:'Relanzar petición', httpTotal:'Tiempo total', httpTapHint:'Toca un salto para simular su caída y ver cómo falla la petición.', httpNotesLabel:'Avisos', httpHopsLabel:'saltos', httpClearFail:'Quitar caída simulada',
       modeDeploy:'Despliegue', depTitle:'Simulador de despliegue', depHint:'Compara estrategias para publicar una versión nueva (v1 → v2) y observa cómo cambia el tráfico, sin cortar el servicio.', depTraffic:'Reparto de tráfico', depDowntime:'Downtime', depStep:'Paso', depReset:'Reiniciar', depRollback:'Rollback', depNext:'Siguiente', depPrev:'Anterior', depDoneTag:'Completo', depV1:'v1 (actual)', depV2:'v2 (nueva)', depUpd:'actualizando',
       modeIncident:'Incidente', incTitle:'Sala de incidentes', incHint:'Diagnostica una avería real: reúne pistas, identifica la causa raíz y aplica el arreglo correcto.', incPickHint:'Elige un incidente para resolver:', incSymptom:'Síntoma', incStartBtn:'Empezar a investigar', incChecks:'Comprobaciones', incChecksHint:'Toca una comprobación para ver su salida.', incToDiagnose:'Ya tengo una hipótesis →', incDiagnoseTitle:'¿Cuál es la causa raíz?', incConfirmCause:'Confirmar causa', incBackInvestigate:'← Volver a investigar', incFixTitle:'¿Cómo lo arreglas?', incApplyFix:'Aplicar arreglo', incResolvedTag:'Incidente resuelto', incLearnLabel:'Aprendizaje', incAnother:'Elegir otro incidente', incRetry:'Reintentar', incPhInvestigate:'Investigar', incPhDiagnose:'Diagnosticar', incPhFix:'Arreglar', incExit:'Salir',
       quizAdaptive:'Adaptativo: las categorías donde fallas volverán a aparecer más.', quizWeak:'A reforzar', quizMastered:'Dominadas',
       chaosStart:'Simular avería', chaosOn:'Toca una pieza…', chaosResil:'Resiliencia', chaosSpof:'puntos únicos de fallo', chaosHint:'Modo avería: toca una pieza para tirarla y ver el impacto.',
-      analysisTitle:'Análisis de arquitectura', analysisRobust:'Robustez', mapLegend:'Leyenda',
+      analysisTitle:'Análisis de arquitectura', analysisRobust:'Robustez', mapLegend:'Leyenda', legFlow:'camino de la petición', legDep:'necesita debajo', legOps:'opera sobre',
       infoUse:'¿Cuándo usarla?', infoAlt:'Alternativas',
       sizingTitle:'Dimensionado', szCost:'Coste', szBudget:'Presupuesto', szMonth:'€/mes', szPerMonth:'€/mes', szUnitCpu:'vCPU', szUnitRam:'GB', szEach:'por pieza',
       searchPh:'Buscar tecnología…', famAllLabel:'Todas', noResults:'Sin resultados',
@@ -1942,13 +1952,13 @@ class Component extends DCLogic {
       missionMet:'met', missionDoneT:'Challenge complete!', missionPartialT:'Almost… check what is missing', missionMissLabel:'Still missing:',
       quizTitle:'Test what you know', quizQ:'Which layer does this piece belong to?', quizNext:'Next', quizResult:'See result',
       quizScore:'Score', quizRestart:'Retry quiz', quizRight:'Correct!', quizWrong:'Not quite', quizDoneT:'Quiz complete', quizStart:'Start quiz', quizQuestion:'Question',
-      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', modeHttp:'Request', simGroup:'Simulators', navModes:'Learning modes', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details · ⤢ to see the whole map', mapDemo:'Example — build your stack in “Learn” to see yours', mapPieces:'pieces',
+      modeMap:'Map', modeTerminal:'Terminal', modeMetrics:'Metrics', modeHttp:'Request', simGroup:'Simulators', navModes:'Learning modes', toolsBtn:'Tools', closeLbl:'Close', cmdRefBtn:'Commands', cmdRefTitle:'Command reference', cmdRefSubtitle:'Tap a command to insert it in the terminal.', cmdRefSearch:'Search command…', cmdRefResults:'commands', cmdRefEmpty:'No results', metTitle:'Live metrics', metLoad:'Simulated load', metLoadHint:'Raise the load and watch your stack respond (a model, not real measurement).', metAlertsLabel:'Alerts', termTitle:'terminal', mapHint:'Wheel: zoom · drag: pan · tap a piece for details · hover a cable to see what it connects · ⤢ whole map', mapDemo:'Example — build your stack in “Learn” to see yours', mapPieces:'pieces',
       httpTitle:'HTTP request — waterfall', httpHint:'Follow a request hop by hop across your stack and see where the time goes (a didactic model, not real measurement).', httpRelaunch:'Relaunch request', httpTotal:'Total time', httpTapHint:'Tap a hop to simulate its failure and see how the request breaks.', httpNotesLabel:'Warnings', httpHopsLabel:'hops', httpClearFail:'Clear simulated failure',
       modeDeploy:'Deploy', depTitle:'Deployment simulator', depHint:'Compare strategies to ship a new version (v1 → v2) and watch traffic shift, with no service interruption.', depTraffic:'Traffic split', depDowntime:'Downtime', depStep:'Step', depReset:'Reset', depRollback:'Rollback', depNext:'Next', depPrev:'Previous', depDoneTag:'Done', depV1:'v1 (current)', depV2:'v2 (new)', depUpd:'updating',
       modeIncident:'Incident', incTitle:'Incident room', incHint:'Diagnose a real outage: gather clues, identify the root cause and apply the right fix.', incPickHint:'Pick an incident to resolve:', incSymptom:'Symptom', incStartBtn:'Start investigating', incChecks:'Checks', incChecksHint:'Tap a check to see its output.', incToDiagnose:'I have a hypothesis →', incDiagnoseTitle:'What is the root cause?', incConfirmCause:'Confirm cause', incBackInvestigate:'← Back to investigating', incFixTitle:'How do you fix it?', incApplyFix:'Apply fix', incResolvedTag:'Incident resolved', incLearnLabel:'Takeaway', incAnother:'Pick another incident', incRetry:'Retry', incPhInvestigate:'Investigate', incPhDiagnose:'Diagnose', incPhFix:'Fix', incExit:'Exit',
       quizAdaptive:'Adaptive: the categories you miss will show up more often.', quizWeak:'To review', quizMastered:'Mastered',
       chaosStart:'Simulate failure', chaosOn:'Tap a piece…', chaosResil:'Resilience', chaosSpof:'single points of failure', chaosHint:'Failure mode: tap a piece to drop it and see the impact.',
-      analysisTitle:'Architecture analysis', analysisRobust:'Robustness', mapLegend:'Legend',
+      analysisTitle:'Architecture analysis', analysisRobust:'Robustness', mapLegend:'Legend', legFlow:'request path', legDep:'needs underneath', legOps:'operates on',
       infoUse:'When to use it', infoAlt:'Alternatives',
       sizingTitle:'Sizing', szCost:'Cost', szBudget:'Budget', szMonth:'€/mo', szPerMonth:'€/mo', szUnitCpu:'vCPU', szUnitRam:'GB', szEach:'per piece',
       searchPh:'Search technology…', famAllLabel:'All', noResults:'No results',
@@ -3247,7 +3257,7 @@ class Component extends DCLogic {
     const built=rows.map(row=>row.filter(z=>!z._skip)).filter(r=>r.length);
     let worldW=0; built.forEach(row=>{ const w=row.reduce((s,z)=>s+z._w,0)+(row.length-1)*ZONE_GAP; row._w=w; if(w>worldW)worldW=w; });
     worldW+=WP*2;
-    const zones=[], nodes=[], labels=[], links=[], zc={}, catPt={};
+    const zones=[], nodes=[], labels=[], links=[], zc={}, catPt={}, catBox={}, bands=[];
     let y=WP;
     built.forEach(row=>{
       const rowH=Math.max.apply(null, row.map(z=>z._h));
@@ -3270,36 +3280,109 @@ class Component extends DCLogic {
               onClick:()=>this.setState({ selected:bid, selectedLayer:null, armed:null, feedback:null }) });
             ny+=CELL_H+CELL_GAP; });
           catPt[g.cat]={ x:gx+GW/2, y:(gy+GHEAD+(ny-CELL_GAP))/2 };
+          catBox[g.cat]={ x:gx, y:gy+GHEAD, w:GW, h:Math.max(24,(ny-CELL_GAP)-(gy+GHEAD)) };
           gx+=GW+GGAP;
         });
         x+=z._w+ZONE_GAP;
       });
+      bands.push({ top:y, bottom:y+rowH });
       y+=rowH+ROW_GAP;
     });
     const worldH=y-ROW_GAP+WP;
-    const R=v=>Math.round(v), seen={};
-    const curve=(aCat,bCat)=>{ if(!aCat||!bCat||aCat===bCat||!catPt[aCat]||!catPt[bCat]) return;
+    const bandIdx=box=>{ for(let i=0;i<bands.length;i++){ if(box.y<bands[i].bottom && bands[i].top<box.y+box.h) return i; } return -1; };
+    const routeCtx={ world:{w:worldW,h:worldH}, bandGap:(A,B)=>{ const i=bandIdx(A), j=bandIdx(B); return (i<0||j<0)?0:Math.max(0,Math.abs(i-j)-1); } };
+    const seen={}; let lane=0;
+    const catName=c=>{ const x=this.catById(c); return x? this.loc(x.name) : c; };
+    const wire=(aCat,bCat,kind,why)=>{
+      if(!aCat||!bCat||aCat===bCat||!catBox[aCat]||!catBox[bCat]) return;
       const k=aCat<bCat?aCat+'|'+bCat:bCat+'|'+aCat; if(seen[k]) return; seen[k]=1;
-      const a=catPt[aCat], b=catPt[bCat], dx=b.x-a.x, dy=b.y-a.y; let c1x,c1y,c2x,c2y;
-      if(Math.abs(dy)>=Math.abs(dx)){ c1x=a.x; c1y=a.y+dy*0.5; c2x=b.x; c2y=b.y-dy*0.5; }
-      else { c1x=a.x+dx*0.5; c1y=a.y; c2x=b.x-dx*0.5; c2y=b.y; }
-      links.push({ d:'M '+R(a.x)+' '+R(a.y)+' C '+R(c1x)+' '+R(c1y)+' '+R(c2x)+' '+R(c2y)+' '+R(b.x)+' '+R(b.y) });
+      const rt=this.linkRoute(catBox[aCat], catBox[bCat], lane++, routeCtx);
+      const flow=(kind==='flow'), ops=(kind==='ops');
+      const head = flow? T('Camino de la petición','Request path')
+                 : ops? T('Opera sobre','Operates on')
+                      : T('Necesita debajo','Needs underneath');
+      links.push({
+        tip: head+' — '+catName(aCat)+' → '+catName(bCat)+(why? '. '+why : ''),
+        d: this.orthoPath(rt.pts, 11),
+        stroke: flow? 'var(--accent)' : (ops? '#9333ea' : 'var(--text-faint)'),
+        w: flow? '2' : '1.5',
+        dash: flow? 'none' : (ops? '2 6' : '5 5'),
+        op: flow? '0.75' : (ops? '0.6' : '0.7'),
+        animated: flow,
+        hasHead: flow, head: flow? this.arrowHead(rt.end, rt.dir, 5.5) : '',
+        ports: this.portMark(rt.pts[0], 2.6) + (flow? '' : this.portMark(rt.end, 2.6)),
+      });
     };
-    // dependencias estructurales (linter)
-    const D=this.deps();
-    Object.keys(D).forEach(cat=>{ if(!catPt[cat]) return; const tgt=D[cat].oneOf.find(o=>catPt[o]); if(tgt) curve(cat,tgt); });
-    // enlaces de flujo / infraestructura que conectan el resto de zonas
-    const pick=(...cs)=>cs.find(c=>catPt[c]);
+    const pick=(...cs)=>cs.find(c=>catBox[c]);
     const svc=pick('orquestacion','contenedores','so','computo','hci','nube');
-    curve('red', svc);                              // el tráfico entra por el perímetro hacia el servicio
-    if(catPt['datos']) curve(svc,'datos');          // el servicio consulta la base de datos
-    if(catPt['nube']) curve(svc,'nube');            // servicios gestionados en la nube
-    curve('monitorizacion', svc);                   // la monitorización observa el servicio
-    curve('cicd', svc);                             // CI/CD despliega en el servicio
-    curve('iac', pick('computo','hci','red'));      // IaC provisiona la infraestructura
-    curve('seguridad', 'red');                      // la seguridad protege el perímetro
+    // 1) el camino de la petición — es el hilo que el alumno debe poder seguir
+    wire('red', svc, 'flow', T('el tráfico entra por el perímetro de red antes de llegar al servicio','traffic enters through the network edge before reaching the service'));
+    if(catBox['datos']) wire(svc,'datos','flow', T('el servicio consulta la base de datos para responder','the service queries the database to answer'));
+    if(catBox['nube']) wire(svc,'nube','flow', T('parte de la petición la atienden servicios gestionados en la nube','part of the request is served by managed cloud services'));
+    // 2) dependencias estructurales del linter: quién necesita qué debajo
+    const D=this.deps();
+    Object.keys(D).forEach(cat=>{ if(!catBox[cat]) return; const tgt=D[cat].oneOf.find(o=>catBox[o]); if(tgt) wire(cat,tgt,'dep', this.loc(D[cat].why)); });
+    // 3) operación transversal: opera sobre el stack, ni lo sostiene ni lleva datos
+    wire('monitorizacion', svc, 'ops', T('la monitorización observa el servicio y avisa cuando algo va mal','monitoring watches the service and alerts when something breaks'));
+    wire('cicd', svc, 'ops', T('la fábrica de software despliega aquí las versiones nuevas','the software factory deploys new versions here'));
+    wire('iac', pick('computo','hci','red'), 'ops', T('la infraestructura se declara en código y se provisiona desde aquí','infrastructure is declared as code and provisioned from here'));
+    wire('seguridad', 'red', 'ops', T('la seguridad protege el perímetro por el que entra el tráfico','security protects the edge where traffic comes in'));
     return { world:{w:worldW,h:worldH}, zones, nodes, labels, links, isDemo, count:nodes.length, catPt };
   }
+  // ---- cableado del mapa -------------------------------------------------
+  // Trazado ortogonal (ángulos rectos, esquinas redondeadas) como en un
+  // esquema de red: sale del borde de un grupo, recorre un pasillo y entra
+  // por el borde del otro. Dos lenguajes distintos, nunca el mismo trazo:
+  //   · flujo      → acento, grueso, con punta de flecha y tráfico animado
+  //   · dependencia→ gris, fino y discontinuo, sin dirección ni movimiento
+  orthoPath(pts, r){
+    const p=[]; pts.forEach(q=>{ const l=p[p.length-1]; if(!l || Math.abs(l.x-q.x)>0.5 || Math.abs(l.y-q.y)>0.5) p.push(q); });
+    if(p.length<2) return '';
+    const R=v=>Math.round(v*10)/10;
+    let d='M '+R(p[0].x)+' '+R(p[0].y);
+    for(let i=1;i<p.length-1;i++){
+      const c=p[i], a=p[i-1], b=p[i+1];
+      const s1x=Math.sign(c.x-a.x), s1y=Math.sign(c.y-a.y);
+      const s2x=Math.sign(b.x-c.x), s2y=Math.sign(b.y-c.y);
+      const l1=Math.abs(c.x-a.x)+Math.abs(c.y-a.y), l2=Math.abs(b.x-c.x)+Math.abs(b.y-c.y);
+      const rr=Math.max(0, Math.min(r, l1/2, l2/2));
+      d+=' L '+R(c.x-s1x*rr)+' '+R(c.y-s1y*rr);
+      d+=' Q '+R(c.x)+' '+R(c.y)+' '+R(c.x+s2x*rr)+' '+R(c.y+s2y*rr);
+    }
+    const e=p[p.length-1];
+    return d+' L '+R(e.x)+' '+R(e.y);
+  }
+  // El cable nunca cruza por encima de otro grupo: va por una bandeja libre.
+  //   · mismas filas  → baja bajo las dos cajas y cruza por debajo
+  //   · filas vecinas → pasillo recto por el hueco entre filas
+  //   · filas lejanas → bus vertical por el margen del mapa
+  linkRoute(A, B, lane, ctx){
+    const G=11, off=((lane%3)-1)*16;
+    const ca={x:A.x+A.w/2, y:A.y+A.h/2}, cb={x:B.x+B.w/2, y:B.y+B.h/2};
+    if(A.y < B.y+B.h && B.y < A.y+A.h){
+      const trayY=Math.max(A.y+A.h, B.y+B.h)+20+(lane%3)*8;
+      const a={x:ca.x+off*0.5, y:A.y+A.h+G}, b={x:cb.x+off*0.5, y:B.y+B.h+G};
+      return { pts:[a,{x:a.x,y:trayY},{x:b.x,y:trayY},b], end:b, dir:{x:0,y:-1} };
+    }
+    const skipped = (ctx && ctx.bandGap) ? ctx.bandGap(A,B) : 0;
+    if(skipped>0 && ctx && ctx.world){
+      const left=(ca.x+cb.x)/2 < ctx.world.w/2;
+      const xLane = left ? 26+(lane%3)*11 : ctx.world.w-26-(lane%3)*11;
+      const a={ x: left? A.x-G : A.x+A.w+G, y:ca.y+off*0.5 };
+      const b={ x: left? B.x-G : B.x+B.w+G, y:cb.y+off*0.5 };
+      return { pts:[a,{x:xLane,y:a.y},{x:xLane,y:b.y},b], end:b, dir:{x:left?1:-1,y:0} };
+    }
+    const down=cb.y>ca.y;
+    const a={ x:ca.x+off*0.6, y: down? A.y+A.h+G : A.y-G };
+    const b={ x:cb.x+off*0.6, y: down? B.y-G : B.y+B.h+G };
+    const my=(a.y+b.y)/2+off;
+    return { pts:[a,{x:a.x,y:my},{x:b.x,y:my},b], end:b, dir:{x:0,y:down?1:-1} };
+  }
+  arrowHead(p, dir, s){
+    const R=v=>Math.round(v*10)/10, bx=p.x-dir.x*s, by=p.y-dir.y*s, px=-dir.y, py=dir.x;
+    return 'M '+R(p.x)+' '+R(p.y)+' L '+R(bx+px*s*0.62)+' '+R(by+py*s*0.62)+' L '+R(bx-px*s*0.62)+' '+R(by-py*s*0.62)+' Z';
+  }
+  portMark(p, s){ const R=v=>Math.round(v*10)/10; return 'M '+R(p.x-s)+' '+R(p.y-s)+'h'+(2*s)+'v'+(2*s)+'h'+(-2*s)+'z'; }
   _clampScale(s){ return Math.min(2.6, Math.max(0.18, s)); }
   onMapWheel(e){
     if(e&&e.preventDefault) e.preventDefault();
