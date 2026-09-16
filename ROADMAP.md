@@ -103,6 +103,16 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Ritmo más lento (~950 ms por paso) y pausa final para leer la ruta entera.
 - Pendiente si se quiere: **controles de reproducción** (pausa / paso a paso) para que el alumno marque su propio ritmo.
 
+### ✅ Hecho — modo Kids (cuarta pestaña)
+- ✅ **8 pasos guiados**, una capa por pantalla, de abajo hacia arriba: caminos → máquina → cajón → partir → jefe → cajas → libreta → nube.
+- ✅ **Tres opciones como máximo** y una sola decisión por pantalla (memoria de trabajo corta).
+- ✅ Cada capa entra por una **analogía concreta**, no por su definición técnica.
+- ✅ **El error no castiga**: sin rojo, sin puntuación; la opción tocada dice qué es de verdad y da una pista visual.
+- ✅ La **familia se revela al responder**, no antes: así hay algo que recordar.
+- ✅ **Torre que crece** y no se borra, con bloques estilo Scratch; al final queda el stack entero a la vista.
+- ✅ Guía («Bit») presente toda la partida, estrellas de progreso y puente final al Mapa real.
+- Pendiente si se quiere: voz en off o lectura en alto, y más rutas (una de seguridad, otra de datos).
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 - ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

@@ -47,9 +47,16 @@
     .lab-grid > aside.rail-right{ border-left:none !important; border-top:1px solid var(--border) !important; }
     .lab-header{ flex-wrap:wrap !important; }
   }
-  @media (max-width:820px){
-    .home-cards{ grid-template-columns:minmax(0,1fr) !important; }
+  @media (max-width:1180px){ .home-cards{ grid-template-columns:repeat(2, minmax(0,1fr)) !important; } }
+  @media (max-width:640px){ .home-cards{ grid-template-columns:minmax(0,1fr) !important; } }
+  @keyframes kidBob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
+  @keyframes kidPop { 0% { transform: scale(0.72); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes kidShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+  @media (max-width:900px){
+    .kids-wrap{ grid-template-columns:minmax(0,1fr) !important; }
+    .kids-tower{ position:static !important; }
   }
+  @media (max-width:620px){ .kids-opts{ grid-template-columns:minmax(0,1fr) !important; } }
   @keyframes suggestPulse { 0%,100% { box-shadow:0 0 0 0 rgba(56,189,248,0); } 50% { box-shadow:0 0 0 3px rgba(56,189,248,0.22); } }
   @keyframes flowLayerGlow { 0%,100% { box-shadow:0 0 0 0 rgba(99,102,241,0); } 50% { box-shadow:0 0 18px -2px rgba(99,102,241,0.55); } }
   * { box-sizing: border-box; }
@@ -227,7 +234,7 @@
             </button>
           </sc-if>
 
-          <div class="home-cards" style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;">
+          <div class="home-cards" style="display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:13px;">
             <sc-for list="{{ home.cards }}" as="hc" hint-placeholder-count="3">
               <button onClick="{{ hc.onClick }}" style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:0; padding:22px 20px 20px; border-radius:16px; border:1px solid {{ hc.border }}; background:{{ hc.bg }}; color:var(--text); cursor:pointer; font-family:'Inter',sans-serif; transition:transform .16s, border-color .16s, box-shadow .16s; box-shadow:var(--card-shadow);" style-hover="{{ hc.hoverStyle }}">
                 <span style="width:44px; height:44px; border-radius:13px; display:grid; place-items:center; font-size:21px; background:{{ hc.iconBg }}; border:1px solid {{ hc.iconBorder }}; margin-bottom:14px;">{{ hc.icon }}</span>
@@ -245,6 +252,128 @@
                 <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-faint); margin-top:2px;">{{ hs.label }}</div>
               </div>
             </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- KIDS -->
+      <sc-if value="{{ showKids }}" hint-placeholder-val="{{ false }}">
+        <div class="kids-wrap" style="max-width:1080px; margin:0 auto; padding:14px 4px 24px; min-height:calc(100vh - 230px); display:grid; grid-template-columns:minmax(0,1fr) 258px; gap:24px; align-items:center;">
+
+          <div style="min-width:0;">
+            <!-- estrellas de progreso: siempre se ve cuánto llevas y cuánto falta -->
+            <div style="display:flex; align-items:center; justify-content:center; gap:9px; margin:4px 0 20px;">
+              <sc-for list="{{ kids.dots }}" as="kd" hint-placeholder-count="8">
+                <span style="width:{{ kd.size }}; height:{{ kd.size }}; border-radius:50%; background:{{ kd.bg }}; border:3px solid {{ kd.border }}; box-shadow:{{ kd.ring }}; display:grid; place-items:center; font-size:13px; line-height:1; color:#fff; transition:all .3s;">{{ kd.mark }}</span>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ kids.done }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center; padding:26px 20px 30px; border-radius:26px; border:3px solid var(--accent); background:linear-gradient(170deg, var(--accent-tint), var(--panel)); animation:kidPop .5s ease both;">
+                <div style="font-size:58px; line-height:1; margin-bottom:12px;">🎉</div>
+                <div style="font-family:'Inter',sans-serif; font-size:30px; font-weight:800; letter-spacing:-0.02em; margin-bottom:12px;">{{ kids.endTitle }}</div>
+                <p style="font-size:17px; line-height:1.6; color:var(--text-muted); max-width:520px; margin:0 auto 24px;">{{ kids.endBody }}</p>
+                <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                  <button onClick="{{ kids.onAgain }}" style="border:none; background:var(--accent); color:#fff; padding:15px 28px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:17px; font-weight:800; box-shadow:0 5px 0 0 rgba(0,0,0,0.16);" style-hover="filter:brightness(1.08);">🔁 {{ kids.again }}</button>
+                  <button onClick="{{ kids.onMap }}" style="border:3px solid var(--border-strong); background:var(--panel); color:var(--text); padding:13px 24px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:16px; font-weight:700;" style-hover="border-color:var(--accent);">🗺 {{ kids.toMap }}</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ kids.guideShow }}" hint-placeholder-val="{{ true }}">
+              <!-- el guía: pone voz y contexto, y se queda toda la partida -->
+              <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:20px;">
+                <span style="flex:0 0 auto; animation:kidBob 2.6s ease-in-out infinite;">
+                  <svg width="84" height="84" viewBox="0 0 62 62" style="display:block;">
+                    <path d="M31 6v7" stroke="{{ kids.color }}" stroke-width="3" stroke-linecap="round" fill="none"></path>
+                    <circle cx="31" cy="5" r="4" fill="{{ kids.color }}"></circle>
+                    <rect x="9" y="13" width="44" height="34" rx="13" fill="{{ kids.color }}"></rect>
+                    <circle cx="23" cy="29" r="6" fill="#fff"></circle>
+                    <circle cx="39" cy="29" r="6" fill="#fff"></circle>
+                    <circle cx="24" cy="30" r="3" fill="#0f172a"></circle>
+                    <circle cx="40" cy="30" r="3" fill="#0f172a"></circle>
+                    <path d="M25 39q6 5 12 0" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"></path>
+                    <rect x="20" y="48" width="22" height="6" rx="3" fill="{{ kids.color }}" opacity="0.45"></rect>
+                  </svg>
+                </span>
+                <div style="min-width:0; flex:1 1 auto; position:relative; border-radius:20px; border:3px solid {{ kids.color }}; background:var(--panel); padding:15px 19px;">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:{{ kids.color }}; margin-bottom:5px;">{{ kids.stepLabel }} · {{ kids.title }}</div>
+                  <div style="font-size:17px; line-height:1.55; color:var(--text);">{{ kids.say }}</div>
+                </div>
+              </div>
+
+            </sc-if>
+
+            <sc-if value="{{ kids.askShow }}" hint-placeholder-val="{{ true }}">
+              <div style="text-align:center; font-family:'Inter',sans-serif; font-size:22px; font-weight:800; letter-spacing:-0.01em; margin:0 0 18px;">{{ kids.ask }}</div>
+            </sc-if>
+
+            <!-- tres opciones grandes, nunca más: una decisión cabe, cinco no -->
+            <sc-if value="{{ kids.optionsShow }}" hint-placeholder-val="{{ true }}">
+              <div class="kids-opts" style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px;">
+                <sc-for list="{{ kids.options }}" as="ko" hint-placeholder-count="3">
+                  <button onClick="{{ ko.onClick }}" aria-label="{{ ko.aria }}" style="position:relative; display:flex; flex-direction:column; align-items:center; gap:11px; padding:20px 12px 20px; border-radius:26px; border:4px solid {{ ko.border }}; background:{{ ko.bg }}; box-shadow:{{ ko.lift }}; opacity:{{ ko.op }}; cursor:{{ ko.cursor }}; font-family:'Inter',sans-serif; transition:transform .16s, box-shadow .16s, opacity .3s; animation:{{ ko.anim }};" style-hover="{{ ko.hoverStyle }}">
+                    <span style="width:126px; height:104px; border-radius:24px; background:{{ ko.halo }}; display:grid; place-items:center;">
+                      <svg width="112" height="92" viewBox="0 0 56 46" style="display:block;">
+                        <sc-for list="{{ ko.art }}" as="kp" hint-placeholder-count="0">
+                          <path d="{{ kp.d }}" fill="{{ kp.fill }}" stroke="{{ kp.stroke }}" stroke-width="{{ kp.sw }}" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </sc-for>
+                      </svg>
+                    </span>
+                    <span style="font-size:17px; font-weight:800; color:var(--text); text-align:center; line-height:1.2;">{{ ko.name }}</span>
+                    <sc-if value="{{ ko.layerShow }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:{{ ko.color }}; animation:fadeUp .25s ease both;">{{ ko.layer }}</span>
+                    </sc-if>
+                    <sc-if value="{{ ko.markShow }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute; top:-12px; right:-8px; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-size:17px; color:#fff; background:#22c55e; box-shadow:0 3px 0 0 rgba(0,0,0,0.15); animation:kidPop .4s ease both;">{{ ko.mark }}</span>
+                    </sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- error = te cuento qué has tocado y te doy una pista. Nunca «mal». -->
+            <sc-if value="{{ kids.hintShow }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="display:flex; align-items:flex-start; gap:12px; margin-top:18px; padding:15px 18px; border-radius:20px; border:3px solid var(--warm-border); background:var(--warm); animation:fadeUp .25s ease both;">
+                <span style="flex:0 0 auto; font-size:26px; line-height:1;">🤔</span>
+                <span style="font-size:16px; line-height:1.55; color:var(--text);">{{ kids.hint }}</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ kids.whyShow }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="margin-top:18px; padding:18px 20px; border-radius:20px; border:3px solid #22c55e; background:rgba(34,197,94,0.10); animation:fadeUp .25s ease both;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:7px;">
+                  <span style="font-size:26px; line-height:1;">🌟</span>
+                  <span style="font-family:'Inter',sans-serif; font-size:19px; font-weight:800; color:#16a34a;">{{ kids.okTitle }}</span>
+                </div>
+                <div style="font-size:16.5px; line-height:1.6; color:var(--text);">{{ kids.why }}</div>
+                <button onClick="{{ kids.onNext }}" style="margin-top:16px; border:none; background:var(--accent); color:#fff; padding:14px 30px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:17px; font-weight:800; box-shadow:0 5px 0 0 rgba(0,0,0,0.16);" style-hover="filter:brightness(1.08);">{{ kids.nextLabel }} →</button>
+              </div>
+            </sc-if>
+          </div>
+
+          <!-- la torre: lo construido no se borra nunca, crece de abajo hacia arriba -->
+          <div class="kids-tower" style="position:sticky; top:8px; border-radius:22px; border:3px dashed var(--border-strong); background:var(--panel-alt); padding:14px 12px 16px;">
+            <div style="text-align:center; font-family:'Inter',sans-serif; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin-bottom:12px;">{{ kids.towerTitle }}</div>
+            <sc-if value="{{ kids.towerEmpty }}" hint-placeholder-val="{{ true }}">
+              <div style="text-align:center; font-size:13px; line-height:1.5; color:var(--text-faint); padding:14px 6px;">{{ kids.towerEmptyMsg }}</div>
+            </sc-if>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <sc-for list="{{ kids.tower }}" as="kt" hint-placeholder-count="0">
+                <div style="position:relative; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:2px solid {{ kt.border }}; background:{{ kt.bg }}; animation:kidPop .4s ease both;">
+                  <span style="position:absolute; top:-4px; left:16px; width:24px; height:7px; border-radius:0 0 7px 7px; background:{{ kt.color }}; opacity:0.75;"></span>
+                  <svg width="30" height="25" viewBox="0 0 56 46" style="display:block; flex:0 0 auto;">
+                    <sc-for list="{{ kt.art }}" as="kq" hint-placeholder-count="0">
+                      <path d="{{ kq.d }}" fill="{{ kq.fill }}" stroke="{{ kq.stroke }}" stroke-width="{{ kq.sw }}" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </sc-for>
+                  </svg>
+                  <span style="min-width:0;">
+                    <span style="display:block; font-size:13px; font-weight:700; color:var(--text); line-height:1.2;">{{ kt.name }}</span>
+                    <span style="display:block; font-size:10.5px; color:{{ kt.color }}; font-weight:600; margin-top:1px;">{{ kt.layer }}</span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
           </div>
         </div>
       </sc-if>
@@ -1346,7 +1475,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
+  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { step: 0, phase: 'ask', wrong: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   catsBase() {
@@ -1927,7 +2056,9 @@ class Component extends DCLogic {
       pathTitle:'Ruta de aprendizaje', pathSubtitle:'Un camino guiado de 0 a arquitecto: teoría, retos y quiz en orden.', pathRead:'Leer', pathHide:'Ocultar', pathMarkRead:'Marcar como leído', pathStart:'Empezar reto', pathDoQuiz:'Hacer quiz', pathGo:'Ir', pathCurrent:'Siguiente paso',
       glTitle:'Glosario', glSubtitle:'Todos los términos con su definición. Busca y toca uno para ampliarlo.', glSearch:'Buscar término…', glCat:'Categoría', glView:'Ver ficha', glResults:'términos', glEmpty:'Sin resultados',
       homeBack:'Volver al inicio', moreBtn:'Más',
-      navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar',
+      navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar', navKids:'Kids',
+      navKidsHint:'Para peques: la infraestructura paso a paso, jugando',
+      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'8 pasos · a partir de 8 años',
       navBuildHint:'Monta tu stack pieza a pieza y entiende cada capa', navPracticeHint:'Retos con objetivos y quiz de repaso', navExploreHint:'Mira tu stack desde otros ángulos: mapa, petición, despliegue…',
       homeKicker:'Taller visual de infraestructura', homeTitle:'¿Qué quieres hacer hoy?',
       homeLead:'Aprende cómo se monta la infraestructura de un sistema real: capa por capa, entendiendo por qué existe cada una. Elige por dónde empezar.',
@@ -1981,7 +2112,9 @@ class Component extends DCLogic {
       pathTitle:'Learning path', pathSubtitle:'A guided path from zero to architect: theory, challenges and quiz in order.', pathRead:'Read', pathHide:'Hide', pathMarkRead:'Mark as read', pathStart:'Start challenge', pathDoQuiz:'Take quiz', pathGo:'Go', pathCurrent:'Next step',
       glTitle:'Glossary', glSubtitle:'Every term with its definition. Search and tap one to expand.', glSearch:'Search term…', glCat:'Category', glView:'View card', glResults:'terms', glEmpty:'No results',
       homeBack:'Back to start', moreBtn:'More',
-      navBuild:'Learn', navPractice:'Practice', navExplore:'Explore',
+      navBuild:'Learn', navPractice:'Practice', navExplore:'Explore', navKids:'Kids',
+      navKidsHint:'For kids: infrastructure step by step, by playing',
+      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'8 steps · ages 8+',
       navBuildHint:'Build your stack piece by piece and understand every layer', navPracticeHint:'Goal-based challenges and a revision quiz', navExploreHint:'See your stack from other angles: map, request, deployment…',
       homeKicker:'Visual infrastructure workshop', homeTitle:'What do you want to do today?',
       homeLead:'Learn how the infrastructure of a real system is put together: layer by layer, understanding why each one exists. Pick where to start.',
@@ -3232,6 +3365,153 @@ class Component extends DCLogic {
     const tick=()=>{ i++; if(i<n){ this.setState({flowStep:i}); this.mapFocusCat(cats[i]); this._flowT=setTimeout(tick,dur); } else { this._flowT=setTimeout(()=>this.setState({flowing:false, flowStep:-1}), 1900); } };
     this._flowT=setTimeout(tick,dur);
   }
+  // ================= MODO KIDS =================
+  // Diseñado al revés que el resto de la app: una sola cosa en pantalla, una
+  // sola decisión, y nunca un error que castigue.
+  //  · memoria de trabajo corta → 1 capa por pantalla, 3 opciones como máximo
+  //  · pensamiento concreto → cada capa entra por una analogía del mundo real
+  //  · error = información, no fallo → la opción equivocada cuenta qué es y da pista
+  //  · lo construido se queda a la vista → la torre crece y no se borra nunca
+  kidsSteps(){
+    const F=(es,en)=>({es,en});
+    return [
+      { cat:'red', block:'switch', wrong:['postgres','baremetal'],
+        title:F('Los caminos','The roads'),
+        say:F('Vamos a construir por dentro una página web. Se empieza por abajo del todo: los caminos por donde viajan los mensajes.','We are going to build the inside of a web page. We start at the very bottom: the roads the messages travel on.'),
+        ask:F('¿Qué reparte los mensajes entre ordenadores?','What hands out messages between computers?'),
+        hint:F('Busca algo lleno de agujeritos para enchufar cables.','Look for something full of little holes for cables.'),
+        why:F('El switch es un cartero rapidísimo: coge cada mensaje y lo lleva al ordenador correcto.','A switch is a super fast postman: it takes each message to the right computer.') },
+      { cat:'computo', block:'baremetal', wrong:['docker','nas'],
+        title:F('La máquina que trabaja','The machine that works'),
+        say:F('Ya tenemos caminos. Ahora hace falta una máquina de verdad que piense y trabaje.','We have roads now. Now we need a real machine that thinks and works.'),
+        ask:F('¿Cuál es el ordenador grande que nunca se apaga?','Which is the big computer that never turns off?'),
+        hint:F('Es plano y ancho, con huecos para los discos delante.','It is flat and wide, with slots for disks at the front.'),
+        why:F('El servidor es un ordenador que trabaja de día y de noche, sin descansar nunca.','A server is a computer that works day and night and never rests.') },
+      { cat:'almacenamiento', block:'nas', wrong:['linux','switch'],
+        title:F('El cajón que no olvida','The drawer that never forgets'),
+        say:F('Si apagas un ordenador, se le olvida casi todo. Necesitamos un sitio donde guardar las cosas para siempre.','If you switch a computer off, it forgets almost everything. We need a place to keep things forever.'),
+        ask:F('¿Dónde se guardan las fotos y los archivos?','Where do photos and files get stored?'),
+        hint:F('Parece una torre con cajoncitos apilados.','It looks like a tower with little stacked drawers.'),
+        why:F('El NAS es una caja con muchos cajones. Guardas algo dentro y ahí sigue mañana.','A NAS is a box with many drawers. You put something in and it is still there tomorrow.') },
+      { cat:'virtualizacion', block:'hypervisor', wrong:['postgres','switch'],
+        title:F('Partir la máquina','Splitting the machine'),
+        say:F('Un servidor es enorme para un solo programa. ¡Se puede partir en varias máquinas pequeñas!','A server is huge for just one program. It can be split into several small machines!'),
+        ask:F('¿Quién parte un ordenador grande en varios pequeños?','Who splits one big computer into several small ones?'),
+        hint:F('Dibuja una máquina con tres máquinas pequeñas encima.','It draws one machine with three little machines on top.'),
+        why:F('El hipervisor parte una máquina grande en varias, como cortar una tarta en porciones.','A hypervisor splits one big machine into several, like slicing a cake.') },
+      { cat:'so', block:'linux', wrong:['nas','docker'],
+        title:F('El jefe de dentro','The boss inside'),
+        say:F('Dentro de cada máquina hace falta alguien que mande y reparta el trabajo entre todos.','Inside every machine someone has to be in charge and share the work out.'),
+        ask:F('¿Quién manda dentro de un ordenador?','Who is in charge inside a computer?'),
+        hint:F('Es una ventana negra con letras verdes.','It is a black window with green letters.'),
+        why:F('Linux es el jefe: decide quién usa la memoria y cuándo, para que nadie se pelee.','Linux is the boss: it decides who uses the memory and when, so nobody fights.') },
+      { cat:'contenedores', block:'docker', wrong:['baremetal','postgres'],
+        title:F('Cajas que viajan','Travelling boxes'),
+        say:F('Para llevar un programa de un ordenador a otro, lo metemos en una caja con todo lo que necesita dentro.','To move a program from one computer to another, we pack it in a box with everything it needs.'),
+        ask:F('¿Qué mete el programa en una caja para que viaje?','What packs the program into a box so it can travel?'),
+        hint:F('Son cajas apiladas, como las de un barco.','They are stacked boxes, like the ones on a ship.'),
+        why:F('Docker mete el programa en una caja. Lo lleves donde lo lleves, funciona igual.','Docker packs the program in a box. Wherever you take it, it works the same.') },
+      { cat:'datos', block:'postgres', wrong:['switch','hypervisor'],
+        title:F('La libreta gigante','The giant notebook'),
+        say:F('La página tiene que acordarse de cosas: nombres, puntos, mensajes que le escribes...','The page has to remember things: names, points, messages you write to it...'),
+        ask:F('¿Dónde se apunta todo para no olvidarlo?','Where is everything written down so it is not forgotten?'),
+        hint:F('Tiene forma de tarta redonda de varios pisos.','It is shaped like a round cake with several layers.'),
+        why:F('La base de datos es una libreta gigante: lo apunta todo y lo encuentra en un segundo.','A database is a giant notebook: it writes everything down and finds it in a second.') },
+      { cat:'nube', block:'cloudvm', wrong:['nas','linux'],
+        title:F('La nube','The cloud'),
+        say:F('¿Y si no quieres cuidar tú las máquinas? Se las alquilas a otra empresa y ellos las cuidan.','What if you do not want to look after the machines? You rent them from another company and they look after them.'),
+        ask:F('¿Qué son ordenadores que están lejos y alquilas?','What are computers that live far away and you rent?'),
+        hint:F('Su dibujo es una nube con un rayo dentro.','Its drawing is a cloud with a lightning bolt inside.'),
+        why:F('En la nube usas ordenadores de otros. Tú solo pides, y ellos se encargan de todo.','In the cloud you use other people’s computers. You just ask, and they take care of everything.') },
+    ];
+  }
+  kidsPick(id){
+    const S=this.state.kids||{}, steps=this.kidsSteps(), st=steps[S.step];
+    if(!st || S.phase==='ok') return;
+    if(id===st.block){ this.setState({ kids:{ ...S, phase:'ok', wrong:null } }); }
+    else { this.setState({ kids:{ ...S, wrong:id } }); }
+  }
+  kidsNext(){
+    const S=this.state.kids||{}, steps=this.kidsSteps();
+    const next=S.step+1;
+    if(next>=steps.length){ this.fireConfetti(); this.setState({ kids:{ step:next, phase:'end', wrong:null } }); }
+    else this.setState({ kids:{ step:next, phase:'ask', wrong:null } });
+  }
+  kidsRestart(){ this.setState({ kids:{ step:0, phase:'ask', wrong:null } }); }
+  kidsView(){
+    const S=this.state.kids||{ step:0, phase:'ask', wrong:null };
+    const steps=this.kidsSteps(), total=steps.length, es=this.state.lang==='es';
+    const T=(a,b)=>es?a:b;
+    const shot=(bid,cat)=>{ const c=this.catById(cat); return this.paintArt(this.artKeyFor(bid,cat), c? c.color : '#6366f1'); };
+    // la torre guarda todo lo colocado: nunca se borra, siempre a la vista
+    const placedN=(S.phase==='end')? total : (S.step + (S.phase==='ok'?1:0));
+    const tower=steps.slice(0,placedN).map((st,i)=>{ const c=this.catById(st.cat), b=this.blockById(st.block); return {
+      name:b? this.loc(b.name) : st.block, layer:this.loc(c.name), color:c.color,
+      bg:this.hexA(c.color,0.16), border:this.hexA(c.color,0.5), num:String(i+1),
+      art:shot(st.block, st.cat),
+    };}).reverse();
+    const dots=steps.map((st,i)=>{ const dc=this.catById(st.cat).color, got=i<placedN;
+      return {
+        bg: got? dc : 'var(--panel-2)',
+        border: got? dc : 'var(--border-strong)',
+        size: i===S.step ? '26px' : '20px',
+        ring: i===S.step ? ('0 0 0 5px '+this.hexA(dc,0.22)) : 'none',
+        mark: got? '★' : '',
+      };
+    });
+    if(S.phase==='end'){
+      return { show:true, done:true, total:String(total),
+        endTitle:T('¡Lo has construido entero!','You built the whole thing!'),
+        endBody:T('Has puesto las '+total+' capas, desde los cables de abajo hasta la nube de arriba. Así de verdad funciona por dentro una página web.','You placed all '+total+' layers, from the cables at the bottom to the cloud at the top. That is really how a web page works inside.'),
+        again:T('Jugar otra vez','Play again'), toMap:T('Ver el mapa de verdad','See the real map'),
+        onAgain:()=>this.kidsRestart(), onMap:()=>this.setMode('map'),
+        dots, tower, towerTitle:T('Lo que has construido','What you built'), towerEmpty:false, towerEmptyMsg:'',
+        stepLabel:'', title:'', say:'', ask:'', hint:'', hintShow:false, why:'', whyShow:false, okTitle:'',
+        color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{}, askShow:false, guideShow:false };
+    }
+    const st=steps[S.step], c=this.catById(st.cat);
+    const ok=(S.phase==='ok');
+    const ids=[st.block].concat(st.wrong);
+    // orden estable pero distinto en cada paso, para que no se aprenda la posición
+    const order=[[0,1,2],[1,2,0],[2,0,1],[1,0,2],[0,2,1],[2,1,0],[0,1,2],[1,2,0]][S.step%8];
+    const options=order.map(k=>ids[k]).map(bid=>{
+      const b=this.blockById(bid), bc=this.catById(b? b.cat : st.cat);
+      const isOk=(bid===st.block), isWrong=(S.wrong===bid);
+      const dim = ok && !isOk;
+      return {
+        name:b? this.loc(b.name) : bid, art:shot(bid, b? b.cat : st.cat),
+        layer:this.loc(bc.name), layerShow: (ok&&isOk)||isWrong, color:bc.color,
+        bg: isWrong? 'var(--warm)' : 'var(--panel)',
+        halo: this.hexA(bc.color, isOk&&ok? 0.30 : 0.14),
+        border: isWrong? '#f97316' : bc.color,
+        lift: (ok&&isOk)? ('0 6px 0 0 '+this.hexA(bc.color,0.55)+', 0 0 0 6px '+this.hexA(bc.color,0.22)) : ('0 6px 0 0 '+this.hexA(bc.color,0.38)),
+        anim: isWrong? 'kidShake .45s ease' : ((ok&&isOk)? 'kidPop .45s ease both' : 'none'),
+        op: dim? '0.4' : '1',
+        mark: (ok&&isOk)? '★' : '',
+        markShow: (ok&&isOk),
+        cursor: ok? 'default' : 'pointer',
+        hoverStyle: ok? '' : 'transform:translateY(-5px); box-shadow:0 11px 0 0 '+this.hexA(bc.color,0.45)+';',
+        aria:(b? this.loc(b.name) : bid)+', '+this.loc(bc.name),
+        onClick:()=>this.kidsPick(bid),
+      };
+    });
+    const wrongBlock=S.wrong? this.blockById(S.wrong) : null;
+    const wrongCat=wrongBlock? this.catById(wrongBlock.cat) : null;
+    return { show:true, done:false, total:String(total),
+      stepLabel:T('Paso ','Step ')+(S.step+1)+' / '+total,
+      title:this.loc(st.title), say:this.loc(st.say), ask:this.loc(st.ask),
+      askShow:!ok, guideShow:true,
+      color:c.color, layerName:this.loc(c.name),
+      hintShow: !!S.wrong && !ok,
+      hint: wrongBlock ? (T("Eso es ","That is ")+this.loc(wrongBlock.name)+T(", de la parte de ","; it belongs to ")+this.loc(wrongCat.name)+T(". ¡Ya te tocará! Pista: ",". You will get there! Hint: ")+this.loc(st.hint)) : "",
+      whyShow: ok, why:this.loc(st.why),
+      okTitle:T('¡Muy bien!','Nice one!'),
+      nextLabel: (S.step+1>=total)? T('¡Terminar!','Finish!') : T('Siguiente','Next'),
+      onNext:()=>this.kidsNext(),
+      options, optionsShow:true, dots, tower, towerTitle:T('Tu torre','Your tower'),
+      towerEmpty: tower.length===0, towerEmptyMsg:T('Aquí irán apareciendo las piezas que coloques.','The pieces you place will show up here.'),
+      again:'', toMap:'', onAgain:()=>{}, onMap:()=>{}, endTitle:'', endBody:'' };
+  }
   // ---- chaos / failure simulation ----
   resilience(placed){
     const stackIds=['red','computo','almacenamiento','virtualizacion','hci','so','contenedores','orquestacion','datos','nube'];
@@ -3852,12 +4132,13 @@ class Component extends DCLogic {
     const guideOpen = !hasDetail && !hasLayerDetail;
 
     // ---- navegación por grupos: aprender · practicar · explorar ----
-    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore' };
+    const groupOf = { sandbox:'build', mission:'practice', quiz:'practice', map:'explore', terminal:'explore', metrics:'explore', http:'explore', deploy:'explore', incident:'explore', kids:'kids' };
     const navGroup = groupOf[mode] || 'home';
     const navGroups = [
       { id:'build', icon:'🧱', label:t.navBuild, hint:t.navBuildHint, to:'sandbox' },
       { id:'practice', icon:'🎯', label:t.navPractice, hint:t.navPracticeHint, to:'mission' },
       { id:'explore', icon:'🔭', label:t.navExplore, hint:t.navExploreHint, to:'map' },
+      { id:'kids', icon:'🚀', label:t.navKids, hint:t.navKidsHint, to:'kids' },
     ].map((g,i)=>{ const on = navGroup===g.id; return {
       icon:g.icon, label:g.label, hint:g.hint,
       sep: i===0 ? 'none' : '1px solid var(--border-strong)',
@@ -3926,6 +4207,7 @@ class Component extends DCLogic {
         { icon:'🧱', title:t.cardLearnT, desc:t.cardLearnD, meta:t.cardLearnM, color:'#6366f1', to:'sandbox' },
         { icon:'🎯', title:t.cardPracticeT, desc:t.cardPracticeD, meta:t.cardPracticeM, color:'#f59e0b', to:'mission' },
         { icon:'🔭', title:t.cardExploreT, desc:t.cardExploreD, meta:t.cardExploreM, color:'#38bdf8', to:'map' },
+        { icon:'🚀', title:t.cardKidsT, desc:t.cardKidsD, meta:t.cardKidsM, color:'#22c55e', to:'kids' },
       ].map(c=>({ icon:c.icon, title:c.title, desc:c.desc, meta:c.meta,
         border:this.hexA(c.color,0.34), bg:'var(--panel)',
         iconBg:this.hexA(c.color,0.12), iconBorder:this.hexA(c.color,0.30), metaColor:c.color,
@@ -4090,6 +4372,7 @@ class Component extends DCLogic {
       subnav, subnavShow: subnav.length>0, subnavLabel: t.subnavLabel,
       gridClass, showPalette: needPalette, showRail: needRail,
       showHome: mode==='home', home,
+      showKids: mode==='kids', kids: this.kidsView(),
       showChecklist: buildingNow, progressParts, nextStep,
       moreBg: S.showTools?'var(--panel-2)':'var(--panel-alt)', moreColor: S.showTools?'var(--text)':'var(--text-muted)',
       toolTheme:()=>this.toolTheme(), toolAch:()=>this.toolAch(), toolShare:()=>this.toolShare(), toolReset:()=>this.toolReset(),

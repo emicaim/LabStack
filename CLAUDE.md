@@ -80,6 +80,21 @@ Cutting across all modes: `deps()` declares category-level dependencies (`orques
 
 `renderVals()` computes the per-mode view objects (`mission`, `quiz`, `map`, `analysis`, `sizing`, `metricsTiles`, `home`, terminal fields…) and exposes mode flags (`showTree`, `showQuiz`, `showMap`, `showTerminal`, `showMetrics`, `showMissionPicker`, `showMissionGoals`, `showPresets`, `showHome`). To add a mission, append to `missions()`; a quiz variant, extend `buildQuiz()`; a terminal command, add a `case` in `execCmd()` and to `termCmds()`; a piece, edit `blocks()` (+ `extras()`/`pieceIcons()`/`specs()`). There is a Node smoke-test pattern (instantiate `Component` with stubbed `DCLogic`/`React`/`localStorage`/`window`, call `renderVals()` across all ten modes; simulate events with stubbed `currentTarget.getBoundingClientRect`/`e.key`) used to validate logic changes without a browser — every feature above was verified this way. A companion check walks every `{{ key }}` in the template and asserts it has a binding in some mode; run it after touching the template.
 
+### Kids mode (`mode === 'kids'`)
+
+A fourth header group, built on **the opposite rules to the rest of the app**. Everything it shows is reused (`blocks()`, `catById` colours, the map's `artArchetypes()` drawings) but the presentation is driven by how children actually learn — treat these as constraints, not style preferences:
+
+- **One decision per screen.** A child's working memory holds far less than an adult's, so: one layer, one question, **exactly three options**, never a palette. Don't add a fourth option.
+- **Concrete before abstract.** Every layer enters through a real-world analogy written for the age (*"el switch es un cartero rapidísimo"*), never through its technical definition. `kidsSteps()` holds that copy — `title`, `say`, `ask`, `hint`, `why` — bilingual like everything else.
+- **An error is information, never a failure.** A wrong tap has no penalty, no red, no score: the card turns warm, reveals what it actually is (*"eso es PostgreSQL, de Bases de datos"*) and gives a concrete visual hint. Nothing advances. Keep it that way.
+- **The family label is a reward, not a prompt.** `layerShow` reveals a piece's category **only after** it is tapped — correct (labels it) or wrong (corrects it). Showing it up front removes the retrieval, which is where the learning is.
+- **What you build never disappears.** The tower on the right grows bottom-up with a Scratch-style nub on each block and is still whole on the final screen.
+- **The guide stays on screen** the whole game (`guideShow`), even after a correct answer. It is the child's anchor.
+
+Flow: `state.kids = { step, phase: 'ask' | 'ok' | 'end', wrong }`; `kidsPick()` → `kidsNext()` → `kidsRestart()`; `kidsView()` builds everything. Progress is **not** persisted — the run is short and a half-finished state would confuse more than it helps. The final screen offers a bridge into `map`, so a child who finishes can go look at the real thing.
+
+Colour is deliberate: each option carries **its own family colour**. At step 1 that means nothing to the child; by step 5 the colour itself has become a cue. That is the intended effect — don't neutralise it.
+
 ### Map artwork (schematic illustrations)
 
 Map nodes are **not** the small line icons used elsewhere. Each node draws a schematic front view of the real device, so a rack, a switch and a database are told apart without reading the label.
