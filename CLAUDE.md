@@ -129,6 +129,12 @@ A ticket queue plus **four simultaneous terminals**, one per host (`fw01`, `sw-c
 - **Ticket evidence overrides the generic terminal.** `deskEvidence(host, raw)` looks up the open ticket's `evidence[]` for a `(host, command)` match and returns those lines instead. Anything not declared falls through to `execCmd` and answers as usual. That is what lets one command tell *this* ticket's story on the box that matters.
 - Resolution reuses the incident pattern: investigate → cause → fix, wrong answers give feedback and never advance.
 
+**Hosts come from the stack you built.** `deskHosts()` reads `effectivePlaced()` and, for each of the four roles (`red`, `seguridad`, `so`, `datos`), picks the first piece placed in that category: the host is renamed via `deskHostName()` (`winserver` → `win01`, `kong` → `gw01`, `redis` → `cache01`…) and labelled **from the category**, never from the sample host — put Vault where the sample had a firewall and it must not keep saying "firewall". A role you have not built keeps its sample host, visibly marked, so the desk is never a dead end.
+
+This is why **ticket evidence binds to the role id, not the hostname**: `evidence[].host` is matched against `h.id` (the stable role key), while the prompt, the header and `hostname` show `h.name` (what you actually built). Renaming a host must never break a ticket — `desk-test.js` loads a preset and re-checks the evidence still lands.
+
+Tab completion is `deskComplete(i)`, per session, sharing `termCmds()` with Terminal mode. `man` needs nothing special: it is a `case` in `execCmd`, so it already works.
+
 **Writing a ticket** (`contenido/tickets.js`): give it evidence on **more than one host**, including at least one that rules something out — a firewall that turns out to be fine is as instructive as the broken thing. Keep the distinctive line long enough to be unique: `desk-test.js` matches on the longest line precisely because a short one like `4` collides with generic output.
 
 ### Map artwork (schematic illustrations)

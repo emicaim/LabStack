@@ -70,5 +70,54 @@ c.deskOpen(tickets[0].id); escribir(0,'hostname');
 const v2=c.renderVals().desk;
 if(texto(1).indexOf('hostname')>=0) mal('el historial se mezcla entre sesiones');
 else console.log('  ✓ cada sesión tiene su propio historial');
+
+// --- los equipos salen del stack que hayas montado ---
+console.log('\n  equipos según el stack:');
+console.log('    sin montar nada (ejemplo): ' + c.deskHosts().map(h => h.name).join(', '));
+const c2 = new C(); c2.props = {}; c2.setState({ mode: 'desk' });
+c2.loadPreset(c2.presets()[0].id);
+const mios = c2.deskHosts();
+console.log('    con un stack montado:      ' + mios.map(h => h.name).join(', '));
+const propios = mios.filter(h => h.mine).length;
+if (!propios) mal('ningún equipo sale del stack montado');
+else console.log('    ' + propios + '/' + mios.length + ' equipos son piezas tuyas de verdad');
+
+// y la evidencia sigue encontrando su sitio aunque el equipo se llame distinto
+c2.deskOpen(tickets[0].id);
+const ev0 = tickets[0].evidence.find(e => e.host === 'web01');
+const iw = c2.deskHosts().findIndex(h => h.id === 'web01');
+let v3 = c2.renderVals().desk;
+v3.terms[iw].onInput({ target: { value: ev0.cmd[0] } });
+v3.terms[iw].onKey({ key: 'Enter', preventDefault() {} });
+const txt = c2.renderVals().desk.terms[iw].lines.map(l => l.t).join('\n');
+if (txt.indexOf(ev0.lines[0][0]) < 0) mal('con equipos propios la evidencia deja de encontrarse');
+else console.log('    la evidencia llega a su equipo aunque se llame distinto');
+
+// --- Tab autocompleta, y por sesión ---
+c.deskOpen(tickets[0].id);
+let v4 = c.renderVals().desk;
+v4.terms[0].onInput({ target: { value: 'journ' } });
+v4.terms[0].onKey({ key: 'Tab', preventDefault() {} });
+const tras = c.renderVals().desk.terms[0].input;
+if (tras.trim() !== 'journalctl') mal('Tab no completa un comando único (salió: "' + tras + '")');
+else console.log('\n  ✓ Tab completa: "journ" -> "' + tras.trim() + '"');
+
+v4 = c.renderVals().desk;
+v4.terms[1].onInput({ target: { value: 'ip' } });
+v4.terms[1].onKey({ key: 'Tab', preventDefault() {} });
+const lista = c.renderVals().desk.terms[1].lines.map(l => l.t).join(' ');
+if (lista.indexOf('iptables') < 0) mal('Tab no lista las opciones cuando hay varias');
+else console.log('  ✓ Tab lista las opciones cuando hay varias');
+if (c.renderVals().desk.terms[0].input.trim() !== 'journalctl') mal('el Tab de una sesión pisa otra');
+else console.log('  ✓ el autocompletado de una sesión no toca a las demás');
+
+// --- man sigue funcionando dentro del puesto ---
+v4 = c.renderVals().desk;
+v4.terms[2].onInput({ target: { value: 'man ss' } });
+v4.terms[2].onKey({ key: 'Enter', preventDefault() {} });
+const manTxt = c.renderVals().desk.terms[2].lines.map(l => l.t).join(' ').toLowerCase();
+if (manTxt.indexOf('ss') < 0 || manTxt.indexOf('not found') >= 0) mal('man no responde en el puesto');
+else console.log('  ✓ man responde dentro del puesto');
+
 console.log(fail? ('\n'+fail+' fallo(s)') : '\nPuesto OK');
 process.exit(fail?1:0);

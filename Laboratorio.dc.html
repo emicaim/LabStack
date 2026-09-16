@@ -346,10 +346,12 @@
               </div>
 
               <!-- las cuatro sesiones -->
+              <div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--text-faint); margin:0 0 8px; text-align:right;">{{ desk.termHint }}</div>
               <div class="desk-terms" style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px;">
                 <sc-for list="{{ desk.terms }}" as="dt" hint-placeholder-count="4">
                   <div onClick="{{ dt.onFocus }}" style="display:flex; flex-direction:column; height:302px; border-radius:13px; border:2px solid {{ dt.border }}; box-shadow:{{ dt.glow }}; background:#0b1020; overflow:hidden; transition:border-color .15s, box-shadow .15s;">
-                    <div style="flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
+                    <div title="{{ dt.mineTitle }}" style="flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.08);">
                       <span style="width:9px; height:9px; border-radius:50%; background:{{ dt.color }}; box-shadow:0 0 8px {{ dt.color }};"></span>
                       <span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#e6edf7;">{{ dt.host }}</span>
                       <span style="font-size:11px; color:#8a97ad; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ dt.role }}</span>
@@ -367,6 +369,7 @@
                   </div>
                 </sc-for>
               </div>
+              </div>
             </div>
           </sc-if>
 
@@ -380,9 +383,10 @@
               </div>
               <p style="font-size:13px; line-height:1.55; color:var(--text-muted); margin:0 0 14px;">{{ desk.queueHint }}</p>
 
+              <div style="font-size:12px; color:var(--text-faint); margin:0 0 9px;">{{ desk.stackNote }}</div>
               <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px;">
                 <sc-for list="{{ desk.hosts }}" as="dh" hint-placeholder-count="4">
-                  <span style="display:flex; align-items:center; gap:6px; border:1px solid var(--border-strong); background:var(--panel); border-radius:99px; padding:5px 12px; font-size:11.5px; color:var(--text-muted);"><span style="width:8px; height:8px; border-radius:50%; background:{{ dh.color }};"></span><b style="font-family:'JetBrains Mono',monospace; color:var(--text);">{{ dh.name }}</b>{{ dh.role }}</span>
+                  <span style="display:flex; align-items:center; gap:6px; border:1px solid var(--border-strong); background:var(--panel); border-radius:99px; padding:5px 12px; font-size:11.5px; color:var(--text-muted); opacity:{{ dh.op }};"><span style="width:8px; height:8px; border-radius:50%; background:{{ dh.color }};"></span><b style="font-family:'JetBrains Mono',monospace; color:var(--text);">{{ dh.name }}</b>{{ dh.role }}</span>
                 </sc-for>
               </div>
 
@@ -2962,7 +2966,26 @@ class Component extends DCLogic {
   // Cuatro sesiones abiertas a la vez y una cola de tickets. La gracia
   // didáctica es que el mismo comando contesta distinto según el equipo:
   // hay que elegir dónde mirar, no sólo qué escribir.
-  deskHosts(){ return this.content('equipos', []); }
+  // Nombre de máquina según la pieza que hayas montado; si no tienes nada de
+  // ese papel, se usa un equipo de ejemplo para que el puesto siga jugable.
+  deskHostName(){ return { switch:'sw-core', router:'rt-edge', lb:'lb01', dns:'dns01', kong:'gw01', vlan:'sw-core',
+    firewall:'fw01', vpn:'vpn01', tls:'fw01', vault:'vault01', iam:'idp01', encryption:'fw01',
+    linux:'web01', winserver:'win01',
+    postgres:'db01', mysql:'db01', mongodb:'db01', cassandra:'db01', redis:'cache01', elasticsearch:'es01' }; }
+  deskHosts(){
+    const base=this.content('equipos', []), placed=this.effectivePlaced().placed, names=this.deskHostName();
+    return base.map(h=>{
+      const ids=placed[h.cat]||[];
+      const b=ids.map(id=>this.blockById(id)).filter(Boolean)[0];
+      if(!b) return { ...h, mine:false };
+      // la etiqueta sale de la CATEGORÍA, no del equipo de ejemplo: si pones
+      // Vault donde el ejemplo tenía un firewall, no puede seguir diciendo «firewall»
+      const c=this.catById(h.cat), etiqueta=(c? this.loc(c.name) : this.loc(h.role))+' · '+this.loc(b.name);
+      return { id:h.id, cat:h.cat, mine:true, piece:b.id,
+        name: names[b.id] || h.name,
+        role: { es:etiqueta, en:etiqueta } };
+    });
+  }
   tickets(){ return this.content('tickets', []); }
   deskState(){
     const d=this.state.desk||{};
@@ -2971,8 +2994,8 @@ class Component extends DCLogic {
   }
   deskNewTerms(){
     const es=this.state.lang==='es';
-    return this.deskHosts().map(h=>({ host:h.id, input:'', cwd:'/root', cmdHistory:[], histIdx:-1,
-      history:[ { t:(es?'Conectado a ':'Connected to ')+h.id+' — '+this.loc(h.role), c:'sys' } ] }));
+    return this.deskHosts().map(h=>({ host:h.id, name:h.name, input:'', cwd:'/root', cmdHistory:[], histIdx:-1,
+      history:[ { t:(es?'Conectado a ':'Connected to ')+h.name+' — '+this.loc(h.role)+(h.mine? '' : (es?'  (equipo de ejemplo: no lo has montado)':'  (sample host: not in your stack)')), c:'sys' } ] }));
   }
   deskTerms(){ const d=this.deskState(); return d.terms || this.deskNewTerms(); }
   deskPrompt(host, cwd){ return 'root@'+host+':'+((cwd||'/root').replace('/root','~'))+'# '; }
@@ -2986,6 +3009,18 @@ class Component extends DCLogic {
     if(!e) return;
     if(e.key==='Enter'){ if(e.preventDefault)e.preventDefault(); this.deskSubmit(i); return; }
     if(e.key==='ArrowUp'||e.key==='ArrowDown'){ if(e.preventDefault)e.preventDefault(); this.deskNav(i, e.key==='ArrowUp'?-1:1); return; }
+    if(e.key==='Tab'){ if(e.preventDefault)e.preventDefault(); this.deskComplete(i); return; }
+  }
+  // Mismo autocompletado que el modo Terminal, pero por sesión: una sola
+  // coincidencia se escribe sola, varias se listan en esa consola.
+  deskComplete(i){
+    const terms=this.deskTerms().slice(), t=terms[i], inp=(t.input||'');
+    const first=inp.split(/\s+/)[0]; if(!first) return;
+    const m=this.termCmds().filter(c=>c.indexOf(first)===0);
+    if(m.length===1){ const parts=inp.trim().split(/\s+/); parts[0]=m[0]; terms[i]={ ...t, input:parts.join(' ')+' ' }; }
+    else if(m.length>1){ terms[i]={ ...t, history:[...t.history, { t:this.deskPrompt(t.name||t.host,t.cwd)+inp, c:'in' }, { t:m.join('  '), c:'dim' }] }; }
+    else return;
+    this.deskSet({ terms, focus:i });
   }
   deskNav(i,dir){
     const terms=this.deskTerms().slice(), t=terms[i], h=t.cmdHistory||[]; if(!h.length) return;
@@ -3007,9 +3042,9 @@ class Component extends DCLogic {
   deskSubmit(i){
     const terms=this.deskTerms().slice(), t=terms[i], input=t.input, host=t.host;
     const cmdHist = input.trim()? [...(t.cmdHistory||[]), input] : (t.cmdHistory||[]);
-    const echo={ t:this.deskPrompt(host,t.cwd)+input, c:'in' };
+    const echo={ t:this.deskPrompt(t.name||host, t.cwd)+input, c:'in' };
     const ev=this.deskEvidence(host, input);
-    const r = ev ? { lines:ev } : this.execCmd(input, { cwd:t.cwd, host });
+    const r = ev ? { lines:ev } : this.execCmd(input, { cwd:t.cwd, host:(t.name||host) });
     if(r.clear){ terms[i]={ ...t, input:'', history:[], cmdHistory:cmdHist, histIdx:-1 }; this.deskSet({ terms, focus:i }); return; }
     const hist=[...t.history, echo, ...(r.lines||[])];
     terms[i]={ ...t, input:'', histIdx:-1, cmdHistory:cmdHist,
@@ -3047,11 +3082,14 @@ class Component extends DCLogic {
         op:done?'0.55':'1', onClick:()=>this.deskOpen(tk.id) };});
 
     if(!d.ticket){
-      return { show:true, open:false, closed:true, phaseWork:false, lessonLabel:'', nextTicketLabel:'',
+      return { show:true, open:false, closed:true, phaseWork:false, lessonLabel:'', nextTicketLabel:'', termHint:'',
         queueTitle:T('Cola de tickets','Ticket queue'),
         queueHint:T('Elige un aviso. Se abren cuatro sesiones y tienes que averiguar qué pasa mirando en el equipo correcto.',
                     'Pick a ticket. Four sessions open and you have to work out what is wrong by looking on the right box.'),
-        queueCount:nSolved+' / '+all.length+' '+T('resueltos','solved'), queue, hosts:hosts.map(h=>({ name:h.name, role:this.loc(h.role), color:(this.catById(h.cat)||{color:'var(--accent)'}).color })),
+        queueCount:nSolved+' / '+all.length+' '+T('resueltos','solved'), queue, hosts:hosts.map(h=>({ name:h.name, role:this.loc(h.role), color:(this.catById(h.cat)||{color:'var(--accent)'}).color, op:h.mine?'1':'0.55' })),
+        stackNote: this.effectivePlaced().isDemo
+          ? T('Estás usando un puesto de ejemplo. Monta tu stack en «Aprender» y los equipos pasarán a ser los tuyos.','You are on a sample desk. Build your stack in “Learn” and these become your own hosts.')
+          : T('Los equipos salen del stack que has montado.','These hosts come from the stack you built.'),
         terms:[], ticket:null, backLabel:'', onBack:()=>{}, phase:'', suggest:[],
         causes:[], fixes:[], showCauses:false, showFixes:false, showDone:false,
         wrongShow:false, wrongMsg:'', diagnoseLabel:'', onDiagnose:()=>{}, solvedText:'', lessonText:'',
@@ -3061,10 +3099,11 @@ class Component extends DCLogic {
     const tk=all.find(x=>x.id===d.ticket)||all[0], p=prioOf(tk.prio);
     const terms=this.deskTerms().map((t,i)=>{ const h=hosts.find(x=>x.id===t.host)||{}, col=(this.catById(h.cat)||{color:'var(--accent)'}).color;
       const active=(d.focus||0)===i;
-      return { host:t.host, role:this.loc(h.role||{es:'',en:''}), color:col,
+      return { host:t.name||t.host, role:this.loc(h.role||{es:'',en:''}), color:col,
+        mineMark: h.mine? '' : '·', mineTitle: h.mine? '' : (es? 'Equipo de ejemplo: no tienes nada de este tipo en tu stack' : 'Sample host: you have nothing of this kind in your stack'),
         border: active? col : 'var(--border-strong)',
         glow: active? ('0 0 0 3px '+this.hexA(col,0.18)) : 'none',
-        prompt:this.deskPrompt(t.host,t.cwd), input:t.input,
+        prompt:this.deskPrompt(t.name||t.host, t.cwd), input:t.input,
         lines:(t.history||[]).slice().reverse().map(l=>({ t:l.t, color:this.termColor(l.c) })),
         onFocus:()=>this.deskFocus(i), onInput:(e)=>this.deskInput(i,e), onKey:(e)=>this.deskKey(i,e) };});
     const wrongItem = d.wrong ? ((tk.causes||[]).concat(tk.fixes||[])).find(x=>x.id===d.wrong) : null;
@@ -3077,6 +3116,7 @@ class Component extends DCLogic {
       ticket:{ id:tk.id, subject:this.loc(tk.subject), from:this.loc(tk.from), body:this.loc(tk.body),
         prio:p.n, prioColor:p.c, prioBg:this.hexA(p.c,0.14) },
       backLabel:T('← Volver a la cola','← Back to the queue'), onBack:()=>this.deskBack(),
+      termHint:T('↑↓ historial · Tab autocompleta · man <comando> · clic para cambiar de sesión','↑↓ history · Tab completes · man <command> · click to switch session'),
       suggestTitle:T('Por dónde empezar','Where to start'),
       suggest:(tk.suggest||[]).map(c=>({ cmd:c, onClick:()=>this.deskRun(c) })),
       terms, phase:d.phase,
@@ -3088,7 +3128,7 @@ class Component extends DCLogic {
       showDone:d.phase==='done', doneTitle:T('Ticket resuelto','Ticket solved'),
       solvedText:this.loc(tk.solved), lessonText:this.loc(tk.lesson),
       wrongShow:!!wrongItem, wrongMsg: wrongItem? T('Eso no cuadra con lo que dicen las terminales. Vuelve a mirar y prueba otra vez.','That does not match what the terminals are telling you. Look again and try once more.') : '',
-      queueTitle:'', queueHint:'', queueCount:'', queue:[], hosts:[] };
+      queueTitle:'', queueHint:'', queueCount:'', queue:[], hosts:[], stackNote:'' };
   }
   // ---- live metrics dashboard (SVG sparklines, no libs) ----
   tickMetrics(){

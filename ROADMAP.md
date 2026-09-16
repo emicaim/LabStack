@@ -129,7 +129,9 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ **Cola de 5 tickets** con remitente, prioridad y texto de usuario real, y flujo investigar → causa → arreglo con aprendizaje al cerrar.
 - ✅ La gracia didáctica: **el mismo comando contesta distinto según el equipo**. Hay que elegir dónde mirar, no sólo qué escribir. Cada ticket trae falsas pistas que descartan cosas.
 - ✅ Reutiliza `execCmd` (los ~148 comandos) pasándole la sesión; no hay un segundo intérprete.
-- Pendiente si se quiere: más tickets, y que el puesto use el stack que has montado en vez de equipos fijos.
+- ✅ **Los equipos salen del stack que has montado**: el nombre y la etiqueta vienen de la pieza que pusiste (Vault → `vault01`, Windows → `win01`, Redis → `cache01`). Lo que no hayas montado se queda como equipo de ejemplo, marcado.
+- ✅ **Tab autocompleta** y **`man`** funcionan también en el puesto, por sesión.
+- Pendiente si se quiere: más tickets.
 
 ### Corto plazo (alto valor, bajo esfuerzo)
 
