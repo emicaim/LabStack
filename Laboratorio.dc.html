@@ -3370,7 +3370,13 @@ class Component extends DCLogic {
     const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
     const line=norm(raw); if(!line) return null;
     const hit=(tk.evidence||[]).find(ev=>ev.host===host && (ev.cmd||[]).some(c=>line===norm(c)||line.indexOf(norm(c))===0));
-    return hit ? hit.lines.map(l=>({ t:l[0], c:l[1]||'out' })) : null;
+    if(!hit) return null;
+    // Una vez resuelta la incidencia, el mismo comando tiene que contestar
+    // sano. Si siguiera dando el fallo, la simulación se contradiría a sí
+    // misma. Las evidencias que servían para descartar no llevan «fixed»
+    // porque ya estaban bien antes y siguen igual después.
+    const src=(d.phase==='done' && hit.fixed) ? hit.fixed : hit.lines;
+    return src.map(l=>({ t:l[0], c:l[1]||'out' }));
   }
   // ¿este comando tiene evidencia en OTRO equipo del ticket abierto?
   deskOtherHost(host, raw){

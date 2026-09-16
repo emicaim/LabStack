@@ -119,6 +119,13 @@ tks.forEach(tk => {
   // un ticket con toda la pista en un solo equipo no enseña a elegir dónde
   // mirar, que es justo el punto del modo
   if (hosts.size < 2) { mal(n + ': toda la evidencia está en el mismo equipo'); tkMal++; }
+  // si una evidencia enseña el fallo, tiene que saber también cómo se ve
+  // arreglado: si no, al resolver el ticket la terminal seguiría dando el error
+  (tk.evidence || []).forEach(ev => {
+    const rota = (ev.lines || []).some(l => l[1] === 'err');
+    if (rota && !(ev.fixed || []).length) { mal(n + ': "' + ev.cmd[0] + '" en ' + ev.host + ' enseña el fallo pero no cómo queda arreglado'); tkMal++; }
+    if ((ev.fixed || []).some(l => l[1] === 'err')) { mal(n + ': la versión arreglada de "' + ev.cmd[0] + '" sigue teniendo una línea de error'); tkMal++; }
+  });
   const cOk = (tk.causes || []).filter(x => x.correct).length;
   const fOk = (tk.fixes || []).filter(x => x.correct).length;
   if (cOk !== 1) { mal(n + ': tiene ' + cOk + ' causas correctas, debe haber 1'); tkMal++; }
@@ -132,7 +139,9 @@ if (!tkMal) {
   const usados = new Set();
   tks.forEach(tk => (tk.evidence || []).forEach(e => usados.add(e.host)));
   const media = (tks.reduce((s, tk) => s + (tk.evidence || []).length, 0) / tks.length).toFixed(1);
+  const conFix = tks.reduce((s, tk) => s + (tk.evidence || []).filter(e => (e.fixed || []).length).length, 0);
   bien(tks.length + ' tickets: evidencia en ' + usados.size + ' equipos, ' + media + ' pistas de media, una sola respuesta buena cada uno');
+  bien(conFix + ' evidencias saben además cómo se ven una vez arreglado el problema');
 }
 
 // --- textos ---

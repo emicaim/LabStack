@@ -37,17 +37,33 @@ window.LABSTACK.tickets = function () {
           ['● nginx.service - A high performance web server', 'out'],
           ['   Loaded: loaded (/lib/systemd/system/nginx.service; enabled)', 'dim'],
           ['   Active: failed (Result: exit-code) desde hace 21min', 'err'],
-          ['  Process: 1841 ExecStart=/usr/sbin/nginx (code=exited, status=1/FAILURE)', 'dim'] ] },
+          ['  Process: 1841 ExecStart=/usr/sbin/nginx (code=exited, status=1/FAILURE)', 'dim'] ],
+          fixed: [
+            ["● nginx.service - A high performance web server", 'out'],
+            ["   Loaded: loaded (/lib/systemd/system/nginx.service; enabled)", 'dim'],
+            ["   Active: active (running) desde hace 2min", 'ok'],
+            ["  Process: 6021 ExecStart=/usr/sbin/nginx (code=exited, status=0/SUCCESS)", 'dim'] ] },
         { host: 'web01', cmd: ['journalctl -u nginx', 'journalctl'], lines: [
           ['nginx[1841]: nginx: [emerg] bind() to 0.0.0.0:80 failed', 'err'],
           ['nginx[1841]: (98: Address already in use)', 'err'],
-          ['systemd[1]: nginx.service: Failed with result \'exit-code\'.', 'dim'] ] },
+          ['systemd[1]: nginx.service: Failed with result \'exit-code\'.', 'dim'] ],
+          fixed: [
+            ["systemd[1]: Starting A high performance web server...", 'dim'],
+            ["systemd[1]: Started A high performance web server.", 'ok'],
+            ["(sin errores desde el arranque)", 'dim'] ] },
         { host: 'web01', cmd: ['ss -lntp', 'netstat -lntp', 'lsof -i :80'], lines: [
           ['State   Local Address:Port    Process', 'dim'],
           ['LISTEN  0.0.0.0:8080          node (pid=2210)', 'out'],
-          ['LISTEN  0.0.0.0:80            python3 (pid=2314)  ← ocupa el 80', 'err'] ] },
+          ['LISTEN  0.0.0.0:80            python3 (pid=2314)  ← ocupa el 80', 'err'] ],
+          fixed: [
+            ["State   Local Address:Port    Process", 'dim'],
+            ["LISTEN  0.0.0.0:80            nginx (pid=6021)", 'ok'],
+            ["LISTEN  0.0.0.0:8080          node (pid=2210)", 'out'] ] },
         { host: 'web01', cmd: ['curl -I http://web01', 'curl -I localhost', 'curl localhost'], lines: [
-          ['HTTP/1.1 502 Bad Gateway', 'err'], ['Server: haproxy', 'dim'] ] },
+          ['HTTP/1.1 502 Bad Gateway', 'err'], ['Server: haproxy', 'dim'] ],
+          fixed: [
+            ["HTTP/1.1 200 OK", 'ok'],
+            ["Server: nginx", 'dim'] ] },
         { host: 'fw01', cmd: ['iptables -L -n', 'ufw status'], lines: [
           ['Chain INPUT (policy DROP)', 'dim'],
           ['ACCEPT  tcp  --  0.0.0.0/0  0.0.0.0/0  tcp dpt:80', 'ok'],
@@ -85,7 +101,11 @@ window.LABSTACK.tickets = function () {
         { host: 'web01', cmd: ['psql -h db01', 'psql'], lines: [
           ['psql: error: connection to server at "db01" (10.0.2.20), port 5432 failed:', 'err'],
           ['        Connection timed out', 'err'],
-          ['(«timed out», no «refused»: alguien se está comiendo los paquetes en silencio)', 'dim'] ] },
+          ['(«timed out», no «refused»: alguien se está comiendo los paquetes en silencio)', 'dim'] ],
+          fixed: [
+            ["psql (16.2)  Type \"help\" for help.", 'ok'],
+            ["labdb=# ", 'out'],
+            ["(conecta a la primera)", 'dim'] ] },
         { host: 'db01', cmd: ['ss -lntp', 'netstat -lntp'], lines: [
           ['State   Local Address:Port    Process', 'dim'],
           ['LISTEN  0.0.0.0:5432          postgres (pid=903)', 'ok'],
@@ -96,7 +116,11 @@ window.LABSTACK.tickets = function () {
         { host: 'fw01', cmd: ['iptables -L -n', 'ufw status'], lines: [
           ['Chain FORWARD (policy ACCEPT)', 'dim'],
           ['DROP    tcp  --  10.0.1.0/24  10.0.2.20  tcp dpt:5432   /* regla nueva ayer 17:40 */', 'err'],
-          ['ACCEPT  tcp  --  0.0.0.0/0    0.0.0.0/0  tcp dpt:443', 'ok'] ] },
+          ['ACCEPT  tcp  --  0.0.0.0/0    0.0.0.0/0  tcp dpt:443', 'ok'] ],
+          fixed: [
+            ["Chain FORWARD (policy ACCEPT)", 'dim'],
+            ["ACCEPT  tcp  --  10.0.1.0/24  10.0.2.20  tcp dpt:5432   /* app -> bd, documentada */", 'ok'],
+            ["ACCEPT  tcp  --  0.0.0.0/0    0.0.0.0/0  tcp dpt:443", 'ok'] ] },
       ],
       causes: [
         { id: 'c1', text: F('Una regla nueva del firewall bloquea el 5432 desde la red de aplicación', 'A new firewall rule blocks 5432 from the app network'), correct: true },
@@ -127,15 +151,28 @@ window.LABSTACK.tickets = function () {
           ['gi0/10   UP     ---', 'ok'],
           ['gi0/12   DOWN   ---   ← fila de planta 2', 'err'],
           ['gi0/13   DOWN   ---', 'err'],
-          ['gi0/14   DOWN   ---', 'err'] ] },
+          ['gi0/14   DOWN   ---', 'err'] ],
+          fixed: [
+            ["gi0/01   UP     10.0.1.1/24", 'ok'],
+            ["gi0/12   UP     ---   ← planta 2 de vuelta", 'ok'],
+            ["gi0/13   UP     ---", 'ok'],
+            ["gi0/14   UP     ---", 'ok'] ] },
         { host: 'sw-core', cmd: ['ethtool gi0/12', 'ethtool'], lines: [
           ['Settings for gi0/12:', 'out'],
           ['        Speed: Unknown!', 'dim'],
           ['        Link detected: no', 'err'],
-          ['        Port state: administratively down  ← lo apagó alguien', 'err'] ] },
+          ['        Port state: administratively down  ← lo apagó alguien', 'err'] ],
+          fixed: [
+            ["Settings for gi0/12:", 'out'],
+            ["        Speed: 1000Mb/s", 'ok'],
+            ["        Link detected: yes", 'ok'],
+            ["        Port state: up", 'ok'] ] },
         { host: 'sw-core', cmd: ['dmesg', 'journalctl'], lines: [
           ['[ayer 19:02] mgmt: user=backup cmd="interface range gi0/12-14 / shutdown"', 'err'],
-          ['[ayer 19:02] link gi0/12 gi0/13 gi0/14 state DOWN', 'dim'] ] },
+          ['[ayer 19:02] link gi0/12 gi0/13 gi0/14 state DOWN', 'dim'] ],
+          fixed: [
+            ["[hoy 10:05] mgmt: user=tu cmd=\"interface range gi0/12-14 / no shutdown\"", 'ok'],
+            ["[hoy 10:05] link gi0/12 gi0/13 gi0/14 state UP", 'ok'] ] },
         { host: 'sw-core', cmd: ['arp -a'], lines: [
           ['10.0.1.10  aa:bb:cc:00:11:22  gi0/01', 'out'],
           ['(ninguna entrada de la planta 2: no llegan ni a pedir IP)', 'dim'] ] },
@@ -143,7 +180,11 @@ window.LABSTACK.tickets = function () {
           ['PING 10.0.1.60 (10.0.1.60) 56 data bytes', 'out'],
           ['Request timeout for icmp_seq=1', 'err'],
           ['eth0   UP   10.0.1.10/24   ← este servidor tiene su enlace bien', 'ok'],
-          ['(el servidor está sano; lo que no llega es el camino hasta la planta 2)', 'dim'] ] },
+          ['(el servidor está sano; lo que no llega es el camino hasta la planta 2)', 'dim'] ],
+          fixed: [
+            ["PING 10.0.1.60 (10.0.1.60) 56 data bytes", 'out'],
+            ["64 bytes from 10.0.1.60: icmp_seq=1 ttl=63 time=0.51 ms", 'ok'],
+            ["eth0   UP   10.0.1.10/24", 'ok'] ] },
       ],
       causes: [
         { id: 'c1', text: F('Alguien desactivó esos puertos del switch por error', 'Someone disabled those switch ports by mistake'), correct: true },
@@ -172,15 +213,28 @@ window.LABSTACK.tickets = function () {
         { host: 'db01', cmd: ['df -h', 'df'], lines: [
           ['Filesystem      Size  Used Avail Use% Mounted on', 'dim'],
           ['/dev/sda1        50G   12G   36G  26% /', 'out'],
-          ['/dev/sda2       200G  190G  8.0G  96% /var', 'err'] ] },
+          ['/dev/sda2       200G  190G  8.0G  96% /var', 'err'] ],
+          fixed: [
+            ["Filesystem      Size  Used Avail Use% Mounted on", 'dim'],
+            ["/dev/sda1        50G   12G   36G  26% /", 'out'],
+            ["/dev/sda2       200G   62G  138G  31% /var", 'ok'] ] },
         { host: 'db01', cmd: ['du -sh /var/log', 'du -sh /var', 'du'], lines: [
           ['68G     /var/log', 'err'],
           ['121G    /var/lib/postgresql', 'out'],
-          ['(los logs se han comido un tercio del disco)', 'dim'] ] },
+          ['(los logs se han comido un tercio del disco)', 'dim'] ],
+          fixed: [
+            ["2,1G    /var/log", 'ok'],
+            ["121G    /var/lib/postgresql", 'out'],
+            ["(los registros vuelven a un tamaño normal)", 'dim'] ] },
         { host: 'db01', cmd: ['ls -la /var/log', 'ls /var/log'], lines: [
           ['-rw-r-----  41G  postgresql-2026.log      ← sin rotar desde enero', 'err'],
           ['-rw-r-----  27G  postgresql-slow.log', 'err'],
-          ['-rw-r--r--  12M  syslog', 'out'] ] },
+          ['-rw-r--r--  12M  syslog', 'out'] ],
+          fixed: [
+            ["-rw-r-----  1,2G  postgresql.log", 'ok'],
+            ["-rw-r-----  340M  postgresql.log.1.gz", 'ok'],
+            ["-rw-r-----  312M  postgresql.log.2.gz", 'ok'],
+            ["(logrotate activo, 14 días de retención)", 'dim'] ] },
         { host: 'db01', cmd: ['systemctl status postgresql', 'service postgresql status'], lines: [
           ['● postgresql.service - PostgreSQL RDBMS', 'out'],
           ['   Active: active (running) — todavía acepta escrituras', 'ok'] ] },
@@ -216,16 +270,27 @@ window.LABSTACK.tickets = function () {
       evidence: [
         { host: 'fw01', cmd: ['uptime', 'w'], lines: [
           ['09:14:02 up 92 days,  load average: 7.82, 6.40, 3.10', 'err'],
-          ['(con 4 núcleos, una carga de 7.8 es el doble de lo que aguanta)', 'dim'] ] },
+          ['(con 4 núcleos, una carga de 7.8 es el doble de lo que aguanta)', 'dim'] ],
+          fixed: [
+            ["09:14:02 up 92 días,  load average: 1.92, 2.10, 2.40", 'ok'],
+            ["(con 8 núcleos, esa carga va holgada)", 'dim'] ] },
         { host: 'fw01', cmd: ['top', 'htop', 'ps'], lines: [
           ['  PID USER      %CPU  COMMAND', 'dim'],
           ['  812 root     382.4  openvpn --config corp.conf', 'err'],
-          ['  903 root       4.1  iptables-restore', 'out'] ] },
+          ['  903 root       4.1  iptables-restore', 'out'] ],
+          fixed: [
+            ["  PID USER      %CPU  COMMAND", 'dim'],
+            ["  812 root      96.2  openvpn --config corp.conf", 'ok'],
+            ["  903 root       3.8  iptables-restore", 'out'] ] },
         { host: 'fw01', cmd: ['nproc', 'lscpu'], lines: [['4', 'out'], ['(4 vCPU para cifrar todo el tráfico de la empresa)', 'dim']] },
         { host: 'fw01', cmd: ['vmstat', 'free'], lines: [
           ['procs -----------memory----------  -----cpu-----', 'dim'],
           ['  8  0   1240336  512000  2104320   us 94  sy 5  id 1', 'err'],
-          ['(la CPU está al 99%, la memoria sobra: no es falta de RAM)', 'dim'] ] },
+          ['(la CPU está al 99%, la memoria sobra: no es falta de RAM)', 'dim'] ],
+          fixed: [
+            ["procs -----------memory----------  -----cpu-----", 'dim'],
+            ["  1  0   1240336  512000  2104320   us 41  sy 6  id 53", 'ok'],
+            ["(la CPU respira: el cifrado ya no la monopoliza)", 'dim'] ] },
         { host: 'sw-core', cmd: ['ip -br link', 'ethtool gi0/01'], lines: [
           ['gi0/01   UP   1000Mb/s full duplex   utilización 22%', 'ok'],
           ['(la línea va holgada: el cuello no está en la red)', 'dim'] ] },
@@ -257,14 +322,22 @@ window.LABSTACK.tickets = function () {
         { host: 'web01', cmd: ['openssl s_client', 'curl -I https://web01', 'curl https://web01'], lines: [
           ['subject=CN = tienda.empresa.com', 'out'],
           ['notAfter=Aug 14 09:12:00 2026 GMT', 'err'],
-          ['Verify return code: 10 (certificate has expired)  ← caducó hace 33 días', 'err'] ] },
+          ['Verify return code: 10 (certificate has expired)  ← caducó hace 33 días', 'err'] ],
+          fixed: [
+            ["subject=CN = tienda.empresa.com", 'out'],
+            ["notAfter=Dec 15 09:12:00 2026 GMT", 'ok'],
+            ["Verify return code: 0 (ok)", 'ok'] ] },
         { host: 'web01', cmd: ['date'], lines: [
           ['lun 16 sep 2026 09:41:02 CEST', 'out'],
           ['(la fecha del servidor es correcta: no es el reloj)', 'dim'] ] },
         { host: 'web01', cmd: ['ls -la /etc/letsencrypt', 'ls /etc/letsencrypt', 'systemctl status certbot'], lines: [
           ['● certbot.timer - Run certbot twice daily', 'out'],
           ['   Active: failed — el temporizador lleva 3 meses sin ejecutarse', 'err'],
-          ['-rw-r--r--  fullchain.pem   emitido el 16 may 2026', 'dim'] ] },
+          ['-rw-r--r--  fullchain.pem   emitido el 16 may 2026', 'dim'] ],
+          fixed: [
+            ["● certbot.timer - Run certbot twice daily", 'out'],
+            ["   Active: active (waiting) — próxima ejecución en 8h", 'ok'],
+            ["-rw-r--r--  fullchain.pem   emitido hoy", 'ok'] ] },
         { host: 'fw01', cmd: ['iptables -L -n', 'ufw status'], lines: [
           ['ACCEPT  tcp  --  0.0.0.0/0  0.0.0.0/0  tcp dpt:443', 'ok'],
           ['(el 443 está abierto y llega tráfico: el firewall no pinta nada aquí)', 'dim'] ] },
@@ -297,10 +370,19 @@ window.LABSTACK.tickets = function () {
           ['gi0/22   RX broadcast 48.912.334   (hace 20 min: 1.204)', 'err'],
           ['gi0/23   RX broadcast 48.910.877   (hace 20 min: 1.198)', 'err'],
           ['gi0/01   RX broadcast 2.410', 'out'],
-          ['(dos bocas con millones de broadcast: algo se está repitiendo solo)', 'dim'] ] },
+          ['(dos bocas con millones de broadcast: algo se está repitiendo solo)', 'dim'] ],
+          fixed: [
+            ["gi0/22   RX broadcast 1.284", 'ok'],
+            ["gi0/23   RX broadcast 1.271", 'ok'],
+            ["gi0/01   RX broadcast 2.455", 'ok'],
+            ["(los contadores vuelven a cifras normales)", 'dim'] ] },
         { host: 'sw-core', cmd: ['dmesg', 'journalctl'], lines: [
           ['[09:22:14] LOOP DETECT: trama propia recibida de vuelta por gi0/23', 'err'],
-          ['[09:22:14] gi0/22 <-> gi0/23 forman un bucle de capa 2', 'err'] ] },
+          ['[09:22:14] gi0/22 <-> gi0/23 forman un bucle de capa 2', 'err'] ],
+          fixed: [
+            ["[hoy 09:31] gi0/23 link down (cable retirado)", 'out'],
+            ["[hoy 09:32] loop-guard habilitado en las bocas de usuario", 'ok'],
+            ["(sin detecciones de bucle desde entonces)", 'dim'] ] },
         { host: 'web01', cmd: ['uptime', 'top', 'w'], lines: [
           ['09:41:02 up 61 días,  load average: 0.31, 0.28, 0.25', 'ok'],
           ['(el servidor está tranquilo: no es carga, es la red)', 'dim'] ] },
@@ -335,15 +417,26 @@ window.LABSTACK.tickets = function () {
         { host: 'web01', cmd: ['dmesg', 'journalctl -k'], lines: [
           ['[08:14:02] Out of memory: Killed process 4412 (java) total-vm:6291456kB', 'err'],
           ['[11:47:51] Out of memory: Killed process 5108 (java) total-vm:6288900kB', 'err'],
-          ['(no se cae: el propio sistema lo está matando por falta de memoria)', 'dim'] ] },
+          ['(no se cae: el propio sistema lo está matando por falta de memoria)', 'dim'] ],
+          fixed: [
+            ["[hoy 10:12] cgroup: límite de memoria fijado para app.service (3G)", 'ok'],
+            ["(ninguna muerte por falta de memoria desde el cambio)", 'dim'] ] },
         { host: 'web01', cmd: ['free -h', 'free'], lines: [
           ['               total        used        free', 'dim'],
           ['Mem:            3,8Gi       3,6Gi       112Mi', 'err'],
-          ['Swap:              0B          0B          0B  ← sin swap', 'err'] ] },
+          ['Swap:              0B          0B          0B  ← sin swap', 'err'] ],
+          fixed: [
+            ["               total        used        free", 'dim'],
+            ["Mem:            7,8Gi       4,1Gi       3,1Gi", 'ok'],
+            ["Swap:           2,0Gi          0B       2,0Gi", 'ok'] ] },
         { host: 'web01', cmd: ['systemctl status', 'service status', 'ps'], lines: [
           ['● app.service - Tienda', 'out'],
           ['   Active: active (running) desde hace 41 min', 'out'],
-          ['   (se ha reiniciado 6 veces hoy)', 'err'] ] },
+          ['   (se ha reiniciado 6 veces hoy)', 'err'] ],
+          fixed: [
+            ["● app.service - Tienda", 'out'],
+            ["   Active: active (running) desde hace 6h", 'ok'],
+            ["   (0 reinicios desde el arreglo)", 'ok'] ] },
         { host: 'db01', cmd: ['free -h', 'free', 'uptime'], lines: [
           ['Mem:           15Gi        6,1Gi       8,4Gi', 'ok'],
           ['(a la base de datos le sobra memoria: el problema no está aquí)', 'dim'] ] },
@@ -375,14 +468,22 @@ window.LABSTACK.tickets = function () {
         { host: 'web01', cmd: ['nslookup intranet.empresa.local', 'nslookup', 'dig'], lines: [
           ['Server:  10.0.1.2', 'dim'],
           ['** server can\'t find intranet.empresa.local: SERVFAIL', 'err'],
-          ['(el nombre no se resuelve; la máquina que debería contestar es 10.0.1.2)', 'dim'] ] },
+          ['(el nombre no se resuelve; la máquina que debería contestar es 10.0.1.2)', 'dim'] ],
+          fixed: [
+            ["Server:  10.0.1.2", 'dim'],
+            ["Name:    intranet.empresa.local", 'ok'],
+            ["Address: 10.0.2.30", 'ok'] ] },
         { host: 'web01', cmd: ['ping 10.0.2.30', 'ping -c1 10.0.2.30', 'curl 10.0.2.30'], lines: [
           ['64 bytes from 10.0.2.30: icmp_seq=1 ttl=63 time=0.388 ms', 'ok'],
           ['(por número llega perfectamente: la intranet está viva y la red también)', 'dim'] ] },
         { host: 'fw01', cmd: ['ss -lntp', 'netstat -lntp', 'systemctl status dnsmasq'], lines: [
           ['● dnsmasq.service - DNS interno', 'out'],
           ['   Active: inactive (dead) desde el reinicio de anoche', 'err'],
-          ['   Loaded: loaded (disabled)  ← no arranca solo al encender', 'err'] ] },
+          ['   Loaded: loaded (disabled)  ← no arranca solo al encender', 'err'] ],
+          fixed: [
+            ["● dnsmasq.service - DNS interno", 'out'],
+            ["   Active: active (running) desde hace 12min", 'ok'],
+            ["   Loaded: loaded (enabled)  ← ya arranca solo", 'ok'] ] },
         { host: 'sw-core', cmd: ['ip -br link', 'ip link', 'arp -a'], lines: [
           ['gi0/01   UP     1000Mb/s', 'ok'],
           ['gi0/12   UP     1000Mb/s', 'ok'],
@@ -416,14 +517,25 @@ window.LABSTACK.tickets = function () {
           ['-rw-r-----  0  dump-2026-09-15.sql', 'err'],
           ['-rw-r-----  0  dump-2026-09-14.sql', 'err'],
           ['-rw-r-----  0  dump-2026-09-13.sql', 'err'],
-          ['(todos los volcados pesan cero bytes)', 'err'] ] },
+          ['(todos los volcados pesan cero bytes)', 'err'] ],
+          fixed: [
+            ["-rw-r-----  4,2G  dump-2026-09-16.sql.gz", 'ok'],
+            ["-rw-r-----  4,1G  dump-2026-09-15.sql.gz", 'ok'],
+            ["-rw-r-----  4,1G  dump-2026-09-14.sql.gz", 'ok'] ] },
         { host: 'db01', cmd: ['du -sh /backup', 'du'], lines: [
           ['4,0K    /backup', 'err'],
-          ['(tres semanas de copias ocupan cuatro kilobytes)', 'dim'] ] },
+          ['(tres semanas de copias ocupan cuatro kilobytes)', 'dim'] ],
+          fixed: [
+            ["96G     /backup", 'ok'],
+            ["(las copias vuelven a pesar lo que tienen que pesar)", 'dim'] ] },
         { host: 'db01', cmd: ['journalctl -u backup', 'journalctl', 'cat /var/log/backup.log'], lines: [
           ['pg_dump: error: connection to server failed: role "backup" does not exist', 'err'],
           ['backup.sh: línea 12: pg_dump ... || true', 'err'],
-          ['backup.service: Succeeded.  ← termina en verde igualmente', 'err'] ] },
+          ['backup.service: Succeeded.  ← termina en verde igualmente', 'err'] ],
+          fixed: [
+            ["pg_dump: 4,2 GB volcados en 6m18s", 'ok'],
+            ["backup.sh: verificación de restauración: OK", 'ok'],
+            ["backup.service: Succeeded.", 'ok'] ] },
         { host: 'db01', cmd: ['df -h', 'df'], lines: [
           ['/dev/sdc1       500G   18G  482G   4% /backup', 'ok'],
           ['(sitio de sobra: no es falta de disco)', 'dim'] ] },
@@ -458,14 +570,25 @@ window.LABSTACK.tickets = function () {
       evidence: [
         { host: 'sw-core', cmd: ['arp -a', 'arp'], lines: [
           ['10.0.1.55  00:1b:44:11:3a:b7  gi0/07', 'out'],
-          ['10.0.1.55  3c:52:82:04:9e:11  gi0/19   ← la misma IP en dos bocas', 'err'] ] },
+          ['10.0.1.55  3c:52:82:04:9e:11  gi0/19   ← la misma IP en dos bocas', 'err'] ],
+          fixed: [
+            ["10.0.1.55  00:1b:44:11:3a:b7  gi0/07   (impresora, reserva DHCP)", 'ok'],
+            ["10.0.1.62  3c:52:82:04:9e:11  gi0/19   (portátil, dirección nueva)", 'ok'] ] },
         { host: 'sw-core', cmd: ['dmesg', 'journalctl'], lines: [
           ['[10:02:11] duplicate IP 10.0.1.55 detected, sent from 3c:52:82:04:9e:11', 'err'],
-          ['[10:04:48] duplicate IP 10.0.1.55 detected, sent from 00:1b:44:11:3a:b7', 'err'] ] },
+          ['[10:04:48] duplicate IP 10.0.1.55 detected, sent from 00:1b:44:11:3a:b7', 'err'] ],
+          fixed: [
+            ["[hoy 10:20] reserva DHCP creada para 00:1b:44:11:3a:b7 -> 10.0.1.55", 'ok'],
+            ["(sin avisos de dirección duplicada desde entonces)", 'dim'] ] },
         { host: 'web01', cmd: ['ping 10.0.1.55', 'ping -c1 10.0.1.55'], lines: [
           ['64 bytes from 10.0.1.55: icmp_seq=1 ttl=64 time=0.9 ms', 'ok'],
           ['Request timeout for icmp_seq=2', 'err'],
-          ['64 bytes from 10.0.1.55: icmp_seq=3 ttl=255 time=1.1 ms  ← otro ttl, otra máquina', 'err'] ] },
+          ['64 bytes from 10.0.1.55: icmp_seq=3 ttl=255 time=1.1 ms  ← otro ttl, otra máquina', 'err'] ],
+          fixed: [
+            ["64 bytes from 10.0.1.55: icmp_seq=1 ttl=64 time=0.9 ms", 'ok'],
+            ["64 bytes from 10.0.1.55: icmp_seq=2 ttl=64 time=0.8 ms", 'ok'],
+            ["64 bytes from 10.0.1.55: icmp_seq=3 ttl=64 time=0.9 ms", 'ok'],
+            ["(siempre el mismo ttl: contesta una sola máquina)", 'dim'] ] },
         { host: 'fw01', cmd: ['iptables -L -n', 'ufw status', 'top'], lines: [
           ['Chain FORWARD (policy ACCEPT) — sin reglas para 10.0.1.55', 'ok'],
           ['(el firewall ni la mira: el problema está dentro de la red local)', 'dim'] ] },
@@ -497,13 +620,22 @@ window.LABSTACK.tickets = function () {
         { host: 'db01', cmd: ['cat /proc/mdstat', 'cat /proc/mdstat ', 'mdadm'], lines: [
           ['md0 : active raid1 sdb1[1](F) sda1[0]', 'err'],
           ['      1953512448 blocks [2/1] [U_]   ← un disco fuera del espejo', 'err'],
-          ['      [===>.................]  recovery = 18.4% finish=284.1min', 'err'] ] },
+          ['      [===>.................]  recovery = 18.4% finish=284.1min', 'err'] ],
+          fixed: [
+            ["md0 : active raid1 sdb1[1] sda1[0]", 'ok'],
+            ["      1953512448 blocks [2/2] [UU]   ← espejo completo", 'ok'] ] },
         { host: 'db01', cmd: ['dmesg', 'journalctl -k'], lines: [
           ['[03:11:42] blk_update_request: I/O error, dev sdb, sector 1180492', 'err'],
-          ['[03:11:44] md/raid1:md0: Disk failure on sdb1, disabling device', 'err'] ] },
+          ['[03:11:44] md/raid1:md0: Disk failure on sdb1, disabling device', 'err'] ],
+          fixed: [
+            ["[hoy 11:40] md/raid1:md0: disco sdb1 añadido, reconstrucción iniciada", 'out'],
+            ["[hoy 14:02] md/raid1:md0: reconstrucción completada", 'ok'] ] },
         { host: 'db01', cmd: ['top', 'vmstat', 'iostat'], lines: [
           ['%Cpu(s):  4,1 us,  2,0 sy, 88,3 wa  ← casi todo esperando al disco', 'err'],
-          ['(la CPU no hace nada: está esperando a que el disco conteste)', 'dim'] ] },
+          ['(la CPU no hace nada: está esperando a que el disco conteste)', 'dim'] ],
+          fixed: [
+            ["%Cpu(s): 18,4 us,  3,1 sy,  1,2 wa", 'ok'],
+            ["(la espera de disco vuelve a ser residual)", 'dim'] ] },
         { host: 'db01', cmd: ['df -h', 'df', 'free -h'], lines: [
           ['/dev/md0        1,8T  640G  1,1T  37% /var/lib/postgresql', 'ok'],
           ['(espacio de sobra y memoria normal: no es capacidad)', 'dim'] ] },

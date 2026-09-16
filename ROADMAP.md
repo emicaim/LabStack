@@ -145,6 +145,11 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ La lista avisa de **en qué sesión va a escribir**, para que pinchar no caiga en la máquina equivocada sin querer.
 - ✅ El comando correcto en el equipo equivocado **avisa de que en otro sí cuenta algo** — sin decir en cuál. Deja de ser un callejón sin salida y sigue habiendo que elegir.
 
+### ✅ Hecho — el Puesto es coherente tras resolver
+- ✅ Al resolver un ticket, **los mismos comandos contestan sanos**: nginx arranca, el 200 OK vuelve, el espejo sale `[UU]`, el disco baja al 31%. 34 evidencias con su versión «ya arreglado».
+- ✅ Las que sólo servían para **descartar no cambian**: ya estaban bien antes y siguen igual.
+- ✅ Regla de contenido que lo impide en el futuro: una evidencia con línea de error sin su versión sana rompe el test.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

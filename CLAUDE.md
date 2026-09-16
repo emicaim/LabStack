@@ -162,6 +162,8 @@ Tab completion is `deskComplete(i)`, per session, sharing `termCmds()` with Term
 
 **The right command on the wrong host is a signpost, not a dead end.** `deskOtherHost()` checks whether the typed command has evidence on a *different* host of the open ticket and, if so, appends one dim line saying so. It deliberately **does not name the host** — choosing the box stays the exercise; the test asserts the line never leaks a hostname. A command that is evidence for nobody (`uptime`, `df -h`) must not trigger it.
 
+**Every piece of evidence that shows a fault also carries `fixed`** — how that same command answers once the incident is resolved. `deskEvidence()` returns `fixed` when `phase === 'done'`. Without it the simulation contradicts itself: you apply the fix, re-run the check and it still reports the failure. Evidence that only ruled something out has **no** `fixed` — it was healthy before and stays healthy, and changing it would be a lie in the other direction. `content-test.js` fails any evidence with an `err` line and no `fixed`, and any `fixed` that still contains an `err` line; `desk-test.js` resolves all twelve tickets and re-runs every check.
+
 **Writing a ticket** (`contenido/tickets.js`): give it evidence on **more than one host**, including at least one that rules something out — a firewall that turns out to be fine is as instructive as the broken thing. Keep the distinctive line long enough to be unique: `desk-test.js` matches on the longest line precisely because a short one like `4` collides with generic output.
 
 ### Map artwork (schematic illustrations)

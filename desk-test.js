@@ -172,5 +172,47 @@ const delata = todos.filter(n => n !== 'fw01' && linea.indexOf(n) >= 0);
 if (delata.length) mal('el aviso nombra el equipo donde está la pista: ' + delata.join(', '));
 else bien('el aviso no dice cuál es: sigue habiendo que elegir');
 
+
+// --- tras resolver, el mismo comando tiene que contestar sano ---
+console.log('\n  coherencia tras resolver:');
+let incoh = [];
+tickets.forEach(tk => {
+  c.deskOpen(tk.id);
+  // resolver el ticket entero
+  let v = c.renderVals().desk;
+  v.onDiagnose();
+  v = c.renderVals().desk;
+  v.causes[tk.causes.findIndex(x => x.correct)].onClick();
+  v = c.renderVals().desk;
+  v.fixes[tk.fixes.findIndex(x => x.correct)].onClick();
+  // y ahora relanzar cada evidencia que mostraba el fallo
+  (tk.evidence || []).filter(e => (e.fixed || []).length).forEach(ev => {
+    const j = hosts.indexOf(ev.host);
+    escribir(j, ev.cmd[0]);
+    const t = texto(j);
+    const rota = ev.lines.find(l => l[1] === 'err');
+    if (rota && t.indexOf(rota[0]) >= 0) incoh.push(tk.id + ' » ' + ev.host + ':' + ev.cmd[0] + ' sigue dando el fallo');
+    const sana = ev.fixed.find(l => l[1] === 'ok') || ev.fixed[0];
+    if (t.indexOf(sana[0]) < 0) incoh.push(tk.id + ' » ' + ev.host + ':' + ev.cmd[0] + ' no muestra la salida sana');
+  });
+});
+if (incoh.length) incoh.forEach(x => mal(x));
+else {
+  const n = tickets.reduce((s, tk) => s + (tk.evidence || []).filter(e => (e.fixed || []).length).length, 0);
+  bien('las ' + n + ' evidencias con fallo contestan sanas una vez resuelto el ticket');
+}
+// y las que servían para descartar no cambian: ya estaban bien
+c.deskOpen('T-1042');
+const descarta = c.tickets().find(x => x.id === 'T-1042').evidence.find(e => !(e.fixed || []).length);
+const jd = hosts.indexOf(descarta.host);
+escribir(jd, descarta.cmd[0]);
+const antes = texto(jd).indexOf(descarta.lines[0][0]) >= 0;
+let v0 = c.renderVals().desk; v0.onDiagnose();
+v0 = c.renderVals().desk; v0.causes[c.tickets().find(x => x.id === 'T-1042').causes.findIndex(x => x.correct)].onClick();
+v0 = c.renderVals().desk; v0.fixes[c.tickets().find(x => x.id === 'T-1042').fixes.findIndex(x => x.correct)].onClick();
+escribir(jd, descarta.cmd[0]);
+if (!antes || texto(jd).indexOf(descarta.lines[0][0]) < 0) mal('una evidencia que sólo descartaba ha cambiado al resolver');
+else bien('las que sólo servían para descartar contestan igual antes y después');
+
 console.log(fail? ('\n'+fail+' fallo(s)') : '\nPuesto OK');
 process.exit(fail?1:0);
