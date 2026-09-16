@@ -228,10 +228,9 @@
       <!-- HOME -->
       <sc-if value="{{ showHome }}" hint-placeholder-val="{{ false }}">
         <div style="max-width:940px; margin:0 auto; padding:28px 4px 24px; min-height:calc(100vh - 210px); display:flex; flex-direction:column; justify-content:center; animation:fadeUp .3s ease both;">
-          <div style="text-align:center; margin-bottom:34px;">
-            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">{{ home.kicker }}</div>
-            <h1 style="font-family:'Inter',sans-serif; font-size:32px; font-weight:800; letter-spacing:-0.025em; margin:0 0 10px; line-height:1.15;">{{ home.title }}</h1>
-            <p style="font-size:15px; color:var(--text-muted); line-height:1.6; margin:0 auto; max-width:560px;">{{ home.lead }}</p>
+          <div style="text-align:center; margin-bottom:38px;">
+            <h1 style="font-family:'Inter',sans-serif; font-size:44px; font-weight:800; letter-spacing:-0.03em; margin:0 0 6px; line-height:1.05;">{{ home.brand }}</h1>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--text-faint);">{{ home.by }}</div>
           </div>
 
           <sc-if value="{{ home.hasProgress }}" hint-placeholder-val="{{ false }}">
@@ -4421,7 +4420,7 @@ class Component extends DCLogic {
     // ---- inicio: una sola puerta de entrada ----
     const placedTotal = stackIds.concat(transIds).reduce((n,id)=>n+placedCount(id), 0);
     const home = {
-      kicker:t.homeKicker, title:t.homeTitle, lead:t.homeLead,
+      brand:t.title, by:'by FOKO SOFT',
       hasProgress: placedTotal>0,
       continueTitle: t.homeContinue,
       continueDesc: placedTotal+' '+(S.lang==='es'?'piezas montadas':'pieces placed')+' · '+t.homeContinueDesc,
