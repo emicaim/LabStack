@@ -171,6 +171,19 @@ The ten stackable layers are rendered grouped into the **five conceptual planes*
 
 The seven transversals render as a horizontal **belt** below the stack (`grid-template-columns:repeat(auto-fit,minmax(108px,1fr))`), not as vertical rails. Their labels are horizontal; do not reintroduce `writing-mode:vertical-rl`.
 
+## Console noise at load (expected, not a bug)
+
+Opening the app logs **16 `<path> attribute d: Expected moveto…` errors**. They are inherent to the `.dc.html` format and **do not affect rendering**:
+
+The browser parses the inline `<x-dc>` template into real DOM *before* the runtime compiles it. SVG validates geometry attributes, so a literal `d="{{ x }}"` is rejected and logged. The string itself survives in the attribute, the runtime reads it with `getAttribute` and compiles it correctly. Measured identical over `file://` and `http://` — it has nothing to do with the protocol. Fixing it would need runtime support (the template would have to live somewhere inert), and `support.js` is generated outside this repo.
+
+Two families of error **were** removed and must not come back:
+
+- `<svg> attribute width/height: Expected length` — bind the size through `style="width:{{ x }}px"` instead of the `width`/`height` attributes. An invalid CSS declaration is dropped silently; an invalid SVG attribute is not. Same rendered result.
+- `CORS policy` + `ERR_FAILED` on `file://` — `boot()` in support.js re-fetches the page source to recompile the template from raw text, which CORS always blocks on `file://`. The runtime catches it, but the browser still logs it. A one-line guard before `support.js` sets `window.__resources = {}` **only when `location.protocol === file:`**, which makes the runtime skip that fetch. Over HTTP the fetch is useful and is left alone.
+
+Anything **other** than those 16 `d` lines is a real problem worth chasing.
+
 ## support.js — do not edit by hand
 
 The first line says it all: `GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with cd dc-runtime && bun run build`. **The `dc-runtime` source is not part of this repository** — only the bundled output ships here. Treat `support.js` as read-only; to understand runtime behavior, read it (sections are labeled `// src/<file>.ts`: `parse`, `compile`, `expr`, `logic`, `component`, `runtime`, `index`, …), but make behavioral changes in the `.dc.html` file, not the bundle.

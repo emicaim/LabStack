@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>if (location.protocol === 'file:') window.__resources = window.__resources || {};</script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -546,7 +547,7 @@
                   <div style="position:absolute; top:-13px; left:16px; display:flex; align-items:center; gap:6px; padding:3px 11px; border-radius:99px; background:var(--panel); border:1px solid var(--border-strong); font-size:11.5px; font-weight:600; color:var(--text-muted); white-space:nowrap;"><span style="font-size:13px;">{{ z.icon }}</span>{{ z.label }}</div>
                 </div>
               </sc-for>
-              <svg width="{{ map.world.w }}" height="{{ map.world.h }}" style="position:absolute; left:0; top:0; overflow:visible; pointer-events:none;">
+              <svg style="position:absolute; left:0; top:0; width:{{ map.world.w }}px; height:{{ map.world.h }}px; overflow:visible; pointer-events:none;">
                 <sc-for list="{{ map.links }}" as="l" hint-placeholder-count="0">
                   <g style="pointer-events:stroke;"><title>{{ l.tip }}</title><path d="{{ l.d }}" fill="none" stroke="{{ l.stroke }}" stroke-width="{{ l.w }}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="{{ l.dash }}" opacity="{{ l.op }}"></path><path d="{{ l.d }}" fill="none" stroke="transparent" stroke-width="14"></path></g>
                   <path d="{{ l.ports }}" fill="{{ l.stroke }}" stroke="none" opacity="{{ l.op }}"></path>
@@ -995,7 +996,7 @@
                     <div style="display:flex; align-items:center; gap:12px;">
                       <span style="flex:0 0 auto; width:20px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:{{ layer.color }}; opacity:0.65;">{{ layer.num }}</span>
                       <div style="width:{{ layer.iconBox }}; height:{{ layer.iconBox }}; flex:0 0 auto; border-radius:10px; display:grid; place-items:center; color:{{ layer.color }}; background:{{ layer.numTint }};">
-                        <svg width="{{ layer.iconSz }}" height="{{ layer.iconSz }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ layer.iconPath }}"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:{{ layer.iconSz }}px; height:{{ layer.iconSz }}px;"><path d="{{ layer.iconPath }}"></path></svg>
                       </div>
                       <div style="min-width:0; flex:1 1 auto;">
                         <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -2083,7 +2084,7 @@ class Component extends DCLogic {
       homeBack:'Volver al inicio', moreBtn:'Más',
       navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar', navKids:'Kids',
       navKidsHint:'Para peques: la infraestructura paso a paso, jugando',
-      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'13 pasos · a partir de 8 años',
+      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'15 pasos · a partir de 8 años',
       navBuildHint:'Monta tu stack pieza a pieza y entiende cada capa', navPracticeHint:'Retos con objetivos y quiz de repaso', navExploreHint:'Mira tu stack desde otros ángulos: mapa, petición, despliegue…',
       homeKicker:'Taller visual de infraestructura', homeTitle:'¿Qué quieres hacer hoy?',
       homeLead:'Aprende cómo se monta la infraestructura de un sistema real: capa por capa, entendiendo por qué existe cada una. Elige por dónde empezar.',
@@ -2139,7 +2140,7 @@ class Component extends DCLogic {
       homeBack:'Back to start', moreBtn:'More',
       navBuild:'Learn', navPractice:'Practice', navExplore:'Explore', navKids:'Kids',
       navKidsHint:'For kids: infrastructure step by step, by playing',
-      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'13 steps · ages 8+',
+      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'15 steps · ages 8+',
       navBuildHint:'Build your stack piece by piece and understand every layer', navPracticeHint:'Goal-based challenges and a revision quiz', navExploreHint:'See your stack from other angles: map, request, deployment…',
       homeKicker:'Visual infrastructure workshop', homeTitle:'What do you want to do today?',
       homeLead:'Learn how the infrastructure of a real system is put together: layer by layer, understanding why each one exists. Pick where to start.',
@@ -3412,6 +3413,12 @@ class Component extends DCLogic {
         ask:F('¿Quién convierte un nombre en un número?','Who turns a name into a number?'),
         hint:F('Su dibujo es una bola del mundo con líneas alrededor.','Its drawing is a globe with lines around it.'),
         why:F('El DNS es la agenda de internet: tú dices el nombre y él te da el número para llegar.','DNS is the internet phone book: you say the name and it gives you the number to get there.') },
+      { cat:'red', block:'lb', wrong:['postgres','linux'], chapter:1,
+        title:F('El que reparte la cola','The one who splits the queue'),
+        say:F('Una cosa más en el piso de los caminos: si entran miles de personas a la vez, no pueden ir todas al mismo sitio.','One more thing on the roads floor: if thousands of people come in at once, they cannot all go to the same place.'),
+        ask:F('¿Quién reparte a la gente entre varias máquinas?','Who shares people out between several machines?'),
+        hint:F('Su dibujo tiene una flecha que entra y tres que salen.','Its drawing has one arrow going in and three coming out.'),
+        why:F('El balanceador es como abrir más cajas en el súper: reparte la cola para que nadie espere de más.','A load balancer is like opening more tills at the shop: it splits the queue so nobody waits too long.') },
       { cat:'computo', block:'baremetal', wrong:['docker','nas'], chapter:1,
         title:F('La máquina que trabaja','The machine that works'),
         say:F('Ya tenemos caminos. Ahora hace falta una máquina de verdad que piense y trabaje.','We have roads now. Now we need a real machine that thinks and works.'),
@@ -3460,9 +3467,15 @@ class Component extends DCLogic {
         ask:F('¿Qué son ordenadores que están lejos y alquilas?','What are computers that live far away and you rent?'),
         hint:F('Su dibujo es una nube con un rayo dentro.','Its drawing is a cloud with a lightning bolt inside.'),
         why:F('En la nube usas ordenadores de otros. Tú solo pides, y ellos se encargan de todo.','In the cloud you use other people’s computers. You just ask, and they take care of everything.') },
+      { cat:'mensajeria', block:'rabbitmq', wrong:['nas','hypervisor'], chapter:2, side:true,
+        title:F('El buzón de recados','The message box'),
+        say:F('La torre ya está entera. Ahora faltan los ayudantes: no viven en ningún piso, pero sin ellos nada va bien.','The tower is finished. Now for the helpers: they do not live on any floor, but without them nothing works well.'),
+        ask:F('¿Dónde se dejan los recados hasta que alguien los recoge?','Where are messages left until someone picks them up?'),
+        hint:F('Su dibujo son cartas que entran en una caja con ranuras.','Its drawing is letters going into a box with slots.'),
+        why:F('RabbitMQ es un buzón: dejas el recado y sigues con lo tuyo, y el otro lo recoge cuando puede.','RabbitMQ is a message box: you drop the note and carry on, and the other side picks it up when it can.') },
       { cat:'seguridad', block:'firewall', wrong:['nas','k8s'], chapter:2, side:true,
         title:F('El portero','The doorkeeper'),
-        say:F('La torre ya está entera. Ahora faltan los que la cuidan: estos no viven en ningún piso, vigilan la torre completa.','The tower is finished. Now we need the ones who look after it: they do not live on any floor, they watch over the whole tower.'),
+        say:F('Otro ayudante, y este vigila la puerta: no todo el que llama a la torre puede entrar.','Another helper, and this one guards the door: not everyone who knocks on the tower gets in.'),
         ask:F('¿Quién decide quién puede entrar y quién no?','Who decides who gets in and who does not?'),
         hint:F('Su dibujo es un muro de ladrillos con una llama encima.','Its drawing is a brick wall with a flame on top.'),
         why:F('El firewall es el portero: mira quién llama a la puerta y solo deja pasar a los de confianza.','A firewall is the doorkeeper: it checks who is knocking and only lets the trusted ones in.') },
@@ -3522,18 +3535,18 @@ class Component extends DCLogic {
     if(S.phase==='end'){
       return { show:true, done:true, total:String(total),
         endTitle:T('¡Lo has construido entero!','You built the whole thing!'),
-        endBody:T('Has levantado los '+floors+' pisos de la torre, desde los cables de abajo hasta la nube de arriba, y has puesto los '+sides+' que la cuidan. Así funciona de verdad una página web por dentro.','You built all '+floors+' floors of the tower, from the cables at the bottom to the cloud at the top, and added the '+sides+' that look after it. That is really how a web page works inside.'),
+        endBody:T('Has levantado los '+floors+' pisos de la torre, desde los cables de abajo hasta la nube de arriba, y has puesto sus '+sides+' ayudantes. Así funciona de verdad una página web por dentro.','You built all '+floors+' floors of the tower, from the cables at the bottom to the cloud at the top, and added its '+sides+' helpers. That is really how a web page works inside.'),
         again:T('Jugar otra vez','Play again'), toMap:T('Ver el mapa de verdad','See the real map'),
         onAgain:()=>this.kidsRestart(), onMap:()=>this.setMode('map'),
         dots, tower, guards, guardsShow:guards.length>0,
-        towerTitle:T('Lo que has construido','What you built'), guardsTitle:T('La cuidan','Looking after it'),
+        towerTitle:T('Lo que has construido','What you built'), guardsTitle:T('Los ayudantes','The helpers'),
         towerEmpty:false, towerEmptyMsg:'',
         stepLabel:'', title:'', say:'', ask:'', hint:'', hintShow:false, why:'', whyShow:false, okTitle:'',
         color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{}, askShow:false, guideShow:false,
         chapterShow:false, chapterTitle:'' };
     }
     const st=steps[S.step], c=this.catById(st.cat);
-    const chapNames={ 1:T('Capítulo 1 · La torre','Chapter 1 · The tower'), 2:T('Capítulo 2 · Los que la cuidan','Chapter 2 · The ones who look after it') };
+    const chapNames={ 1:T('Capítulo 1 · La torre','Chapter 1 · The tower'), 2:T('Capítulo 2 · Los ayudantes','Chapter 2 · The helpers') };
     const firstOfChapter = steps.findIndex(x=>x.chapter===st.chapter)===S.step;
     const ok=(S.phase==='ok');
     const ids=[st.block].concat(st.wrong);
@@ -3575,7 +3588,7 @@ class Component extends DCLogic {
       nextLabel: (S.step+1>=total)? T('¡Terminar!','Finish!') : T('Siguiente','Next'),
       onNext:()=>this.kidsNext(),
       options, optionsShow:true, dots, tower, guards, guardsShow:guards.length>0,
-      towerTitle:T('Tu torre','Your tower'), guardsTitle:T('La cuidan','Looking after it'),
+      towerTitle:T('Tu torre','Your tower'), guardsTitle:T('Los ayudantes','The helpers'),
       towerEmpty: tower.length===0, towerEmptyMsg:T('Aquí irán apareciendo las piezas que coloques.','The pieces you place will show up here.'),
       again:'', toMap:'', onAgain:()=>{}, onMap:()=>{}, endTitle:'', endBody:'' };
   }
