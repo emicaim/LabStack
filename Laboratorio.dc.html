@@ -269,12 +269,32 @@
               </sc-for>
             </div>
 
+            <sc-if value="{{ kids.pick }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center; margin-bottom:26px;">
+                <div style="font-family:'Inter',sans-serif; font-size:28px; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px;">{{ kids.pickTitle }}</div>
+                <p style="font-size:16px; line-height:1.55; color:var(--text-muted); margin:0 auto; max-width:460px;">{{ kids.pickLead }}</p>
+              </div>
+              <div class="kids-opts" style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px;">
+                <sc-for list="{{ kids.parts }}" as="kpt" hint-placeholder-count="2">
+                  <button onClick="{{ kpt.onClick }}" style="display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:10px; padding:24px 22px; border-radius:26px; border:4px solid {{ kpt.border }}; background:var(--panel); box-shadow:{{ kpt.lift }}; cursor:pointer; font-family:'Inter',sans-serif; transition:transform .16s, box-shadow .16s;" style-hover="{{ kpt.hoverStyle }}">
+                    <span style="width:62px; height:62px; border-radius:20px; background:{{ kpt.iconBg }}; display:grid; place-items:center; font-size:30px;">{{ kpt.icon }}</span>
+                    <span style="font-size:21px; font-weight:800; letter-spacing:-0.01em;">{{ kpt.title }}</span>
+                    <span style="font-size:14.5px; color:var(--text-muted); line-height:1.5;">{{ kpt.desc }}</span>
+                    <span style="margin-top:4px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:{{ kpt.metaColor }};">{{ kpt.meta }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+
             <sc-if value="{{ kids.done }}" hint-placeholder-val="{{ false }}">
               <div style="text-align:center; padding:26px 20px 30px; border-radius:26px; border:3px solid var(--accent); background:linear-gradient(170deg, var(--accent-tint), var(--panel)); animation:kidPop .5s ease both;">
                 <div style="font-size:58px; line-height:1; margin-bottom:12px;">🎉</div>
                 <div style="font-family:'Inter',sans-serif; font-size:30px; font-weight:800; letter-spacing:-0.02em; margin-bottom:12px;">{{ kids.endTitle }}</div>
                 <p style="font-size:17px; line-height:1.6; color:var(--text-muted); max-width:520px; margin:0 auto 24px;">{{ kids.endBody }}</p>
                 <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                  <sc-if value="{{ kids.contShow }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ kids.onCont }}" style="border:none; background:#9333ea; color:#fff; padding:15px 28px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:17px; font-weight:800; box-shadow:0 5px 0 0 rgba(0,0,0,0.16);" style-hover="filter:brightness(1.08);">🧰 {{ kids.contLabel }}</button>
+                  </sc-if>
                   <button onClick="{{ kids.onAgain }}" style="border:none; background:var(--accent); color:#fff; padding:15px 28px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:17px; font-weight:800; box-shadow:0 5px 0 0 rgba(0,0,0,0.16);" style-hover="filter:brightness(1.08);">🔁 {{ kids.again }}</button>
                   <button onClick="{{ kids.onMap }}" style="border:3px solid var(--border-strong); background:var(--panel); color:var(--text); padding:13px 24px; border-radius:99px; cursor:pointer; font-family:'Inter',sans-serif; font-size:16px; font-weight:700;" style-hover="border-color:var(--accent);">🗺 {{ kids.toMap }}</button>
                 </div>
@@ -359,6 +379,7 @@
           </div>
 
           <!-- la torre: lo construido no se borra nunca, crece de abajo hacia arriba -->
+          <sc-if value="{{ kids.towerShow }}" hint-placeholder-val="{{ true }}">
           <div class="kids-tower" style="position:sticky; top:8px; max-height:calc(100vh - 210px); overflow-y:auto; border-radius:22px; border:3px dashed var(--border-strong); background:var(--panel-alt); padding:14px 12px 16px;">
             <div style="text-align:center; font-family:'Inter',sans-serif; font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted); margin-bottom:12px;">{{ kids.towerTitle }}</div>
             <sc-if value="{{ kids.towerEmpty }}" hint-placeholder-val="{{ true }}">
@@ -366,7 +387,7 @@
             </sc-if>
             <div style="display:flex; flex-direction:column; gap:3px;">
               <sc-for list="{{ kids.tower }}" as="kt" hint-placeholder-count="0">
-                <div style="position:relative; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:2px {{ kt.dash }} {{ kt.border }}; background:{{ kt.bg }}; animation:kidPop .4s ease both;">
+                <div style="position:relative; display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:2px {{ kt.dash }} {{ kt.border }}; background:{{ kt.bg }}; opacity:{{ kt.op }}; animation:kidPop .4s ease both;">
                   <span style="position:absolute; top:-4px; left:16px; width:24px; height:7px; border-radius:0 0 7px 7px; background:{{ kt.color }}; opacity:{{ kt.nubOp }};"></span>
                   <svg width="30" height="25" viewBox="0 0 56 46" style="display:block; flex:0 0 auto;">
                     <sc-for list="{{ kt.art }}" as="kq" hint-placeholder-count="0">
@@ -401,6 +422,7 @@
               </div>
             </sc-if>
           </div>
+          </sc-if>
         </div>
       </sc-if>
 
@@ -1501,7 +1523,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { step: 0, phase: 'ask', wrong: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
+  state = { lang: 'es', theme: 'light', mode: 'home', density: 'compact', kids: { part: null, step: 0, phase: 'ask', wrong: null }, placed: {}, selected: null, selectedLayer: null, armed: null, over: null, flowing: false, flowStep: -1, feedback: null, mission: null, missionResult: null, quiz: null, map: { tx: 60, ty: 40, scale: 0.6 }, mapPanning: false, search: '', famFilter: null, collapsed: {}, achievements: {}, showAchievements: false, achConfirm: false, toast: null, quizStats: {}, contentPack: {}, showContent: false, contentDraft: '', contentMsg: null, progress: { missions: {}, lessons: {}, quizAce: false }, showPaths: false, openLesson: null, showGlossary: false, glossarySearch: '', glossaryOpen: null, showCmdRef: false, cmdRefSearch: '', showTools: false, showSims: false, chaos: { active: false }, tour: { active: false, step: 0 }, term: { input: '', history: [], cmdHistory: [], histIdx: -1, cwd: '/home/labuser' }, metrics: { load: 55, cpu: [], ram: [], rps: [], lat: [] }, request: null, reqFail: null, deploy: { strategy: 'rolling', step: 0, playing: false, rolled: false }, incident: null };
 
   // ---- static data ----
   catsBase() {
@@ -2084,7 +2106,7 @@ class Component extends DCLogic {
       homeBack:'Volver al inicio', moreBtn:'Más',
       navBuild:'Aprender', navPractice:'Practicar', navExplore:'Explorar', navKids:'Kids',
       navKidsHint:'Para peques: la infraestructura paso a paso, jugando',
-      cardKidsT:'Kids', cardKidsD:'Para los más peques. Una capa cada vez, con dibujos, sin prisa y sin equivocarse nunca del todo.', cardKidsM:'15 pasos · a partir de 8 años',
+      cardKidsT:'Kids', cardKidsD:'Para los más peques. Dos partidas cortas, una capa cada vez, con dibujos y sin equivocarse nunca del todo.', cardKidsM:'2 partidas · a partir de 8 años',
       navBuildHint:'Monta tu stack pieza a pieza y entiende cada capa', navPracticeHint:'Retos con objetivos y quiz de repaso', navExploreHint:'Mira tu stack desde otros ángulos: mapa, petición, despliegue…',
       homeKicker:'Taller visual de infraestructura', homeTitle:'¿Qué quieres hacer hoy?',
       homeLead:'Aprende cómo se monta la infraestructura de un sistema real: capa por capa, entendiendo por qué existe cada una. Elige por dónde empezar.',
@@ -2140,7 +2162,7 @@ class Component extends DCLogic {
       homeBack:'Back to start', moreBtn:'More',
       navBuild:'Learn', navPractice:'Practice', navExplore:'Explore', navKids:'Kids',
       navKidsHint:'For kids: infrastructure step by step, by playing',
-      cardKidsT:'Kids', cardKidsD:'For the youngest. One layer at a time, with drawings, no rush and no real way to get it wrong.', cardKidsM:'15 steps · ages 8+',
+      cardKidsT:'Kids', cardKidsD:'For the youngest. Two short games, one layer at a time, with drawings and no real way to get it wrong.', cardKidsM:'2 games · ages 8+',
       navBuildHint:'Build your stack piece by piece and understand every layer', navPracticeHint:'Goal-based challenges and a revision quiz', navExploreHint:'See your stack from other angles: map, request, deployment…',
       homeKicker:'Visual infrastructure workshop', homeTitle:'What do you want to do today?',
       homeLead:'Learn how the infrastructure of a real system is put together: layer by layer, understanding why each one exists. Pick where to start.',
@@ -3491,106 +3513,139 @@ class Component extends DCLogic {
         ask:F('¿Qué guarda una copia de todo por si se pierde?','What keeps a copy of everything in case it gets lost?'),
         hint:F('Su dibujo es un cartucho de cinta con dos ruedas.','Its drawing is a tape cartridge with two reels.'),
         why:F('La copia de seguridad es tu red de seguridad: si algo se pierde, se vuelve a poner como estaba.','A backup is your safety net: if something is lost, it goes back to how it was.') },
+      { cat:'iac', block:'terraform', wrong:['switch','postgres'], chapter:2, side:true,
+        title:F('Las instrucciones de montaje','The building instructions'),
+        say:F('Montar la torre entera a mano es lentísimo, y siempre se te acaba olvidando algo.','Building the whole tower by hand is really slow, and you always end up forgetting something.'),
+        ask:F('¿Qué guarda por escrito cómo se monta la torre entera?','What writes down how the whole tower is built?'),
+        hint:F('Su dibujo es una hoja con una cuadrícula dibujada.','Its drawing is a sheet of paper with a grid on it.'),
+        why:F('Terraform es como las instrucciones de un Lego: están escritas, y si la torre se rompe, la vuelves a montar igualita.','Terraform is like Lego instructions: they are written down, so if the tower breaks you can build it again exactly the same.') },
+      { cat:'cicd', block:'pipeline', wrong:['nas','dns'], chapter:2, side:true,
+        title:F('La cadena de montaje','The assembly line'),
+        say:F('Y cuando alguien mejora el programa hay que probarlo y publicarlo. ¿A mano cada vez? Uf.','And when someone improves the program it has to be tested and published. By hand every time? Ugh.'),
+        ask:F('¿Qué prueba y publica los cambios él solito?','What tests and publishes the changes all by itself?'),
+        hint:F('Su dibujo son tres cajas seguidas con flechas entre ellas.','Its drawing is three boxes in a row with arrows between them.'),
+        why:F('El pipeline es una cadena de montaje: coge lo nuevo, lo prueba y, si está bien, lo publica. Sin que nadie toque nada.','A pipeline is an assembly line: it takes what is new, tests it and, if it is fine, publishes it. Without anyone touching a thing.') },
     ];
   }
+  // Dos partidas: la torre (los pisos) y los ayudantes (los transversales).
+  // 17 pasos de una sentada son demasiados para esta edad; partido, cada
+  // partida cabe en una sesión y la segunda se puede dejar para otro día.
+  kidsPartSteps(part){ return this.kidsSteps().filter(s=>s.chapter===(part||1)); }
+  kidsParts(){
+    const es=this.state.lang==='es', T=(a,b)=>es?a:b;
+    const n1=this.kidsPartSteps(1).length, n2=this.kidsPartSteps(2).length;
+    return [
+      { id:1, icon:'🏗', color:'#3b82f6', title:T('La torre','The tower'),
+        desc:T('Construye los '+n1+' pisos, desde los cables de abajo hasta la nube de arriba.','Build all '+n1+' floors, from the cables at the bottom to the cloud at the top.'),
+        meta:T(n1+' pasos','1 steps').replace('1 steps',n1+' steps') },
+      { id:2, icon:'🧰', color:'#9333ea', title:T('Los ayudantes','The helpers'),
+        desc:T('Los '+n2+' que hacen que la torre funcione bien: el buzón, el portero, el vigilante, la copia, las instrucciones y la cadena de montaje.','The '+n2+' that keep the tower running well: the message box, the doorkeeper, the watcher, the backup, the instructions and the assembly line.'),
+        meta:T(n2+' pasos · mejor después de la torre',n2+' steps · better after the tower') },
+    ];
+  }
+  kidsStart(part){ this.setState({ kids:{ part, step:0, phase:'ask', wrong:null } }); }
   kidsPick(id){
-    const S=this.state.kids||{}, steps=this.kidsSteps(), st=steps[S.step];
+    const S=this.state.kids||{}, steps=this.kidsPartSteps(S.part), st=steps[S.step];
     if(!st || S.phase==='ok') return;
     if(id===st.block){ this.setState({ kids:{ ...S, phase:'ok', wrong:null } }); }
     else { this.setState({ kids:{ ...S, wrong:id } }); }
   }
   kidsNext(){
-    const S=this.state.kids||{}, steps=this.kidsSteps();
+    const S=this.state.kids||{}, steps=this.kidsPartSteps(S.part);
     const next=S.step+1;
-    if(next>=steps.length){ this.fireConfetti(); this.setState({ kids:{ step:next, phase:'end', wrong:null } }); }
-    else this.setState({ kids:{ step:next, phase:'ask', wrong:null } });
+    if(next>=steps.length){ this.fireConfetti(); this.setState({ kids:{ ...S, step:next, phase:'end', wrong:null } }); }
+    else this.setState({ kids:{ ...S, step:next, phase:'ask', wrong:null } });
   }
-  kidsRestart(){ this.setState({ kids:{ step:0, phase:'ask', wrong:null } }); }
+  kidsRestart(){ this.setState({ kids:{ part:null, step:0, phase:'ask', wrong:null } }); }
   kidsView(){
-    const S=this.state.kids||{ step:0, phase:'ask', wrong:null };
-    const steps=this.kidsSteps(), total=steps.length, es=this.state.lang==='es';
-    const T=(a,b)=>es?a:b;
+    const S=this.state.kids||{ part:null, step:0, phase:'ask', wrong:null };
+    const es=this.state.lang==='es', T=(a,b)=>es?a:b;
     const shot=(bid,cat)=>{ const c=this.catById(cat); return this.paintArt(this.artKeyFor(bid,cat), c? c.color : '#6366f1'); };
-    // la torre guarda todo lo colocado: nunca se borra, siempre a la vista
-    const placedN=(S.phase==='end')? total : (S.step + (S.phase==='ok'?1:0));
-    const built=steps.slice(0,placedN).map((st,i)=>{ const c=this.catById(st.cat), b=this.blockById(st.block); return {
-      name:b? this.loc(b.name) : st.block, layer:this.loc(c.name), color:c.color, side:!!st.side,
-      bg:this.hexA(c.color,0.16), border:this.hexA(c.color,0.5), num:String(i+1),
-      dash: st.side? 'dashed' : 'solid', nubOp: st.side? '0' : '0.75',
-      art:shot(st.block, st.cat),
-    };});
-    // los pisos se apilan de abajo hacia arriba; los guardianes van aparte
-    const tower=built.filter(x=>!x.side).reverse();
-    const guards=built.filter(x=>x.side);
-    const floors=steps.filter(x=>!x.side).length, sides=steps.length-floors;
-    const dots=steps.map((st,i)=>{ const dc=this.catById(st.cat).color, got=i<placedN;
-      return {
-        bg: got? dc : 'var(--panel-2)',
-        border: got? dc : 'var(--border-strong)',
-        size: i===S.step ? '26px' : '20px',
-        ring: i===S.step ? ('0 0 0 5px '+this.hexA(dc,0.22)) : 'none',
-        mark: got? '★' : '',
-      };
-    });
-    if(S.phase==='end'){
-      return { show:true, done:true, total:String(total),
-        endTitle:T('¡Lo has construido entero!','You built the whole thing!'),
-        endBody:T('Has levantado los '+floors+' pisos de la torre, desde los cables de abajo hasta la nube de arriba, y has puesto sus '+sides+' ayudantes. Así funciona de verdad una página web por dentro.','You built all '+floors+' floors of the tower, from the cables at the bottom to the cloud at the top, and added its '+sides+' helpers. That is really how a web page works inside.'),
-        again:T('Jugar otra vez','Play again'), toMap:T('Ver el mapa de verdad','See the real map'),
-        onAgain:()=>this.kidsRestart(), onMap:()=>this.setMode('map'),
-        dots, tower, guards, guardsShow:guards.length>0,
-        towerTitle:T('Lo que has construido','What you built'), guardsTitle:T('Los ayudantes','The helpers'),
-        towerEmpty:false, towerEmptyMsg:'',
-        stepLabel:'', title:'', say:'', ask:'', hint:'', hintShow:false, why:'', whyShow:false, okTitle:'',
-        color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{}, askShow:false, guideShow:false,
-        chapterShow:false, chapterTitle:'' };
+    const blockCard=(st,opts)=>{ const c=this.catById(st.cat), b=this.blockById(st.block); return {
+      name:b? this.loc(b.name) : st.block, layer:this.loc(c.name), color:c.color,
+      bg:this.hexA(c.color,0.16), border:this.hexA(c.color,0.5),
+      dash:(opts&&opts.dash)||'solid', nubOp:(opts&&opts.dash)?'0':'0.75', op:(opts&&opts.op)||'1',
+      art:shot(st.block, st.cat) };};
+    const empty={ show:true, pick:false, done:false, dots:[], tower:[], guards:[], guardsShow:false,
+      towerTitle:'', guardsTitle:'', towerEmpty:false, towerEmptyMsg:'', towerShow:false,
+      stepLabel:'', title:'', say:'', ask:'', hint:'', hintShow:false, why:'', whyShow:false, okTitle:'',
+      color:'var(--accent)', layerName:'', options:[], optionsShow:false, nextLabel:'', onNext:()=>{},
+      askShow:false, guideShow:false, chapterShow:false, chapterTitle:'',
+      endTitle:'', endBody:'', again:'', toMap:'', onAgain:()=>{}, onMap:()=>{},
+      pickTitle:'', pickLead:'', parts:[], contShow:false, contLabel:'', onCont:()=>{} };
+
+    // --- elegir partida ---
+    if(!S.part){
+      return { ...empty, pick:true,
+        pickTitle:T('¿Por dónde empiezas?','Where do you start?'),
+        pickLead:T('Son dos partidas. Puedes hacer una hoy y la otra otro día.','There are two games. You can play one today and the other another day.'),
+        parts:this.kidsParts().map(pt=>({ icon:pt.icon, title:pt.title, desc:pt.desc, meta:pt.meta,
+          border:this.hexA(pt.color,0.45), iconBg:this.hexA(pt.color,0.14), metaColor:pt.color,
+          lift:'0 6px 0 0 '+this.hexA(pt.color,0.38),
+          hoverStyle:'transform:translateY(-5px); box-shadow:0 11px 0 0 '+this.hexA(pt.color,0.45)+';',
+          onClick:()=>this.kidsStart(pt.id) })) };
     }
-    const st=steps[S.step], c=this.catById(st.cat);
-    const chapNames={ 1:T('Capítulo 1 · La torre','Chapter 1 · The tower'), 2:T('Capítulo 2 · Los ayudantes','Chapter 2 · The helpers') };
-    const firstOfChapter = steps.findIndex(x=>x.chapter===st.chapter)===S.step;
-    const ok=(S.phase==='ok');
+
+    const steps=this.kidsPartSteps(S.part), total=steps.length, part2=(S.part===2);
+    const placedN=(S.phase==='end')? total : (S.step + (S.phase==='ok'?1:0));
+    const done=steps.slice(0,placedN);
+    // en la partida 2 la torre ya está: se muestra entera y atenuada, de fondo
+    const tower = part2
+      ? this.kidsPartSteps(1).map(st=>blockCard(st,{op:'0.5'})).reverse()
+      : done.map(st=>blockCard(st)).reverse();
+    const guards = part2 ? done.map(st=>blockCard(st,{dash:'dashed'})) : [];
+    const dots=steps.map((st,i)=>{ const dc=this.catById(st.cat).color, got=i<placedN;
+      return { bg:got?dc:'var(--panel-2)', border:got?dc:'var(--border-strong)',
+        size:i===S.step?'26px':'20px', ring:i===S.step?('0 0 0 5px '+this.hexA(dc,0.22)):'none', mark:got?'★':'' };});
+    const base={ ...empty, dots, tower, guards, guardsShow:guards.length>0, towerShow:true,
+      towerTitle: part2? T('La torre que hiciste','The tower you built') : T('Tu torre','Your tower'),
+      guardsTitle:T('Los ayudantes','The helpers'),
+      again:T('Elegir otra partida','Pick another game'), toMap:T('Ver el mapa de verdad','See the real map'),
+      onAgain:()=>this.kidsRestart(), onMap:()=>this.setMode('map') };
+
+    if(S.phase==='end'){
+      if(!part2) return { ...base, done:true,
+        endTitle:T('¡Torre terminada!','Tower finished!'),
+        endBody:T('Has levantado los '+total+' pisos, desde los cables de abajo hasta la nube de arriba. Ya funciona… pero todavía no la cuida nadie.','You built all '+total+' floors, from the cables at the bottom to the cloud at the top. It works now… but nobody is looking after it yet.'),
+        contShow:true, contLabel:T('Seguir: los ayudantes','Next: the helpers'), onCont:()=>this.kidsStart(2) };
+      return { ...base, done:true,
+        endTitle:T('¡Ya está completo!','All done!'),
+        endBody:T('La torre tiene sus '+total+' ayudantes: el buzón, el portero, el vigilante, la copia, las instrucciones y la cadena de montaje. Así funciona de verdad una página web por dentro.','The tower has all '+total+' helpers: the message box, the doorkeeper, the watcher, the backup, the instructions and the assembly line. That is really how a web page works inside.') };
+    }
+
+    const st=steps[S.step], c=this.catById(st.cat), ok=(S.phase==='ok');
     const ids=[st.block].concat(st.wrong);
-    // orden estable pero distinto en cada paso, para que no se aprenda la posición
     const order=[[0,1,2],[1,2,0],[2,0,1],[1,0,2],[0,2,1],[2,1,0],[0,1,2],[1,2,0]][S.step%8];
     const options=order.map(k=>ids[k]).map(bid=>{
       const b=this.blockById(bid), bc=this.catById(b? b.cat : st.cat);
-      const isOk=(bid===st.block), isWrong=(S.wrong===bid);
-      const dim = ok && !isOk;
-      return {
-        name:b? this.loc(b.name) : bid, art:shot(bid, b? b.cat : st.cat),
-        layer:this.loc(bc.name), layerShow: (ok&&isOk)||isWrong, color:bc.color,
+      const isOk=(bid===st.block), isWrong=(S.wrong===bid), dim=ok&&!isOk;
+      return { name:b? this.loc(b.name) : bid, art:shot(bid, b? b.cat : st.cat),
+        layer:this.loc(bc.name), layerShow:(ok&&isOk)||isWrong, color:bc.color,
         bg: isWrong? 'var(--warm)' : 'var(--panel)',
         halo: this.hexA(bc.color, isOk&&ok? 0.30 : 0.14),
         border: isWrong? '#f97316' : bc.color,
         lift: (ok&&isOk)? ('0 6px 0 0 '+this.hexA(bc.color,0.55)+', 0 0 0 6px '+this.hexA(bc.color,0.22)) : ('0 6px 0 0 '+this.hexA(bc.color,0.38)),
         anim: isWrong? 'kidShake .45s ease' : ((ok&&isOk)? 'kidPop .45s ease both' : 'none'),
-        op: dim? '0.4' : '1',
-        mark: (ok&&isOk)? '★' : '',
-        markShow: (ok&&isOk),
+        op: dim? '0.4' : '1', mark:(ok&&isOk)?'★':'', markShow:(ok&&isOk),
         cursor: ok? 'default' : 'pointer',
         hoverStyle: ok? '' : 'transform:translateY(-5px); box-shadow:0 11px 0 0 '+this.hexA(bc.color,0.45)+';',
         aria:(b? this.loc(b.name) : bid)+', '+this.loc(bc.name),
-        onClick:()=>this.kidsPick(bid),
-      };
+        onClick:()=>this.kidsPick(bid) };
     });
-    const wrongBlock=S.wrong? this.blockById(S.wrong) : null;
-    const wrongCat=wrongBlock? this.catById(wrongBlock.cat) : null;
-    return { show:true, done:false, total:String(total),
+    const wb=S.wrong? this.blockById(S.wrong) : null, wc=wb? this.catById(wb.cat) : null;
+    return { ...base,
       stepLabel:T('Paso ','Step ')+(S.step+1)+' / '+total,
-      title:this.loc(st.title), say:this.loc(st.say), ask:this.loc(st.ask),
-      askShow:!ok, guideShow:true,
-      chapterShow:firstOfChapter, chapterTitle:chapNames[st.chapter]||'',
+      title:this.loc(st.title), say:this.loc(st.say), ask:this.loc(st.ask), askShow:!ok, guideShow:true,
+      chapterShow:(S.step===0), chapterTitle: part2? T('Los ayudantes','The helpers') : T('La torre','The tower'),
       color:c.color, layerName:this.loc(c.name),
       hintShow: !!S.wrong && !ok,
-      hint: wrongBlock ? (T("Eso es ","That is ")+this.loc(wrongBlock.name)+T(", de la parte de ","; it belongs to ")+this.loc(wrongCat.name)+T(". ¡Ya te tocará! Pista: ",". You will get there! Hint: ")+this.loc(st.hint)) : "",
-      whyShow: ok, why:this.loc(st.why),
-      okTitle:T('¡Muy bien!','Nice one!'),
-      nextLabel: (S.step+1>=total)? T('¡Terminar!','Finish!') : T('Siguiente','Next'),
+      hint: wb ? (T('Eso es ','That is ')+this.loc(wb.name)+T(', de la parte de ','; it belongs to ')+this.loc(wc.name)+T('. ¡Ya te tocará! Pista: ','. You will get there! Hint: ')+this.loc(st.hint)) : '',
+      whyShow: ok, why:this.loc(st.why), okTitle:T('¡Muy bien!','Nice one!'),
+      nextLabel:(S.step+1>=total)? T('¡Terminar!','Finish!') : T('Siguiente','Next'),
       onNext:()=>this.kidsNext(),
-      options, optionsShow:true, dots, tower, guards, guardsShow:guards.length>0,
-      towerTitle:T('Tu torre','Your tower'), guardsTitle:T('Los ayudantes','The helpers'),
-      towerEmpty: tower.length===0, towerEmptyMsg:T('Aquí irán apareciendo las piezas que coloques.','The pieces you place will show up here.'),
-      again:'', toMap:'', onAgain:()=>{}, onMap:()=>{}, endTitle:'', endBody:'' };
+      options, optionsShow:true,
+      towerEmpty: tower.length===0 && guards.length===0,
+      towerEmptyMsg:T('Aquí irán apareciendo las piezas que coloques.','The pieces you place will show up here.') };
   }
   // ---- chaos / failure simulation ----
   resilience(placed){

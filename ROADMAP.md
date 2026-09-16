@@ -104,7 +104,10 @@ Marcado con ⭐ lo que más recomiendo.
 - Pendiente si se quiere: **controles de reproducción** (pausa / paso a paso) para que el alumno marque su propio ritmo.
 
 ### ✅ Hecho — modo Kids (cuarta pestaña)
-- ✅ **15 pasos en dos capítulos**. Capítulo 1, la torre (11 pisos): caminos → agenda (DNS) → repartir la cola (balanceador) → máquina → cajón → partir → jefe → cajas → jefe de las cajas (K8s) → libreta → nube. Capítulo 2, los ayudantes (4): buzón (mensajería), portero (firewall), vigilante (monitorización) y copia de seguridad.
+- ✅ **17 pasos partidos en DOS PARTIDAS**, porque 17 de una sentada pasan de los 8 min que aguanta esta edad.
+  - **Partida 1 · La torre** (11 pisos): caminos → agenda (DNS) → repartir la cola (balanceador) → máquina → cajón → partir → jefe → cajas → jefe de las cajas (K8s) → libreta → nube.
+  - **Partida 2 · Los ayudantes** (6): buzón (mensajería), portero (firewall), vigilante (monitorización), copia de seguridad, instrucciones (IaC/Terraform) y cadena de montaje (CI/CD).
+- ✅ En la partida 2 la torre se muestra **entera y atenuada** de fondo: el niño ve sobre qué está trabajando aunque juegue otro día.
 - ✅ Los ayudantes se dibujan **aparte y con borde discontinuo**: misma distinción visual que pila vs. transversales en la app de adultos, sin usar la palabra.
 - ✅ **Tres opciones como máximo** y una sola decisión por pantalla (memoria de trabajo corta).
 - ✅ Cada capa entra por una **analogía concreta**, no por su definición técnica.

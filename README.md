@@ -14,7 +14,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
   - **Aprender** — monta tu stack por capas, agrupadas en los 5 planos (física → plataforma → aplicación → datos → nube), con densidad **Compacto / Detalle**.
   - **Practicar** — retos con objetivos y presupuesto + quiz adaptativo.
   - **Explorar** — 6 vistas del stack que has montado: Mapa · Petición · Despliegue · Métricas · Terminal · Incidente.
-  - **Kids** — para peques: 15 pasos en dos capítulos (la torre y sus ayudantes), una capa cada vez, con dibujos y sin forma de equivocarse del todo.
+  - **Kids** — para peques: dos partidas cortas (la torre, 11 pisos; los ayudantes, 6), una capa cada vez, con dibujos y sin forma de equivocarse del todo.
 - **~69 tecnologías** en 16 categorías (6 familias de color) con fichas educativas + mensajería (Kafka/RabbitMQ/NATS) + marcos de gobierno (COSO / ISO 27001 / COBIT).
 - **Linter de arquitectura** (robustez, anti-patrones), **dimensionado** (coste/CPU/RAM) y **modo avería** (resiliencia).
 - **11 misiones** con niveles, **quiz adaptativo**, **ruta de aprendizaje** guiada, **logros** y **glosario** buscable.
