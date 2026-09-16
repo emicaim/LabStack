@@ -80,6 +80,19 @@ Cutting across all modes: `deps()` declares category-level dependencies (`orques
 
 `renderVals()` computes the per-mode view objects (`mission`, `quiz`, `map`, `analysis`, `sizing`, `metricsTiles`, `home`, terminal fields…) and exposes mode flags (`showTree`, `showQuiz`, `showMap`, `showTerminal`, `showMetrics`, `showMissionPicker`, `showMissionGoals`, `showPresets`, `showHome`). To add a mission, append to `missions()`; a quiz variant, extend `buildQuiz()`; a terminal command, add a `case` in `execCmd()` and to `termCmds()`; a piece, edit `blocks()` (+ `extras()`/`pieceIcons()`/`specs()`). There is a Node smoke-test pattern (instantiate `Component` with stubbed `DCLogic`/`React`/`localStorage`/`window`, call `renderVals()` across all ten modes; simulate events with stubbed `currentTarget.getBoundingClientRect`/`e.key`) used to validate logic changes without a browser — every feature above was verified this way. A companion check walks every `{{ key }}` in the template and asserts it has a binding in some mode; run it after touching the template.
 
+### Map artwork (schematic illustrations)
+
+Map nodes are **not** the small line icons used elsewhere. Each node draws a schematic front view of the real device, so a rack, a switch and a database are told apart without reading the label.
+
+- `artArchetypes()` returns ~39 archetypes keyed by name (`rack`, `server`, `switch`, `router`, `patch`, `lb`, `globe`, `gateway`, `appliance`, `diskshelf`, `nasbox`, `raidset`, `bucket`, `tape`, `mirror`, `db`, `memory`, `search`, `container`, `cluster`, `vm`, `hostvms`, `os`, `winos`, `cloud`, `tunnel`, `cert`, `lock`, `idcard`, `screen`, `gauge`, `spans`, `doclines`, `bell`, `pipeline`, `branch`, `blueprint`, `queue`, `doc`). Each is a list of `[d, role]` pairs on a **56×46** canvas.
+- **Everything is a `<path>`** — no `<rect>`/`<circle>` — so the template renders one `sc-for` over `n.art`. Use the `artBoxes()` / `artCircle()` helpers to generate repeated ports, bays and circles into a single `d`.
+- Roles map to concrete paint in `paintArt(key, color)`: `body` (chassis: `var(--panel)` fill + accent outline), `panel` / `soft` (accent tints), `solid` (full accent: LEDs, flames, hubs), `line` (thin stroke). Because `body` fills with `var(--panel)`, **light and dark themes work for free** — never hard-code a hex in an archetype.
+- `artKeyFor(pieceId, catId)` maps a piece to its archetype, falling back to a per-category default, so a new piece always draws something sensible.
+- Adding a piece: if it looks like something already drawn, just let the mapping fall through. Add an archetype only when the new piece would otherwise be **visually identical to a different kind of thing** — that duplication is exactly what this system exists to avoid (four security pieces once shared one drawing).
+- To review every archetype at once, render a contact sheet: instantiate `Component` with the Node stubs, call `artArchetypes()` and `paintArt()` for each key, and write them to a scratch HTML grid. Far faster than panning the map.
+
+Node geometry lives in `buildMap()` (`GW=172`, `CELL_H=64`). `mapAutoFit()` runs once per session on first entry to `map` and clamps the scale to a floor (0.78) so the drawings stay legible even if the whole world does not fit; the ⤢ button still does a true fit.
+
 ### Contextual rails (which panels a mode gets)
 
 The three-rail grid is **not** fixed — each mode shows only the panels it needs, which is what keeps the app from feeling like a cockpit:

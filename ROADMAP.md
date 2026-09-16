@@ -81,6 +81,12 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ **Checklist de 17 casillas → tarjeta de progreso** (porcentaje, capas, pilares y siguiente paso).
 - ✅ **Rejilla por clases CSS** con puntos de ruptura propios: deja de romperse a 1280 px.
 
+### ✅ Hecho — mapa ilustrado
+- ✅ **39 arquetipos de dibujo esquemático** (`artArchetypes()`): cada pieza se dibuja como el aparato real de frente — rack con sus U, switch con puertos y LEDs, servidor con bahías, firewall como muro con llama, VPN como túnel, TLS como certificado, cinta de backup, RAM, cabina de discos, NAS, RAID con paridad…
+- ✅ Nodos de 172×64 con ilustración + nombre a dos líneas + código; respetan tema claro/oscuro y el color de familia sin tocar nada (`var(--panel)` + rol de color).
+- ✅ Autoencuadre al entrar (`mapAutoFit()`) con escala mínima para que el dibujo siga legible.
+- Pendiente si se quiere: usar la misma ilustración en la **ficha de la pieza** y en la **paleta** (una línea: `paintArt(artKeyFor(id,cat), color)`).
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 - ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.
