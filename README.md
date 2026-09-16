@@ -28,6 +28,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno con conexión a internet 
 | Archivo | Descripción |
 |---|---|
 | `Laboratorio.dc.html` | La aplicación (plantilla `<x-dc>` + lógica `class Component`). |
+| `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids). |
 | `support.js` | Runtime del formato `.dc.html` (React vía CDN). **Generado — no editar.** |
 | `fokosoft.png` | Logo. |
 | `ROADMAP.md` | Estado del proyecto y plan de mejoras. |

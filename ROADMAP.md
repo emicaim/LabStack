@@ -117,8 +117,15 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Guía («Bit») presente toda la partida, estrellas de progreso y puente final al Mapa real.
 - Pendiente si se quiere: voz en off o lectura en alto, y más rutas (una de seguridad, otra de datos).
 
+### ✅ Hecho — contenido fuera de la lógica
+- ✅ **139 KB de contenido** salen a `contenido/*.js`: piezas y fichas, pedagogía por capa, textos ES/EN, retos e incidentes, y los pasos de Kids. El fichero principal baja de **499 a 377 KB**.
+- ✅ Son **ficheros de datos, no de código**: un docente añade una pieza o cambia un texto sin abrir la lógica.
+- ✅ Se cargan con `<script src>`, **no con `fetch`**: la app sigue abriéndose con doble clic, sin servidor.
+- ✅ Si falta un fichero, avisa en consola con un mensaje claro en vez de quedarse en blanco.
+- ✅ Verificado comparando **método a método contra el original**: contenido idéntico byte a byte en ES y EN.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
-- ⭐ **Externalizar el contenido a JSON** (piezas, misiones, extras) para editarlo sin tocar la lógica y facilitar que un docente añada las suyas.
+
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.
 - **Tooltips enriquecidos al pasar el ratón** (mini-ficha sin clic) en paleta y mapa.
 - **Undo / redo** al montar el stack.

@@ -35,8 +35,27 @@ This is a custom React-backed component format, not plain HTML. A `.dc.html` fil
 - Methods are called directly from the template via `{{ }}` handlers (e.g. `onBlockClick`, `onLayerClick`, `runFlow`, `reset`, `loadPreset`).
 - `DCLogic` is the base class exposed by the runtime (aliased `StreamableLogic`).
 
+## Where the content lives
+
+**The content is not in `Laboratorio.dc.html` any more.** ~139 KB of it sits in `contenido/*.js`, loaded by plain `<script src>` tags in `<head>` before `support.js`:
+
+| File | Holds |
+|---|---|
+| `contenido/piezas.js` | `categorias`, `piezas` (the 75 technologies), `fichas` (one-liner / when to use / alternatives), `iconos`, `dimensionado` |
+| `contenido/capas.js` | `capas` — per-layer pedagogy (hint, why, miss, anal, flow) |
+| `contenido/textos.js` | `textos` — every UI string, `{ es, en }` |
+| `contenido/retos.js` | `retos` (missions) and `incidentes` |
+| `contenido/kids.js` | `kids` — the Kids steps |
+
+**They are `.js`, not `.json`, and that is deliberate.** `fetch` of a sibling file is blocked by CORS under `file://`, and the app must keep opening with a double-click and no server. A classic `<script src>` has no such limit. Each file is still pure data — no logic — so a teacher edits content without opening the app code.
+
+**Every entry is a function, not a value:** `window.LABSTACK.piezas = function () { … return [ … ]; }`. That is not decoration — `extras()`, `specs()` and `pieceIcons()` **mutate** what their `*Base()` returns to merge in the teacher content pack. Returning a shared singleton would let those mutations pile up across calls. A fresh object per call reproduces the original semantics exactly.
+
+Reading goes through `content(key, fallback)`, which calls `contentMissing(key)` and logs a clear one-time error if a file did not load, instead of rendering a blank app. **To add a piece or change a text, edit `contenido/` — not the logic.** The `contentPack` teacher mode (localStorage JSON) still layers on top of all this, unchanged.
+
 ### Data model (all defined as methods returning arrays/objects in the logic script)
 
+- `cats()` / `blocks()` / `layerMeta()` / `strings()` / `missions()` / `incidents()` / `kidsSteps()` now read from `contenido/` (see above); the methods that remain in the file are thin readers.
 - `cats()` — the 17 infrastructure categories (id, color, bilingual name). 10 are stackable layers; `seguridad`, `cicd`, `iac`, `monitorizacion`, `gobernanza`, `mensajeria`, `backup` are cross-cutting transversals (rendered separately, not in the stack).
 - `blocks()` — the draggable items. Each block has `id`, `cat` (category id), `code` (badge), bilingual `name`/`why`/`desc`, `facts[]`, and optionally a fake `term[]` transcript or `steps[]`.
 - `layerMeta()` — per-layer pedagogy (bilingual `hint`, `why`, `miss`, `anal`, `flow`), keyed by category id.
