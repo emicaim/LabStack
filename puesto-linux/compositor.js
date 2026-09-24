@@ -8,6 +8,7 @@
 (function () {
 'use strict';
 const P = window.PUESTO, U = P.u;
+const T = P.T;
 const $ = s => document.querySelector(s);
 const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const CLAVE_IMP = 'puesto-linux-importadas', CLAVE_BORRADOR = 'puesto-linux-borrador';
@@ -18,7 +19,7 @@ const copia = o => JSON.parse(JSON.stringify(o));
 // La plataforma de partida, para ofrecer nodos, servicios, ficheros y VMs reales.
 const BASE = P.crear();
 const NODOS = P.topologia.filter(d => d.n !== 'bastion');
-const ROL = { ctl: 'controlador', cmp: 'hipervisor', ceph: 'Ceph', mon: 'monitorización' };
+const ROL = { ctl: T('controlador', 'controller'), cmp: T('hipervisor', 'hypervisor'), ceph: 'Ceph', mon: T('monitorización', 'monitoring') };
 const VMS_COPIA = BASE.os.imagenesExtra.filter(i => /-20260923$/.test(i.nombre)).map(i => i.nombre.replace(/^backup-/, '').replace(/-20260923$/, ''));
 
 const nueva = () => ({ formato: P.FORMATO_INCIDENCIA, asunto: '', de: '', cuerpo: [''], impacto: 'medio', urgencia: 'alta', tipo: 'incidente', nivel: 2, hace: 30, abiertoHace: 10, autor: '', averias: [] });
@@ -42,17 +43,17 @@ function opciones(lista, valor, vacio) {
 }
 function campo(a, i, c) {
   const v = a[c.k], id = 'f' + i + '-' + c.k, base = `data-i="${i}" data-k="${c.k}" data-t="${c.t}" id="${id}"`;
-  const etiqueta = `<span>${h(c.etiqueta || c.k)}${c.opcional ? ' <em>opcional</em>' : ''}</span>`;
+  const etiqueta = `<span>${h(c.etiqueta || c.k)}${c.opcional ? ' <em>' + T('opcional', 'optional') + '</em>' : ''}</span>`;
   let ctl;
   switch (c.t) {
-    case 'nodo': ctl = `<select ${base}>${opciones(NODOS.filter(d => !c.roles || c.roles.indexOf(d.rol) >= 0).map(d => [d.n, d.n + ' · ' + ROL[d.rol]]), v, v ? null : 'elige un nodo')}</select>`; break;
-    case 'servicio': { const hs = BASE.hosts[a.nodo]; ctl = `<select ${base}${hs ? '' : ' disabled'}>${opciones(hs ? Object.keys(hs.svcs) : [], v, hs ? (v ? null : 'elige un servicio') : 'primero el nodo')}</select>`; break; }
-    case 'motivo': ctl = `<select ${base}>${opciones(Object.keys(P.motivos).sort(), v, '(genérico)')}</select>`; break;
+    case 'nodo': ctl = `<select ${base}>${opciones(NODOS.filter(d => !c.roles || c.roles.indexOf(d.rol) >= 0).map(d => [d.n, d.n + ' · ' + ROL[d.rol]]), v, v ? null : T('elige un nodo', 'choose a node'))}</select>`; break;
+    case 'servicio': { const hs = BASE.hosts[a.nodo]; ctl = `<select ${base}${hs ? '' : ' disabled'}>${opciones(hs ? Object.keys(hs.svcs) : [], v, hs ? (v ? null : T('elige un servicio', 'choose a service')) : T('primero el nodo', 'pick the node first'))}</select>`; break; }
+    case 'motivo': ctl = `<select ${base}>${opciones(Object.keys(P.motivos).sort(), v, T('(genérico)', '(generic)'))}</select>`; break;
     case 'opciones': ctl = `<select ${base}>${opciones(c.opciones, v)}</select>`; break;
     case 'osd': ctl = `<select ${base}>${opciones([0, 1, 2, 3, 4, 5, 6, 7, 8].map(n => [n, 'osd.' + n + ' · ceph0' + (Math.floor(n / 3) + 1)]), v)}</select>`; break;
     case 'proyecto': ctl = `<select ${base}>${opciones(Object.keys(BASE.os.proyectos), v)}</select>`; break;
     case 'flavor': ctl = `<select ${base}>${opciones(Object.keys(P.FLAVORS), v)}</select>`; break;
-    case 'vm': ctl = `<select ${base}>${opciones(VMS_COPIA, v, v ? null : 'elige una VM con copia')}</select>`; break;
+    case 'vm': ctl = `<select ${base}>${opciones(VMS_COPIA, v, v ? null : T('elige una VM con copia', 'choose a VM with a backup'))}</select>`; break;
     case 'bool': return `<label class="cf cf-bool"><input type="checkbox" ${base}${v ? ' checked' : ''}> ${etiqueta}</label>`;
     case 'num': ctl = `<input type="number" ${base} value="${v == null ? '' : h(v)}"${c.min != null ? ' min="' + c.min + '"' : ''}${c.max != null ? ' max="' + c.max + '"' : ''} step="${c.paso || 1}">`; break;
     case 'fichero': { const hs = BASE.hosts[a.nodo], dl = 'dl' + i; ctl = `<input type="text" ${base} list="${dl}" value="${h(v || '')}" placeholder="/var/log/…"><datalist id="${dl}">${hs ? Object.keys(hs.logs).filter(p => !/journal|\.gz$|\.\d$/.test(p)).map(p => '<option value="' + h(p) + '">').join('') : ''}</datalist>`; break; }
@@ -77,83 +78,83 @@ function leerCampo(el) {
 
 // ------------------------------------------------------------------ vista
 const TIPOS = Object.keys(P.averias);
-const tipoOpciones = sel => `<optgroup label="Rompen algo">${opciones(TIPOS.filter(t => !P.averias[t].condicion).map(t => [t, P.averias[t].titulo]), sel)}</optgroup><optgroup label="Condiciones (preparan, no rompen)">${opciones(TIPOS.filter(t => P.averias[t].condicion).map(t => [t, P.averias[t].titulo]), sel)}</optgroup>`;
+const tipoOpciones = sel => `<optgroup label="${T('Rompen algo', 'Break something')}">${opciones(TIPOS.filter(t => !P.averias[t].condicion).map(t => [t, P.averias[t].titulo]), sel)}</optgroup><optgroup label="${T('Condiciones (preparan, no rompen)', 'Conditions (set the scene, break nothing)')}">${opciones(TIPOS.filter(t => P.averias[t].condicion).map(t => [t, P.averias[t].titulo]), sel)}</optgroup>`;
 function tarjetaAveria(a, i) {
   const t = P.averias[a.tipo], n = est.def.averias.length;
-  if (!t) return `<div class="av-card av-mala"><b>Avería ${i + 1}: tipo desconocido «${h(a.tipo)}»</b><button class="btn" data-act="quitar" data-i="${i}">Quitar</button></div>`;
+  if (!t) return `<div class="av-card av-mala"><b>${T(`Avería ${i + 1}: tipo desconocido «${h(a.tipo)}»`, `Fault ${i + 1}: unknown type “${h(a.tipo)}”`)}</b><button class="btn" data-act="quitar" data-i="${i}">${T('Quitar', 'Remove')}</button></div>`;
   return `<div class="av-card${t.condicion ? ' av-cond' : ''}">
     <div class="av-cab">
       <span class="av-n">${i + 1}</span>
-      <select class="av-tipo" data-i="${i}" data-act-cambio="tipo" aria-label="Tipo de la avería ${i + 1}">${tipoOpciones(a.tipo)}</select>
+      <select class="av-tipo" data-i="${i}" data-act-cambio="tipo" aria-label="${T(`Tipo de la avería ${i + 1}`, `Type of fault ${i + 1}`)}">${tipoOpciones(a.tipo)}</select>
       <span class="av-acc">
-        <button data-act="subir" data-i="${i}" title="Subir"${i === 0 ? ' disabled' : ''} aria-label="Subir">↑</button>
-        <button data-act="bajar" data-i="${i}" title="Bajar"${i === n - 1 ? ' disabled' : ''} aria-label="Bajar">↓</button>
-        <button data-act="quitar" data-i="${i}" title="Quitar" aria-label="Quitar">×</button>
+        <button data-act="subir" data-i="${i}" title="${T('Subir', 'Move up')}"${i === 0 ? ' disabled' : ''} aria-label="${T('Subir', 'Move up')}">↑</button>
+        <button data-act="bajar" data-i="${i}" title="${T('Bajar', 'Move down')}"${i === n - 1 ? ' disabled' : ''} aria-label="${T('Bajar', 'Move down')}">↓</button>
+        <button data-act="quitar" data-i="${i}" title="${T('Quitar', 'Remove')}" aria-label="${T('Quitar', 'Remove')}">×</button>
       </span>
     </div>
     ${t.descripcion ? '<p class="av-desc">' + h(t.descripcion) + '</p>' : ''}
     <p class="av-err" role="status"></p>
-    <div class="av-campos">${(P.camposAveria[a.tipo] || []).map(c => campo(a, i, c)).join('') || '<p class="av-desc">No tiene parámetros.</p>'}</div>
-    ${a.soloPractica ? '<p class="av-desc">Marcada como «sólo práctica»: se aplica y cuenta como buena práctica arreglarla, pero no impide cerrar.</p>' : ''}
+    <div class="av-campos">${(P.camposAveria[a.tipo] || []).map(c => campo(a, i, c)).join('') || '<p class="av-desc">' + T('No tiene parámetros.', 'It has no parameters.') + '</p>'}</div>
+    ${a.soloPractica ? '<p class="av-desc">' + T('Marcada como «sólo práctica»: se aplica y cuenta como buena práctica arreglarla, pero no impide cerrar.', 'Marked as “practice only”: it is applied and fixing it counts as a good practice, but it does not block closing.') + '</p>' : ''}
   </div>`;
 }
 function origenes() {
   const imp = leer(CLAVE_IMP, []).filter(x => x && x.id);
-  return `<option value="">Empezar desde…</option><option value="blanco">Una incidencia en blanco</option>
-    <optgroup label="Un ticket del puesto">${P.exportables().map(e => `<option value="t:${e.id}">${e.id} · ${h(e.asunto)}</option>`).join('')}</optgroup>
-    ${imp.length ? `<optgroup label="Una incidencia importada">${imp.map(x => `<option value="i:${h(x.id)}">${h(x.id)} · ${h(x.asunto || '')}</option>`).join('')}</optgroup>` : ''}
-    <optgroup label="Una guardia generada al azar">${[1, 2, 3].map(n => `<option value="g:${n}">Guardia ${P.nivelesGuardia[n].toLowerCase()}</option>`).join('')}</optgroup>`;
+  return `<option value="">${T('Empezar desde…', 'Start from…')}</option><option value="blanco">${T('Una incidencia en blanco', 'A blank incident')}</option>
+    <optgroup label="${T('Un ticket del puesto', 'One of the desk\'s tickets')}">${P.exportables().map(e => `<option value="t:${e.id}">${e.id} · ${h(e.asunto)}</option>`).join('')}</optgroup>
+    ${imp.length ? `<optgroup label="${T('Una incidencia importada', 'An imported incident')}">${imp.map(x => `<option value="i:${h(x.id)}">${h(x.id)} · ${h(x.asunto || '')}</option>`).join('')}</optgroup>` : ''}
+    <optgroup label="${T('Una guardia generada al azar', 'A randomly generated on-call shift')}">${[1, 2, 3].map(n => `<option value="g:${n}">${T(`Guardia ${P.nivelesGuardia[n].toLowerCase()}`, `A ${P.nivelesGuardia[n].toLowerCase()} shift`)}</option>`).join('')}</optgroup>`;
 }
 function pintar() {
   const d = est.def;
   $('#vista').innerHTML = `<div class="comp">
     <div class="comp-form">
       <section class="comp-cab">
-        <h1>Compositor de incidencias</h1>
-        <p>Combina averías del catálogo y escribe el ticket. A la derecha, el puesto la ensaya mientras escribes: lo que verá quien la juegue, lo que tendrá que arreglar y si tiene arreglo.</p>
+        <h1>${T('Compositor de incidencias', 'Incident composer')}</h1>
+        <p>${T('Combina averías del catálogo y escribe el ticket. A la derecha, el puesto la ensaya mientras escribes: lo que verá quien la juegue, lo que tendrá que arreglar y si tiene arreglo.', 'Combine faults from the catalog and write the ticket. On the right, the desk rehearses it as you type: what the player will see, what they will have to fix, and whether it can be fixed at all.')}</p>
         <div class="comp-origen">
-          <select id="origen" aria-label="Punto de partida">${origenes()}</select>
-          <button class="btn" data-act="cargar">Cargar</button>
-          <button class="btn" data-act="fichero">Abrir .json</button>
+          <select id="origen" aria-label="${T('Punto de partida', 'Starting point')}">${origenes()}</select>
+          <button class="btn" data-act="cargar">${T('Cargar', 'Load')}</button>
+          <button class="btn" data-act="fichero">${T('Abrir .json', 'Open .json')}</button>
           <input type="file" id="fichero" accept=".json,application/json" hidden>
         </div>
       </section>
 
       <section class="card comp-sec">
-        <h2>El ticket</h2>
+        <h2>${T('El ticket', 'The ticket')}</h2>
         <div class="comp-grid">
-          <label class="cf cf-ancho"><span>asunto</span><input type="text" data-top="asunto" maxlength="160" value="${h(d.asunto)}" placeholder="Lo que pone el ticket, en una línea"></label>
-          <label class="cf cf-ancho"><span>cuerpo <em>párrafos separados por una línea en blanco</em></span><textarea data-top="cuerpo" rows="4" placeholder="Lo que cuenta quien abre el ticket. Sin dar la causa.">${h((d.cuerpo || []).join('\n\n'))}</textarea></label>
-          <label class="cf"><span>de <em>opcional</em></span><input type="text" data-top="de" value="${h(d.de || '')}" placeholder="Monitorización, un equipo…"></label>
-          <label class="cf"><span>tipo</span><select data-top="tipo">${opciones([['incidente', 'Incidente'], ['peticion', 'Petición'], ['cambio', 'Cambio']], d.tipo)}</select></label>
-          <label class="cf"><span>impacto</span><select data-top="impacto">${opciones(['alto', 'medio', 'bajo'], d.impacto)}</select></label>
-          <label class="cf"><span>urgencia</span><select data-top="urgencia">${opciones(['alta', 'media', 'baja'], d.urgencia)}</select></label>
-          <label class="cf"><span>nivel</span><select data-top="nivel" data-num="1">${opciones([[1, '1 · fácil'], [2, '2 · medio'], [3, '3 · difícil']], d.nivel)}</select></label>
-          <label class="cf"><span>la avería empezó hace (min)</span><input type="number" min="0" max="10080" data-top="hace" data-num="1" value="${d.hace == null ? '' : d.hace}"></label>
-          <label class="cf"><span>el ticket se abrió hace (min)</span><input type="number" min="0" max="10080" data-top="abiertoHace" data-num="1" value="${d.abiertoHace == null ? '' : d.abiertoHace}"></label>
-          <label class="cf"><span>id <em>opcional</em></span><input type="text" data-top="id" value="${h(d.id || '')}" placeholder="EXT-001"></label>
-          <label class="cf"><span>autor <em>opcional</em></span><input type="text" data-top="autor" value="${h(d.autor || '')}"></label>
+          <label class="cf cf-ancho"><span>${T('asunto', 'subject')}</span><input type="text" data-top="asunto" maxlength="160" value="${h(d.asunto)}" placeholder="${T('Lo que pone el ticket, en una línea', 'What the ticket says, in one line')}"></label>
+          <label class="cf cf-ancho"><span>${T('cuerpo <em>párrafos separados por una línea en blanco</em>', 'body <em>paragraphs separated by a blank line</em>')}</span><textarea data-top="cuerpo" rows="4" placeholder="${T('Lo que cuenta quien abre el ticket. Sin dar la causa.', 'What the person opening the ticket reports. Without giving away the cause.')}">${h((d.cuerpo || []).join('\n\n'))}</textarea></label>
+          <label class="cf"><span>${T('de <em>opcional</em>', 'from <em>optional</em>')}</span><input type="text" data-top="de" value="${h(d.de || '')}" placeholder="${T('Monitorización, un equipo…', 'Monitoring, a team…')}"></label>
+          <label class="cf"><span>${T('tipo', 'type')}</span><select data-top="tipo">${opciones([['incidente', T('Incidente', 'Incident')], ['peticion', T('Petición', 'Request')], ['cambio', T('Cambio', 'Change')]], d.tipo)}</select></label>
+          <label class="cf"><span>${T('impacto', 'impact')}</span><select data-top="impacto">${opciones([['alto', T('alto', 'high')], ['medio', T('medio', 'medium')], ['bajo', T('bajo', 'low')]], d.impacto)}</select></label>
+          <label class="cf"><span>${T('urgencia', 'urgency')}</span><select data-top="urgencia">${opciones([['alta', T('alta', 'high')], ['media', T('media', 'medium')], ['baja', T('baja', 'low')]], d.urgencia)}</select></label>
+          <label class="cf"><span>${T('nivel', 'level')}</span><select data-top="nivel" data-num="1">${opciones([[1, T('1 · fácil', '1 · easy')], [2, T('2 · medio', '2 · medium')], [3, T('3 · difícil', '3 · hard')]], d.nivel)}</select></label>
+          <label class="cf"><span>${T('la avería empezó hace (min)', 'fault started (min ago)')}</span><input type="number" min="0" max="10080" data-top="hace" data-num="1" value="${d.hace == null ? '' : d.hace}"></label>
+          <label class="cf"><span>${T('el ticket se abrió hace (min)', 'ticket opened (min ago)')}</span><input type="number" min="0" max="10080" data-top="abiertoHace" data-num="1" value="${d.abiertoHace == null ? '' : d.abiertoHace}"></label>
+          <label class="cf"><span>${T('id <em>opcional</em>', 'id <em>optional</em>')}</span><input type="text" data-top="id" value="${h(d.id || '')}" placeholder="EXT-001"></label>
+          <label class="cf"><span>${T('autor <em>opcional</em>', 'author <em>optional</em>')}</span><input type="text" data-top="autor" value="${h(d.autor || '')}"></label>
         </div>
       </section>
 
       <section class="card comp-sec">
-        <h2>Las averías <span class="der-n">${d.averias.length} de 12</span></h2>
-        <div class="av-lista">${d.averias.map(tarjetaAveria).join('') || '<p class="vacio">Todavía ninguna. Añade una avería suelta o una familia entera (averías que tienen sentido juntas).</p>'}</div>
+        <h2>${T('Las averías', 'The faults')} <span class="der-n">${T(`${d.averias.length} de 12`, `${d.averias.length} of 12`)}</span></h2>
+        <div class="av-lista">${d.averias.map(tarjetaAveria).join('') || '<p class="vacio">' + T('Todavía ninguna. Añade una avería suelta o una familia entera (averías que tienen sentido juntas).', 'None yet. Add a single fault or a whole family (faults that make sense together).') + '</p>'}</div>
         <div class="av-nueva">
-          <select id="nuevoTipo" aria-label="Tipo de avería que añadir">${tipoOpciones('servicio-caido')}</select>
-          <button class="btn" data-act="anadir"${d.averias.length >= 12 ? ' disabled' : ''}>+ Añadir avería</button>
-          <select id="nuevaFamilia" aria-label="Familia que añadir">${P.familias.map(f => `<option value="${f.id}">${h(f.titulo)} · nivel ${f.nivel}</option>`).join('')}</select>
-          <button class="btn" data-act="familia"${d.averias.length >= 12 ? ' disabled' : ''}>+ Añadir familia</button>
+          <select id="nuevoTipo" aria-label="${T('Tipo de avería que añadir', 'Type of fault to add')}">${tipoOpciones('servicio-caido')}</select>
+          <button class="btn" data-act="anadir"${d.averias.length >= 12 ? ' disabled' : ''}>${T('+ Añadir avería', '+ Add fault')}</button>
+          <select id="nuevaFamilia" aria-label="${T('Familia que añadir', 'Family to add')}">${P.familias.map(f => `<option value="${f.id}">${h(f.titulo)} · ${T('nivel', 'level')} ${f.nivel}</option>`).join('')}</select>
+          <button class="btn" data-act="familia"${d.averias.length >= 12 ? ' disabled' : ''}>${T('+ Añadir familia', '+ Add family')}</button>
         </div>
       </section>
 
       <details class="card comp-sec"${d.pistas || d.causa || d.leccion || d.solucion ? ' open' : ''}>
-        <summary><h2>Textos didácticos <em>opcionales: si se dejan vacíos, se generan</em></h2></summary>
+        <summary><h2>${T('Textos didácticos <em>opcionales: si se dejan vacíos, se generan</em>', 'Teaching texts <em>optional: generated if left empty</em>')}</h2></summary>
         <div class="comp-grid">
-          ${[0, 1, 2].map(n => `<label class="cf cf-ancho"><span>pista ${n + 1}</span><textarea rows="2" data-top="pista" data-n="${n}" maxlength="400">${h((d.pistas || [])[n] || '')}</textarea></label>`).join('')}
-          <label class="cf cf-ancho"><span>causa</span><textarea rows="2" data-top="causa" maxlength="1500">${h(d.causa || '')}</textarea></label>
-          <label class="cf cf-ancho"><span>solución</span><textarea rows="2" data-top="solucion" maxlength="1500">${h(d.solucion || '')}</textarea></label>
-          <label class="cf cf-ancho"><span>lo que se lleva quien la resuelva</span><textarea rows="2" data-top="leccion" maxlength="1500">${h(d.leccion || '')}</textarea></label>
+          ${[0, 1, 2].map(n => `<label class="cf cf-ancho"><span>${T(`pista ${n + 1}`, `hint ${n + 1}`)}</span><textarea rows="2" data-top="pista" data-n="${n}" maxlength="400">${h((d.pistas || [])[n] || '')}</textarea></label>`).join('')}
+          <label class="cf cf-ancho"><span>${T('causa', 'cause')}</span><textarea rows="2" data-top="causa" maxlength="1500">${h(d.causa || '')}</textarea></label>
+          <label class="cf cf-ancho"><span>${T('solución', 'fix')}</span><textarea rows="2" data-top="solucion" maxlength="1500">${h(d.solucion || '')}</textarea></label>
+          <label class="cf cf-ancho"><span>${T('lo que se lleva quien la resuelva', 'what the solver takes away')}</span><textarea rows="2" data-top="leccion" maxlength="1500">${h(d.leccion || '')}</textarea></label>
         </div>
       </details>
     </div>
@@ -164,23 +165,23 @@ function pintar() {
 function pintarEnsayo() {
   const r = est.res, v = est.vista;
   const estado = !r ? '' : r.ok
-    ? `<div class="imp-res ok"><b>✓ Jugable</b><span>Se ha aplicado sobre una plataforma nueva y su solución de referencia la resuelve.</span>${r.avisos.map(a => '<span class="imp-aviso">! ' + h(a) + '</span>').join('')}</div>`
-    : `<div class="imp-res mal"><b>Todavía no se puede jugar</b><ul>${r.errores.map(e => '<li>' + h(e) + '</li>').join('')}</ul>${(r.avisos || []).map(a => '<span class="imp-aviso">! ' + h(a) + '</span>').join('')}</div>`;
+    ? `<div class="imp-res ok"><b>${T('✓ Jugable', '✓ Playable')}</b><span>${T('Se ha aplicado sobre una plataforma nueva y su solución de referencia la resuelve.', 'It was applied to a fresh platform and its reference fix resolves it.')}</span>${r.avisos.map(a => '<span class="imp-aviso">! ' + h(a) + '</span>').join('')}</div>`
+    : `<div class="imp-res mal"><b>${T('Todavía no se puede jugar', 'Not playable yet')}</b><ul>${r.errores.map(e => '<li>' + h(e) + '</li>').join('')}</ul>${(r.avisos || []).map(a => '<span class="imp-aviso">! ' + h(a) + '</span>').join('')}</div>`;
   const e = v && v.e, p = e && P.prioridad(e);
-  const cifras = v ? `<div class="cifras"><div><b>${p && p.p ? p.p : '—'}</b><span>${p && p.sla ? 'SLA ' + (p.sla >= 60 ? p.sla / 60 + ' h' : p.sla + ' min') : 'prioridad'}</span></div><div><b>${v.alertas.length}</b><span>alertas</span></div><div><b>${r && r.ensayo ? r.ensayo.comandos : v.guion.length}</b><span>comandos de solución</span></div></div>` : '';
+  const cifras = v ? `<div class="cifras"><div><b>${p && p.p ? p.p : '—'}</b><span>${p && p.sla ? 'SLA ' + (p.sla >= 60 ? p.sla / 60 + ' h' : p.sla + ' min') : T('prioridad', 'priority')}</span></div><div><b>${v.alertas.length}</b><span>${T('alertas', 'alerts')}</span></div><div><b>${r && r.ensayo ? r.ensayo.comandos : v.guion.length}</b><span>${T('comandos de solución', 'fix commands')}</span></div></div>` : '';
   const bloque = (t, cont) => `<div class="bloque"><h4>${t}</h4>${cont}</div>`;
   $('#ensayo').innerHTML = `<section class="panel">
-    <h3>Ensayo</h3>
+    <h3>${T('Ensayo', 'Rehearsal')}</h3>
     ${estado}${cifras}
-    ${v ? bloque('Lo que verá quien juegue (alertas)', v.alertas.length ? v.alertas.map(a => `<div class="alerta al-${a.sev}"><i></i><div><b>${h(a.nombre)}</b><span>${h((a.host ? a.host + ' · ' : '') + a.res)}</span></div><small></small></div>`).join('') : '<p class="vacio">Ninguna: en guardia nadie la encontraría.</p>')
-      + bloque('Lo que tendrá que dejar arreglado', v.pendientes.length ? '<ul class="lista-p">' + v.pendientes.map(x => '<li>' + h(x) + '</li>').join('') + '</ul>' : '<p class="vacio">Nada: así la plataforma nace sana.</p>')
-      + bloque('Pistas', '<ol class="lista-p">' + e.pistas.map(x => '<li>' + h(x) + '</li>').join('') + '</ol>')
-      + bloque('Solución de referencia', '<div class="sol-ref">' + v.guion.map(c => '<code>' + h(c) + '</code>').join('') + '</div>')
-      : '<p class="vacio">Añade al menos una avería válida para ver el ensayo.</p>'}
+    ${v ? bloque(T('Lo que verá quien juegue (alertas)', 'What the player will see (alerts)'), v.alertas.length ? v.alertas.map(a => `<div class="alerta al-${a.sev}"><i></i><div><b>${h(a.nombre)}</b><span>${h((a.host ? a.host + ' · ' : '') + a.res)}</span></div><small></small></div>`).join('') : '<p class="vacio">' + T('Ninguna: en guardia nadie la encontraría.', 'None: on call, nobody would ever find it.') + '</p>')
+      + bloque(T('Lo que tendrá que dejar arreglado', 'What they will have to leave fixed'), v.pendientes.length ? '<ul class="lista-p">' + v.pendientes.map(x => '<li>' + h(x) + '</li>').join('') + '</ul>' : '<p class="vacio">' + T('Nada: así la plataforma nace sana.', 'Nothing: as it stands, the platform starts out healthy.') + '</p>')
+      + bloque(T('Pistas', 'Hints'), '<ol class="lista-p">' + e.pistas.map(x => '<li>' + h(x) + '</li>').join('') + '</ol>')
+      + bloque(T('Solución de referencia', 'Reference fix'), '<div class="sol-ref">' + v.guion.map(c => '<code>' + h(c) + '</code>').join('') + '</div>')
+      : '<p class="vacio">' + T('Añade al menos una avería válida para ver el ensayo.', 'Add at least one valid fault to see the rehearsal.') + '</p>'}
     <div class="acciones">
-      <button class="btn primario" data-act="probar"${r && r.ok ? '' : ' disabled'}>Probarla en el puesto</button>
-      <button class="btn" data-act="guardar"${r && r.ok ? '' : ' disabled'}>Guardar en la cola</button>
-      <button class="btn" data-act="descargar"${r && r.ok ? '' : ' disabled'}>Descargar .json</button>
+      <button class="btn primario" data-act="probar"${r && r.ok ? '' : ' disabled'}>${T('Probarla en el puesto', 'Try it on the desk')}</button>
+      <button class="btn" data-act="guardar"${r && r.ok ? '' : ' disabled'}>${T('Guardar en la cola', 'Save to the queue')}</button>
+      <button class="btn" data-act="descargar"${r && r.ok ? '' : ' disabled'}>${T('Descargar .json', 'Download .json')}</button>
     </div>
     ${est.msg ? '<p class="comp-msg">' + est.msg + '</p>' : ''}
   </section>`;
@@ -198,13 +199,15 @@ function ensayar() {
   est.errAv = d.averias.length && d.averias.every(a => P.averias[a.tipo]) ? P.validarAverias(d.averias) : [];
   if (!est.res.ok) est.errAv.forEach(x => { if (est.res.errores.indexOf(x) < 0) est.res.errores.push(x); });
   document.querySelectorAll('.av-card').forEach((c, i) => {
-    const m = est.errAv.filter(x => x.indexOf('avería ' + (i + 1) + ' ') === 0 || new RegExp('^las averías (\\d+ y )?' + (i + 1) + '\\b').test(x));
+    // Los mensajes del validador llegan en el idioma de la página: «avería 2 (tipo): …»
+    // o «fault 2 (tipo): …», y «las averías 1 y 2 tocan…» o «faults 1 and 2 touch…».
+    const m = est.errAv.filter(x => new RegExp('^(avería|fault) ' + (i + 1) + ' ').test(x) || new RegExp('^(las averías|faults) (\\d+ (y|and) )?' + (i + 1) + '\\b').test(x));
     c.classList.toggle('av-error', m.length > 0);
-    const p = c.querySelector('.av-err'); if (p) p.textContent = m.map(x => x.replace(/^avería \d+ \([^)]*\): /, '')).join(' · ');
+    const p = c.querySelector('.av-err'); if (p) p.textContent = m.map(x => x.replace(/^(avería|fault) \d+ \([^)]*\): /, '')).join(' · ');
   });
   if (d.averias.length && !est.errAv.length) {
     try {
-      const e = P.construirIncidencia(Object.assign({}, d, { asunto: d.asunto || '(sin asunto)', cuerpo: d.cuerpo.length ? d.cuerpo : ['(sin cuerpo)'] }));
+      const e = P.construirIncidencia(Object.assign({}, d, { asunto: d.asunto || T('(sin asunto)', '(no subject)'), cuerpo: d.cuerpo.length ? d.cuerpo : [T('(sin cuerpo)', '(no body)')] }));
       const st = P.preparar(e);
       est.vista = { e, alertas: P.alertasActivas(st), pendientes: e.resuelto(st, P), guion: P.guionDe(e, st) };
     } catch (x) { est.vista = null; }
@@ -230,7 +233,7 @@ function descargar(nombre, texto) {
 function cargar(def, origen) {
   est.def = Object.assign(nueva(), copia(def));
   if (!Array.isArray(est.def.cuerpo)) est.def.cuerpo = [''];
-  est.msg = 'Cargado: ' + h(origen) + '.';
+  est.msg = T('Cargado: ', 'Loaded: ') + h(origen) + '.';
   pintar(); ensayar();
 }
 
@@ -268,7 +271,7 @@ document.addEventListener('change', ev => {
   }
   if (el.id === 'fichero' && el.files && el.files[0]) {
     const f = el.files[0], rd = new FileReader();
-    rd.onload = () => { let d; try { d = JSON.parse(String(rd.result)); } catch (e) { est.msg = 'No es un JSON válido: ' + h(e.message); pintarEnsayo(); return; } if (!d || typeof d !== 'object' || Array.isArray(d)) { est.msg = 'El fichero no contiene una incidencia.'; pintarEnsayo(); return; } cargar(d, f.name); };
+    rd.onload = () => { let d; try { d = JSON.parse(String(rd.result)); } catch (e) { est.msg = T('No es un JSON válido: ', 'Not valid JSON: ') + h(e.message); pintarEnsayo(); return; } if (!d || typeof d !== 'object' || Array.isArray(d)) { est.msg = T('El fichero no contiene una incidencia.', 'The file does not contain an incident.'); pintarEnsayo(); return; } cargar(d, f.name); };
     rd.readAsText(f);
   }
 });
@@ -288,13 +291,13 @@ document.addEventListener('click', ev => {
   if (act === 'fichero') { const f = $('#fichero'); f.value = ''; f.click(); return; }
   if (act === 'cargar') {
     const v = $('#origen').value;
-    if (v === 'blanco') { est.def = nueva(); est.msg = 'Incidencia en blanco.'; pintar(); ensayar(); return; }
-    if (v.indexOf('t:') === 0) { cargar(P.exportarIncidencia(P.escenario(v.slice(2))), 'el ticket ' + v.slice(2)); return; }
-    if (v.indexOf('i:') === 0) { const d = leer(CLAVE_IMP, []).find(x => x.id === v.slice(2)); if (d) cargar(d, 'la incidencia ' + v.slice(2)); return; }
-    if (v.indexOf('g:') === 0) { const g = P.generarGuardia(+v.slice(2), 1 + Math.floor(Math.random() * 999999)); if (g.ok) { const d = copia(g.def); delete d.id; d.asunto = d.asunto.replace(/^Guardia/, 'Noche'); cargar(d, 'una guardia ' + P.nivelesGuardia[+v.slice(2)].toLowerCase()); } return; }
+    if (v === 'blanco') { est.def = nueva(); est.msg = T('Incidencia en blanco.', 'Blank incident.'); pintar(); ensayar(); return; }
+    if (v.indexOf('t:') === 0) { cargar(P.exportarIncidencia(P.escenario(v.slice(2))), T('el ticket ', 'ticket ') + v.slice(2)); return; }
+    if (v.indexOf('i:') === 0) { const d = leer(CLAVE_IMP, []).find(x => x.id === v.slice(2)); if (d) cargar(d, T('la incidencia ', 'incident ') + v.slice(2)); return; }
+    if (v.indexOf('g:') === 0) { const g = P.generarGuardia(+v.slice(2), 1 + Math.floor(Math.random() * 999999)); if (g.ok) { const d = copia(g.def); delete d.id; d.asunto = d.asunto.replace(/^Guardia/, 'Noche').replace(/ on-call shift/, ' night'); cargar(d, T('una guardia ' + P.nivelesGuardia[+v.slice(2)].toLowerCase(), 'a ' + P.nivelesGuardia[+v.slice(2)].toLowerCase() + ' shift')); } return; }
     return;
   }
-  if (act === 'guardar') { const id = guardarEnCola(); if (id) { est.msg = '✓ Guardada en la cola como <b>' + h(id) + '</b>. La verás en «Incidencias importadas».'; pintar(); ensayar(); } return; }
+  if (act === 'guardar') { const id = guardarEnCola(); if (id) { est.msg = T('✓ Guardada en la cola como <b>' + h(id) + '</b>. La verás en «Incidencias importadas».', '✓ Saved to the queue as <b>' + h(id) + '</b>. You will find it under “Imported incidents”.'); pintar(); ensayar(); } return; }
   if (act === 'probar') { const id = guardarEnCola(); if (id) location.href = './index.html#' + encodeURIComponent(id); return; }
   if (act === 'descargar') { const r = est.res; if (r && r.ok) descargar(r.escenario.id.toLowerCase() + '.json', JSON.stringify(Object.assign(limpio(est.def), { id: r.escenario.id }), null, 2)); return; }
 });

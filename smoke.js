@@ -1,6 +1,6 @@
 // Smoke test: instancia Component con stubs y ejecuta renderVals() en los 10 modos.
 const fs = require('fs'), path = require('path');
-const FILE = 'F:/IngLab/Taller visual de infraestructura didáctico/Laboratorio.dc.html';
+const FILE = require('path').join(__dirname, 'Laboratorio.dc.html');
 const src = fs.readFileSync(FILE, 'utf8');
 
 const m = src.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/);
@@ -20,7 +20,7 @@ global.navigator = { clipboard:{ writeText(){ return Promise.resolve(); } } };
 
 // cargar el contenido externo igual que hacen las <script> de la página
 ['piezas','capas','textos','retos','kids','tickets','eventos','comandos'].forEach(function(n){
-  const code=fs.readFileSync('F:/IngLab/Taller visual de infraestructura didáctico/contenido/'+n+'.js','utf8');
+  const code=fs.readFileSync(require('path').join(__dirname, 'contenido', n+'.js'),'utf8');
   new Function('window', code)(global.window);
 });
 global.React = { createElement:(...a)=>({ a }), Fragment:'F' };

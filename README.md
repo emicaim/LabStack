@@ -25,7 +25,7 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno. No requiere instalación
 
 ## Puesto Linux: réplica de un puesto real
 
-Una segunda app, en **`puesto-linux/index.html`** (también enlazada desde la portada): el día a día de un puesto de *Administrador/a de Sistemas Linux* sobre una plataforma simulada de **12 nodos**: bastión, 3 controladores OpenStack, 4 hipervisores, 3 nodos Ceph y monitorización.
+Una segunda app, en **`puesto-linux/index.html`** (también enlazada desde la portada), **en español y en inglés** (botón EN/ES o `?lang=en`): el día a día de un puesto de *Administrador/a de Sistemas Linux* sobre una plataforma simulada de **12 nodos**: bastión, 3 controladores OpenStack, 4 hipervisores, 3 nodos Ceph y monitorización.
 
 - **20 tickets** repartidos entre las cuatro funciones de la oferta: despliegue y mantenimiento de OpenStack, administración de Ceph, automatización con Ansible y Terraform, y resolución de incidencias.
 - **Se arreglan con comandos reales**, no eligiendo respuestas: `ssh`, `systemctl`, `journalctl`, `ceph`, `openstack`, `nova-manage`, `ansible-playbook`, `terraform`, `amtool`… con `sudo`, tuberías, `&&`, Tab y varias pestañas.

@@ -4440,7 +4440,8 @@ class Component extends DCLogic {
       continueDesc: placedTotal+' '+(S.lang==='es'?'piezas montadas':'pieces placed')+' · '+t.homeContinueDesc,
       onContinue: ()=>this.setMode('sandbox'),
       // El Puesto Linux es otra app (puesto-linux/): otro motor, estado propio.
-      jobHref:'./puesto-linux/index.html', jobTitle:t.homeJobT, jobDesc:t.homeJobD, jobCta:t.homeJobCta,
+      // Se abre en el idioma de LabStack (?lang= lo fija allí también).
+      jobHref:'./puesto-linux/index.html?lang='+(S.lang==='en'?'en':'es'), jobTitle:t.homeJobT, jobDesc:t.homeJobD, jobCta:t.homeJobCta,
       cards: [
         { icon:'🧱', title:t.cardLearnT, desc:t.cardLearnD, meta:t.cardLearnM, color:'#6366f1', to:'sandbox' },
         { icon:'🎯', title:t.cardPracticeT, desc:t.cardPracticeD, meta:t.cardPracticeM, color:'#f59e0b', to:'mission' },

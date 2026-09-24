@@ -14,6 +14,40 @@
 'use strict';
 
 const U = P.u = P.u || {};
+
+// ------------------------------------------------------------------ idioma
+// Se decide una vez, al cargar: ?lang= en la URL, lo guardado, el navegador.
+// Cambiarlo recarga la página, así que T(es, en) puede usarse en cualquier
+// sitio, también en los datos que se construyen al cargar (tickets, catálogo,
+// glosario). La salida de los comandos va en inglés en los dos idiomas, como
+// la imprimen las herramientas de verdad. Los tests fijan P.idioma antes de
+// cargar motor.js.
+if (P.idioma !== 'es' && P.idioma !== 'en') P.idioma = (function () {
+  try {
+    const q = /[?&]lang=(es|en)\b/.exec(location.search);
+    if (q) { localStorage.setItem('puesto-idioma', q[1]); return q[1]; }
+    const g = localStorage.getItem('puesto-idioma');
+    if (g === 'es' || g === 'en') return g;
+    return /^es\b/i.test(navigator.language || 'es') ? 'es' : 'en';
+  } catch (e) { return 'es'; }
+})();
+const T = P.T = (es, en) => (P.idioma === 'en' ? en : es);
+P.cambiarIdioma = () => {
+  try { localStorage.setItem('puesto-idioma', P.idioma === 'en' ? 'es' : 'en'); } catch (e) { /* sin almacenamiento */ }
+  location.href = location.href.replace(/([?&])lang=(es|en)&?/, '$1').replace(/[?&]$/, '');
+};
+// Lo fijo del HTML (cabecera, título) lleva su inglés en data-en.
+if (typeof document !== 'undefined') {
+  const traducirHtml = () => {
+    document.documentElement.lang = P.idioma;
+    if (P.idioma !== 'en') return;
+    document.querySelectorAll('[data-en]').forEach(e => { e.textContent = e.dataset.en; });
+    document.querySelectorAll('[data-en-title]').forEach(e => { e.title = e.dataset.enTitle; e.setAttribute('aria-label', e.dataset.enTitle); });
+    const t = document.querySelector('meta[name=titulo-en]'); if (t) document.title = t.content;
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', traducirHtml); else traducirHtml();
+  document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-act=idioma]')) P.cambiarIdioma(); });
+}
 P.comandos = P.comandos || {};     // nombre -> { fn, donde, fuera, ayuda, grupo, completar }
 P.ficheros = P.ficheros || [];     // (st, h) -> { ruta: { lineas(), mb } }
 P.reglas = P.reglas || [];         // (st, h, unidad) -> motivo que impide arrancar | null
@@ -101,11 +135,11 @@ const TOPO = [
 ];
 P.topologia = TOPO;
 P.roles = {
-  bastion: 'Bastión: Ansible, Terraform y CLI de OpenStack',
-  ctl: 'Controlador OpenStack (API, scheduler, RabbitMQ, Galera)',
-  cmp: 'Hipervisor KVM (nova-compute + libvirt)',
-  ceph: 'Nodo Ceph: 1 mon, 1 mgr, 3 OSD',
-  mon: 'Monitorización: Prometheus, Alertmanager, Grafana',
+  bastion: T('Bastión: Ansible, Terraform y CLI de OpenStack', 'Bastion: Ansible, Terraform and the OpenStack CLI'),
+  ctl: T('Controlador OpenStack (API, scheduler, RabbitMQ, Galera)', 'OpenStack controller (API, scheduler, RabbitMQ, Galera)'),
+  cmp: T('Hipervisor KVM (nova-compute + libvirt)', 'KVM hypervisor (nova-compute + libvirt)'),
+  ceph: T('Nodo Ceph: 1 mon, 1 mgr, 3 OSD', 'Ceph node: 1 mon, 1 mgr, 3 OSDs'),
+  mon: T('Monitorización: Prometheus, Alertmanager, Grafana', 'Monitoring: Prometheus, Alertmanager, Grafana'),
 };
 
 const DESC = {
@@ -333,15 +367,15 @@ P.alertasActivas = st => P.alertas(st)
 
 P.detectores.push((st, add) => {
   Object.values(st.hosts).forEach(h => {
-    if (!h.up) { add('NodeDown', 'critical', h.nombre, h.nombre + ' no responde (node_exporter sin datos)'); return; }
-    Object.keys(h.svcs).forEach(u => { if (h.svcs[u].estado === 'failed') add('SystemdUnitFailed', 'warning', h.nombre, u + '.service en estado failed', 'SystemdUnitFailed|' + h.nombre + '|' + u); });
+    if (!h.up) { add('NodeDown', 'critical', h.nombre, h.nombre + T(' no responde (node_exporter sin datos)', ' is not responding (no node_exporter data)')); return; }
+    Object.keys(h.svcs).forEach(u => { if (h.svcs[u].estado === 'failed') add('SystemdUnitFailed', 'warning', h.nombre, u + T('.service en estado failed', '.service is in failed state'), 'SystemdUnitFailed|' + h.nombre + '|' + u); });
     Object.keys(h.discos).forEach(m => {
       const p = U.pctDisco(h, m);
-      if (p >= 90) add('NodeFilesystemAlmostFull', 'critical', h.nombre, m + ' al ' + p + ' %', 'NodeFilesystemAlmostFull|' + h.nombre + '|' + m);
-      else if (p >= 80) add('NodeFilesystemAlmostFull', 'warning', h.nombre, m + ' al ' + p + ' %', 'NodeFilesystemAlmostFull|' + h.nombre + '|' + m);
+      if (p >= 90) add('NodeFilesystemAlmostFull', 'critical', h.nombre, m + T(' al ', ' at ') + p + ' %', 'NodeFilesystemAlmostFull|' + h.nombre + '|' + m);
+      else if (p >= 80) add('NodeFilesystemAlmostFull', 'warning', h.nombre, m + T(' al ', ' at ') + p + ' %', 'NodeFilesystemAlmostFull|' + h.nombre + '|' + m);
     });
-    if (!U.ntpOk(h)) add('NodeClockNotSynchronising', 'warning', h.nombre, 'reloj sin sincronizar (desfase ' + Math.abs(h.ntp.offset).toFixed(3) + ' s)');
-    if (h.kernelNuevo) add('NodeRebootRequired', 'info', h.nombre, 'kernel ' + h.kernelNuevo + ' instalado, falta reiniciar');
+    if (!U.ntpOk(h)) add('NodeClockNotSynchronising', 'warning', h.nombre, T('reloj sin sincronizar (desfase ', 'clock not synchronized (offset ') + Math.abs(h.ntp.offset).toFixed(3) + ' s)');
+    if (h.kernelNuevo) add('NodeRebootRequired', 'info', h.nombre, 'kernel ' + h.kernelNuevo + T(' instalado, falta reiniciar', ' installed, reboot pending'));
   });
 });
 
@@ -375,7 +409,7 @@ P.ficheros.push((st, h) => {
   f['/etc/hostname'] = { lineas: () => [h.nombre] };
   f['/etc/os-release'] = { lineas: () => OS_RELEASE };
   f['/etc/hosts'] = { lineas: () => ['127.0.0.1 localhost', '10.10.1.10 api.retail.local vip-api'].concat(TOPO.map(d => d.ip + ' ' + d.n + '.retail.local ' + d.n)) };
-  f['/etc/chrony/chrony.conf'] = { lineas: () => ['# Gestionado por Ansible (playbooks/chrony.yml). No editar a mano.', 'server ntp1.retail.local iburst', 'server ntp2.retail.local iburst', 'driftfile /var/lib/chrony/chrony.drift', 'makestep 1 3', 'rtcsync', 'logdir /var/log/chrony'] };
+  f['/etc/chrony/chrony.conf'] = { lineas: () => [T('# Gestionado por Ansible (playbooks/chrony.yml). No editar a mano.', '# Managed by Ansible (playbooks/chrony.yml). Do not edit by hand.'),'server ntp1.retail.local iburst', 'server ntp2.retail.local iburst', 'driftfile /var/lib/chrony/chrony.drift', 'makestep 1 3', 'rtcsync', 'logdir /var/log/chrony'] };
   if (h.kernelNuevo) f['/var/run/reboot-required'] = { lineas: () => ['*** System restart required ***'] };
   Object.keys(h.logs).forEach(p => { f[p] = { mb: h.logs[p], lineas: () => P.contenidoLog(st, h, p) }; });
   return f;
@@ -386,7 +420,7 @@ P.contenidoLog = (st, h, p) => {
   if (/\/kern\.log$/.test(p)) return U.syslog(st, h, 40, true);
   if (/\/syslog$/.test(p)) return U.syslog(st, h, 40);
   if (/auth\.log$/.test(p)) return [U.sello(st.reloj - 3) + ' ' + h.nombre + ' sshd[' + U.pid(h.nombre + 'ssh') + ']: Accepted publickey for admin from 10.10.0.5 port 51822 ssh2: ED25519 SHA256:q1c9Jk2Qx0p7', U.sello(st.reloj - 3) + ' ' + h.nombre + ' sshd[' + U.pid(h.nombre + 'ssh') + ']: pam_unix(sshd:session): session opened for user admin(uid=1000) by (uid=0)'];
-  return [U.sello(st.reloj - 30) + ' ' + h.nombre + ' (sin novedades)'];
+  return [U.sello(st.reloj - 30) + ' ' + h.nombre + T(' (sin novedades)', ' (nothing new)')];
 };
 // syslog = el journal de todas las unidades, mezclado por hora.
 U.syslog = (st, h, n, soloKernel) => {
@@ -527,7 +561,7 @@ function correr(st, ses, txt) {
   if (c.donde && c.donde.indexOf(h.rol) < 0 && c.donde.indexOf(h.nombre) < 0) {
     return { lineas: [L(nombre + ': command not found', 'err')].concat(c.fuera ? [L(c.fuera, 'dim')] : []), minutos: 0 };
   }
-  if (c.provisionado && !h.provisionado) return { lineas: [L(nombre + ': command not found', 'err'), L('(' + h.nombre + ' aún no tiene OpenStack instalado)', 'dim')], minutos: 0 };
+  if (c.provisionado && !h.provisionado) return { lineas: [L(nombre + ': command not found', 'err'), L(T('(' + h.nombre + ' aún no tiene OpenStack instalado)', '(' + h.nombre + ' does not have OpenStack installed yet)'), 'dim')], minutos: 0 };
   const ctx = { st, ses, h, sudo: sudo || ses.root, args: a.slice(1), txt, nombre };
   const r = c.fn(ctx);
   if (!r) return { lineas: [] };
@@ -579,7 +613,8 @@ P.ejecutar = function (st, ses, linea) {
 };
 
 // ------------------------------------------------------------------ helpers de comando
-U.sinRoot = (ctx, lineas) => ctx.sudo ? null : lineas.map(x => typeof x === 'string' ? L(x, 'err') : x).concat([L('(necesitas privilegios: repite el comando con sudo delante)', 'dim')]);
+U.SUDO = T('(necesitas privilegios: repite el comando con sudo delante)', '(you need privileges: run the command again with sudo in front)');
+U.sinRoot = (ctx, lineas) => ctx.sudo ? null : lineas.map(x => typeof x === 'string' ? L(x, 'err') : x).concat([L(U.SUDO, 'dim')]);
 U.cmd = (nombre, def) => { P.comandos[nombre] = def; };
 
 // ------------------------------------------------------------------ comandos básicos
@@ -589,11 +624,11 @@ U.cmd('help', { fn: ctx => {
     const c = P.comandos[n];
     if (!c.ayuda) return;
     if (c.donde && c.donde.indexOf(h.rol) < 0 && c.donde.indexOf(h.nombre) < 0) return;
-    const g = c.grupo || 'Sistema'; (grupos[g] = grupos[g] || []).push(n);
+    const g = c.grupo || T('Sistema', 'System'); (grupos[g] = grupos[g] || []).push(n);
   });
-  const out = [L('Comandos disponibles en ' + h.nombre + ':', 'verde')];
+  const out = [L(T('Comandos disponibles en ', 'Commands available on ') + h.nombre + ':', 'verde')];
   Object.keys(grupos).forEach(g => { out.push(L('')); out.push(L(g, 'ambar')); grupos[g].sort().forEach(n => out.push(L('  ' + n.padEnd(18) + P.comandos[n].ayuda))); });
-  out.push(L('')); out.push(L('Encadena con && o ;  ·  filtra con | grep, | tail, | head  ·  Tab completa  ·  ↑/↓ historial', 'dim'));
+  out.push(L('')); out.push(L(T('Encadena con && o ;  ·  filtra con | grep, | tail, | head  ·  Tab completa  ·  ↑/↓ historial', 'Chain with && or ;  ·  filter with | grep, | tail, | head  ·  Tab completes  ·  ↑/↓ history'), 'dim'));
   return { lineas: out, minutos: 0 };
 } });
 U.cmd('clear', { fn: () => ({ lineas: [], limpiar: true, minutos: 0 }) });
@@ -604,8 +639,8 @@ U.cmd('id', { fn: ctx => ({ lineas: [L(ctx.ses.root ? 'uid=0(root) gid=0(root) g
 U.cmd('hostname', { fn: ctx => ({ lineas: [L(ctx.h.nombre)], minutos: 0 }) });
 U.cmd('echo', { fn: ctx => ({ lineas: [L(ctx.args.join(' ').replace(/\$\{?([A-Z_]+)\}?/g, (m, v) => ctx.ses.env[v] || (v === 'HOSTNAME' ? ctx.h.nombre : v === 'USER' ? 'admin' : '')))], minutos: 0 }) });
 U.cmd('date', { fn: ctx => [L(U.fechaCorta(ctx.st.reloj).replace(/ (\d{4})$/, ' UTC $1'))] });
-['vim', 'vi', 'nano', 'emacs'].forEach(n => U.cmd(n, { fn: () => ({ lineas: [L('(no hay editor en el simulador: los cambios de configuración van por Ansible o Terraform, como pide el RUNBOOK)', 'dim')], minutos: 0 }) }));
-U.cmd('man', { fn: ctx => ({ lineas: [L('No manual entry for ' + (ctx.args[0] || ''), 'err'), L('(en el simulador: help lista lo que hay en este equipo)', 'dim')], minutos: 0 }) });
+['vim', 'vi', 'nano', 'emacs'].forEach(n => U.cmd(n, { fn: () => ({ lineas: [L(T('(no hay editor en el simulador: los cambios de configuración van por Ansible o Terraform, como pide el RUNBOOK)', '(no editor in the simulator: configuration changes go through Ansible or Terraform, as the RUNBOOK requires)'), 'dim')], minutos: 0 }) }));
+U.cmd('man', { fn: ctx => ({ lineas: [L('No manual entry for ' + (ctx.args[0] || ''), 'err'), L(T('(en el simulador: help lista lo que hay en este equipo)', '(in the simulator: help lists what is available on this host)'), 'dim')], minutos: 0 }) });
 
 U.cmd('cd', { fn: ctx => {
   const fs = P.vfs(ctx.st, ctx.h), dest = U.ruta(ctx.ses.cwd, ctx.args[0] || '~', ctx.ses);
@@ -613,7 +648,7 @@ U.cmd('cd', { fn: ctx => {
   if (!fs.dirs[dest]) return { lineas: [L('bash: cd: ' + ctx.args[0] + ': No such file or directory', 'err')], minutos: 0 };
   ctx.ses.cwd = dest; return { lineas: [], minutos: 0 };
 } });
-U.cmd('ls', { ayuda: 'lista ficheros (ls -lh con tamaños)', fn: ctx => {
+U.cmd('ls', { ayuda: T('lista ficheros (ls -lh con tamaños)', 'list files (ls -lh with sizes)'), fn: ctx => {
   const fs = P.vfs(ctx.st, ctx.h), ops = ctx.args.filter(x => x[0] === '-').join(''), rutas = ctx.args.filter(x => x[0] !== '-');
   const largo = ops.indexOf('l') >= 0, humano = ops.indexOf('h') >= 0;
   const out = [], objetivos = rutas.length ? [].concat(...rutas.map(r => U.glob(fs, ctx.ses.cwd, r, ctx.ses))) : [ctx.ses.cwd];
@@ -637,37 +672,37 @@ U.cmd('ls', { ayuda: 'lista ficheros (ls -lh con tamaños)', fn: ctx => {
 } });
 function leer(ctx, cmd) {
   const fs = P.vfs(ctx.st, ctx.h), rutas = ctx.args.filter((x, i) => x[0] !== '-' && !(ctx.args[i - 1] === '-n'));
-  if (!rutas.length) return { err: [L(cmd + ': falta el fichero', 'err')] };
+  if (!rutas.length) return { err: [L(cmd + T(': falta el fichero', ': missing file operand'), 'err')] };
   const out = [];
   for (const r of rutas) {
     const p = U.ruta(ctx.ses.cwd, r, ctx.ses);
     if (fs.dirs[p]) { out.push(L(cmd + ': ' + r + ': Is a directory', 'err')); continue; }
     if (!fs.f[p]) { out.push(L(cmd + ': ' + r + ': No such file or directory', 'err')); continue; }
     const c = fs.f[p].lineas();
-    if (!c) { out.push(L('(' + r + ' es binario o está comprimido: ' + (/journal/.test(p) ? 'léelo con journalctl' : 'es un log rotado, anterior al incidente') + ')', 'dim')); continue; }
+    if (!c) { out.push(L(T('(' + r + ' es binario o está comprimido: ' + (/journal/.test(p) ? 'léelo con journalctl' : 'es un log rotado, anterior al incidente') + ')', '(' + r + ' is binary or compressed: ' + (/journal/.test(p) ? 'read it with journalctl' : 'it is a rotated log, older than the incident') + ')'), 'dim')); continue; }
     c.forEach(t => out.push(typeof t === 'string' ? L(t, /\b(ERROR|CRITICAL|error|FAILED|Input\/output error|enospc)\b/.test(t) ? 'rojo' : /\b(WARNING|WARN|warning)\b/.test(t) ? 'ambar' : 'out') : t));
   }
   return { out };
 }
-U.cmd('cat', { ayuda: 'muestra un fichero', fn: ctx => { const r = leer(ctx, 'cat'); return r.err || r.out; } });
+U.cmd('cat', { ayuda: T('muestra un fichero', 'print a file'), fn: ctx => { const r = leer(ctx, 'cat'); return r.err || r.out; } });
 U.cmd('less', { fn: ctx => { const r = leer(ctx, 'less'); return r.err || r.out; } });
 U.cmd('more', { fn: ctx => { const r = leer(ctx, 'more'); return r.err || r.out; } });
 U.cmd('head', { fn: ctx => { const r = leer(ctx, 'head'); return r.err || r.out.slice(0, U.num(ctx.args, 10)); } });
-U.cmd('tail', { ayuda: 'final de un fichero (tail -n 50 fichero)', fn: ctx => {
+U.cmd('tail', { ayuda: T('final de un fichero (tail -n 50 fichero)', 'end of a file (tail -n 50 file)'), fn: ctx => {
   const r = leer(ctx, 'tail'); if (r.err) return r.err;
   const out = r.out.slice(-U.num(ctx.args, 10));
-  if (ctx.args.indexOf('-f') >= 0 || ctx.args.indexOf('-F') >= 0) out.push(L('(tail -f se quedaría escuchando; el simulador muestra lo último y vuelve)', 'dim'));
+  if (ctx.args.indexOf('-f') >= 0 || ctx.args.indexOf('-F') >= 0) out.push(L(T('(tail -f se quedaría escuchando; el simulador muestra lo último y vuelve)', '(tail -f would keep following; the simulator shows the latest lines and returns)'), 'dim'));
   return out;
 } });
-U.cmd('zcat', { fn: () => [L('(log rotado: su contenido es anterior al incidente)', 'dim')] });
-U.cmd('grep', { ayuda: 'busca texto en un fichero', fn: ctx => {
+U.cmd('zcat', { fn: () => [L(T('(log rotado: su contenido es anterior al incidente)', '(rotated log: its contents predate the incident)'), 'dim')] });
+U.cmd('grep', { ayuda: T('busca texto en un fichero', 'search for text in a file'), fn: ctx => {
   const a = ctx.args.slice(), ops = a.filter(x => /^-/.test(x)), resto = a.filter(x => !/^-/.test(x));
   if (resto.length < 2) return [L('Usage: grep [OPTION]... PATTERNS [FILE]...', 'err')];
   const r = leer(Object.assign({}, ctx, { args: resto.slice(1) }), 'grep'); if (r.err) return r.err;
   return filtrar(r.out, 'grep ' + ops.join(' ') + ' "' + resto[0].replace(/"/g, '') + '"');
 } });
 
-U.cmd('df', { ayuda: 'espacio en disco (df -h)', fn: ctx => {
+U.cmd('df', { ayuda: T('espacio en disco (df -h)', 'disk space (df -h)'), fn: ctx => {
   const h = ctx.h, hum = ctx.args.some(x => /h/.test(x));
   const f = g => hum ? U.tam(g * 1024) : String(Math.round(g * 1048576));
   const out = [L('Filesystem                 ' + (hum ? ' Size  Used Avail Use% Mounted on' : '  1K-blocks      Used Available Use% Mounted on'))];
@@ -681,26 +716,26 @@ U.cmd('df', { ayuda: 'espacio en disco (df -h)', fn: ctx => {
   out.push(L('/dev/sda1                  ' + (hum ? ' 1.1G  6.1M  1.1G   1% /boot/efi' : '    1098632      6220   1092412   1% /boot/efi')));
   return out;
 } });
-U.cmd('du', { ayuda: 'qué ocupa espacio (du -sh /var/log/*)', fn: ctx => {
+U.cmd('du', { ayuda: T('qué ocupa espacio (du -sh /var/log/*)', 'what is using the space (du -sh /var/log/*)'), fn: ctx => {
   const fs = P.vfs(ctx.st, ctx.h), rutas = ctx.args.filter(x => x[0] !== '-');
   const prof = ctx.args.find(x => /^--max-depth=\d$/.test(x) || /^-d\d?$/.test(x));
   let objetivos = [].concat(...(rutas.length ? rutas : ['.']).map(r => U.glob(fs, ctx.ses.cwd, r, ctx.ses)));
   if (prof && objetivos.length === 1 && fs.dirs[objetivos[0]]) { const d = objetivos[0]; objetivos = Object.keys(U.hijos(fs, d)).sort().map(n => (d === '/' ? '' : d) + '/' + n).concat([d]); }
   return objetivos.map(p => (fs.f[p] || fs.dirs[p]) ? L(U.tam(U.tamRuta(fs, p)) + '\t' + p, U.tamRuta(fs, p) > 10240 ? 'rojo' : 'out') : L("du: cannot access '" + p + "': No such file or directory", 'err'));
 } });
-U.cmd('rm', { ayuda: 'borra ficheros (sólo logs)', fn: ctx => {
+U.cmd('rm', { ayuda: T('borra ficheros (sólo logs)', 'delete files (logs only)'), fn: ctx => {
   const h = ctx.h, fs = P.vfs(ctx.st, h), rutas = ctx.args.filter(x => x[0] !== '-');
-  if (ctx.args.some(x => /^-[a-z]*r/.test(x))) return [L('(rm -r está desactivado en el simulador: borra ficheros concretos)', 'dim')];
+  if (ctx.args.some(x => /^-[a-z]*r/.test(x))) return [L(T('(rm -r está desactivado en el simulador: borra ficheros concretos)', '(rm -r is disabled in the simulator: delete specific files)'), 'dim')];
   if (!rutas.length) return [L('rm: missing operand', 'err')];
   const out = [];
   [].concat(...rutas.map(r => U.glob(fs, ctx.ses.cwd, r, ctx.ses))).forEach(p => {
     if (fs.dirs[p]) { out.push(L("rm: cannot remove '" + p + "': Is a directory", 'err')); return; }
     if (!fs.f[p]) { out.push(L("rm: cannot remove '" + p + "': No such file or directory", 'err')); return; }
-    if (h.logs[p] == null) { out.push(L("rm: cannot remove '" + p + "': Operation not permitted", 'err')); out.push(L('(el simulador sólo deja borrar logs)', 'dim')); return; }
+    if (h.logs[p] == null) { out.push(L("rm: cannot remove '" + p + "': Operation not permitted", 'err')); out.push(L(T('(el simulador sólo deja borrar logs)', '(the simulator only lets you delete logs)'), 'dim')); return; }
     if (!ctx.sudo) { out.push(L("rm: cannot remove '" + p + "': Permission denied", 'err')); return; }
     delete h.logs[p]; ctx.st.hechos['limpieza:' + h.nombre] = true;
   });
-  if (!ctx.sudo && out.some(l => /Permission denied/.test(l.t))) out.push(L('(necesitas privilegios: repite el comando con sudo delante)', 'dim'));
+  if (!ctx.sudo && out.some(l => /Permission denied/.test(l.t))) out.push(L(U.SUDO, 'dim'));
   return out;
 } });
 U.cmd('truncate', { fn: ctx => {
@@ -709,13 +744,13 @@ U.cmd('truncate', { fn: ctx => {
   const out = [];
   [].concat(...rutas.map(r => U.glob(fs, ctx.ses.cwd, r, ctx.ses))).forEach(p => {
     if (h.logs[p] == null) { out.push(L("truncate: cannot open '" + p + "' for writing: " + (fs.f[p] ? 'Operation not permitted' : 'No such file or directory'), 'err')); return; }
-    if (!ctx.sudo) { out.push(L("truncate: cannot open '" + p + "' for writing: Permission denied", 'err')); out.push(L('(necesitas privilegios: repite el comando con sudo delante)', 'dim')); return; }
+    if (!ctx.sudo) { out.push(L("truncate: cannot open '" + p + "' for writing: Permission denied", 'err')); out.push(L(U.SUDO, 'dim')); return; }
     h.logs[p] = 0; ctx.st.hechos['limpieza:' + h.nombre] = true;
   });
   return out;
 } });
 
-U.cmd('ssh', { ayuda: 'entra en otro equipo (ssh ceph02)', grupo: 'Acceso', fn: ctx => {
+U.cmd('ssh', { ayuda: T('entra en otro equipo (ssh ceph02)', 'log in to another host (ssh ceph02)'), grupo: T('Acceso', 'Access'), fn: ctx => {
   const dest = (ctx.args.filter(x => x[0] !== '-').pop() || '').replace(/^.*@/, '').replace(/\.retail\.local$/, '');
   if (!dest) return [L('usage: ssh [-46AaCfGgKkMNnqsTtVvXxYy] destination [command]', 'err')];
   const h = ctx.st.hosts[dest];
@@ -723,7 +758,7 @@ U.cmd('ssh', { ayuda: 'entra en otro equipo (ssh ceph02)', grupo: 'Acceso', fn: 
   if (!h.up) return [L('ssh: connect to host ' + dest + ' port 22: No route to host', 'err')];
   U.entrar(ctx.ses, dest, HOME, false);
   const out = [L('Welcome to Ubuntu 22.04.4 LTS (GNU/Linux ' + h.kernel + ' x86_64)'), L(''), L(' * ' + P.roles[h.rol], 'dim')];
-  if (!h.provisionado) out.push(L(' * Nodo nuevo: sólo sistema base, sin OpenStack', 'dim'));
+  if (!h.provisionado) out.push(L(T(' * Nodo nuevo: sólo sistema base, sin OpenStack', ' * New node: base system only, no OpenStack'), 'dim'));
   if (h.kernelNuevo) { out.push(L('')); out.push(L('*** System restart required ***', 'ambar')); }
   out.push(L('Last login: ' + U.fechaCorta(ctx.st.reloj - 71) + ' from 10.10.0.5'));
   return { lineas: out, minutos: 0 };
@@ -731,9 +766,9 @@ U.cmd('ssh', { ayuda: 'entra en otro equipo (ssh ceph02)', grupo: 'Acceso', fn: 
 function salir(ctx) {
   const antes = ctx.ses.host;
   if (U.salir(ctx.ses)) { const out = [L('logout')]; if (ctx.ses.host !== antes) out.push(L('Connection to ' + antes + ' closed.', 'dim')); return { lineas: out, minutos: 0 }; }
-  return { lineas: [L('logout'), L('(esta pestaña es tu sesión del bastión y no se cierra: abre otra con +)', 'dim')], minutos: 0 };
+  return { lineas: [L('logout'), L(T('(esta pestaña es tu sesión del bastión y no se cierra: abre otra con +)', '(this tab is your bastion session and does not close: open another one with +)'), 'dim')], minutos: 0 };
 }
-U.cmd('exit', { ayuda: 'vuelve al equipo anterior', grupo: 'Acceso', fn: salir });
+U.cmd('exit', { ayuda: T('vuelve al equipo anterior', 'go back to the previous host'), grupo: T('Acceso', 'Access'), fn: salir });
 U.cmd('logout', { fn: salir });
 
 function fuente(ctx) {
@@ -744,19 +779,19 @@ function fuente(ctx) {
   (f.lineas() || []).forEach(l => { const m = /^export ([A-Z_]+)=(.*)$/.exec(l); if (m) ctx.ses.env[m[1]] = m[2]; });
   return { lineas: [], minutos: 0 };
 }
-U.cmd('source', { ayuda: 'carga variables (source ~/admin-openrc)', grupo: 'Acceso', fn: fuente });
+U.cmd('source', { ayuda: T('carga variables (source ~/admin-openrc)', 'load variables (source ~/admin-openrc)'), grupo: T('Acceso', 'Access'), fn: fuente });
 U.cmd('.', { fn: fuente });
 U.cmd('env', { fn: ctx => ['SHELL=/bin/bash', 'USER=' + (ctx.ses.root ? 'root' : 'admin'), 'HOME=' + U.home(ctx.ses), 'PWD=' + ctx.ses.cwd, 'HOSTNAME=' + ctx.h.nombre].concat(Object.keys(ctx.ses.env).map(k => k + '=' + (k === 'OS_PASSWORD' ? '********' : ctx.ses.env[k]))).map(t => L(t)) });
 P.comandos.printenv = P.comandos.env;
 U.cmd('export', { fn: ctx => { ctx.args.forEach(x => { const i = x.indexOf('='); if (i > 0) ctx.ses.env[x.slice(0, i)] = x.slice(i + 1); }); return { lineas: [], minutos: 0 }; } });
 
 function carga(h, f) { const b = { ctl: 1.8, cmp: 9.4, ceph: 2.6, mon: 0.9, bastion: 0.1 }[h.rol] || 0.3; return (b * (f || 1) + (h.nombre.length % 3) * 0.07).toFixed(2); }
-U.cmd('uptime', { ayuda: 'cuánto lleva encendido y la carga', fn: ctx => {
+U.cmd('uptime', { ayuda: T('cuánto lleva encendido y la carga', 'how long it has been up, and the load'), fn: ctx => {
   const h = ctx.h, m = ctx.st.reloj - h.arrancado;
   const up = m >= 1440 ? Math.floor(m / 1440) + ' days, ' + Math.floor((m % 1440) / 60) + ':' + p2(m % 60) : m >= 60 ? Math.floor(m / 60) + ':' + p2(m % 60) : m + ' min';
   return [L(' ' + U.hora(ctx.st.reloj) + ':' + p2(U.seg(ctx.st.reloj)) + ' up ' + up + ',  1 user,  load average: ' + carga(h) + ', ' + carga(h, 0.9) + ', ' + carga(h, 0.8))];
 } });
-U.cmd('uname', { ayuda: 'versión del kernel (uname -r)', fn: ctx => ctx.args.indexOf('-r') >= 0 ? [L(ctx.h.kernel)] : ctx.args.indexOf('-a') >= 0 ? [L('Linux ' + ctx.h.nombre + ' ' + ctx.h.kernel + ' #' + (ctx.h.kernel.indexOf('122') >= 0 ? '132' : '129') + '-Ubuntu SMP x86_64 x86_64 x86_64 GNU/Linux')] : [L('Linux')] });
+U.cmd('uname', { ayuda: T('versión del kernel (uname -r)', 'kernel version (uname -r)'), fn: ctx => ctx.args.indexOf('-r') >= 0 ? [L(ctx.h.kernel)] : ctx.args.indexOf('-a') >= 0 ? [L('Linux ' + ctx.h.nombre + ' ' + ctx.h.kernel + ' #' + (ctx.h.kernel.indexOf('122') >= 0 ? '132' : '129') + '-Ubuntu SMP x86_64 x86_64 x86_64 GNU/Linux')] : [L('Linux')] });
 const RAM = { ctl: 128, cmp: 256, ceph: 128, mon: 32, bastion: 8 };
 // Memoria usada (GB). Cada proceso aporta su RSS: si uno crece, crece el nodo.
 U.rss = (st, h, u) => { const r = P.rssUnidad && P.rssUnidad(st, h, u); return r != null ? r : /osd/.test(u) ? 3.9 : /rabbit|mariadb|nova|neutron|cinder|glance/.test(u) ? 1.1 : 0.04; };
@@ -766,13 +801,13 @@ U.ramUsada = (st, h) => {
   return Math.round(base + Object.keys(h.svcs).filter(u => h.svcs[u].estado === 'active').reduce((a, u) => a + U.rss(st, h, u), 0));
 };
 U.ramTotal = h => RAM[h.rol] || 8;
-U.cmd('free', { ayuda: 'memoria (free -h)', fn: ctx => {
+U.cmd('free', { ayuda: T('memoria (free -h)', 'memory (free -h)'), fn: ctx => {
   const h = ctx.h, t = U.ramTotal(h);
   const usada = Math.min(t - 1, U.ramUsada(ctx.st, h));
   const libre = Math.max(1, t - usada - 3);
   return [L('               total        used        free      shared  buff/cache   available'), L('Mem:           ' + (t + 'Gi').padEnd(13) + (usada + 'Gi').padEnd(12) + (libre + 'Gi').padEnd(10) + '1.2Gi       3.0Gi' + ('      ' + (libre + 3) + 'Gi')), L('Swap:             0B          0B          0B')];
 } });
-U.cmd('top', { ayuda: 'foto de procesos y carga', fn: ctx => {
+U.cmd('top', { ayuda: T('foto de procesos y carga', 'snapshot of processes and load'), fn: ctx => {
   const h = ctx.h, act = Object.keys(h.svcs).filter(u => h.svcs[u].estado === 'active');
   const out = [L('top - ' + U.hora(ctx.st.reloj) + ':' + p2(U.seg(ctx.st.reloj)) + ' up, 1 user,  load average: ' + carga(h) + ', ' + carga(h, 0.9) + ', ' + carga(h, 0.8)),
     L('Tasks: ' + (180 + act.length * 3) + ' total,   1 running, ' + (179 + act.length * 3) + ' sleeping,   0 stopped,   0 zombie'),
@@ -780,22 +815,22 @@ U.cmd('top', { ayuda: 'foto de procesos y carga', fn: ctx => {
     L('    PID USER      PR  NI    VIRT    RES  %CPU  %MEM     TIME+ COMMAND')];
   out.splice(3, 0, L('GiB Mem :  ' + U.ramTotal(h).toFixed(1) + ' total,  ' + Math.max(1, U.ramTotal(h) - U.ramUsada(ctx.st, h) - 3).toFixed(1) + ' free,  ' + Math.min(U.ramTotal(h) - 1, U.ramUsada(ctx.st, h)).toFixed(1) + ' used,    3.0 buff/cache', U.ramUsada(ctx.st, h) / U.ramTotal(h) >= 0.9 ? 'rojo' : 'out'));
   act.slice().sort((a, b) => U.rss(ctx.st, h, b) - U.rss(ctx.st, h, a)).slice(0, 12).forEach((u, i) => { const r = U.rss(ctx.st, h, u); out.push(L(String(U.pid(h.nombre + u + h.svcs[u].desde)).padStart(7) + ' ' + (/ceph/.test(u) ? 'ceph    ' : /rabbit/.test(u) ? 'rabbitmq' : /nova|neutron|cinder|glance/.test(u) ? 'nova    ' : 'root    ') + '  20   0  ' + (r + 1.2).toFixed(1).padStart(5) + 'g ' + (r >= 1 ? r.toFixed(1) + 'g' : Math.round(r * 1024) + 'm').padStart(6) + '  ' + (8 - i * 0.5).toFixed(1).padStart(4) + '  ' + (r / U.ramTotal(h) * 100).toFixed(1).padStart(4) + '  ' + (100 + i * 17) + ':12.44 ' + U.binario(u), r / U.ramTotal(h) > 0.2 ? 'rojo' : 'out')); });
-  out.push(L('(foto fija: el simulador no refresca top)', 'dim'));
+  out.push(L(T('(foto fija: el simulador no refresca top)', '(static snapshot: the simulator does not refresh top)'), 'dim'));
   return out;
 } });
-U.cmd('ps', { ayuda: 'procesos (ps aux --sort=-rss: los que más memoria usan)', fn: ctx => {
+U.cmd('ps', { ayuda: T('procesos (ps aux --sort=-rss: los que más memoria usan)', 'processes (ps aux --sort=-rss: biggest memory users first)'), fn: ctx => {
   const h = ctx.h, st = ctx.st, t = U.ramTotal(h);
   let us = Object.keys(h.svcs).filter(u => h.svcs[u].estado === 'active');
   if (ctx.args.some(x => /^--sort=-(rss|%mem|pmem)$/.test(x))) us = us.sort((a, b) => U.rss(st, h, b) - U.rss(st, h, a));
   return [L('USER         PID %CPU %MEM      VSZ      RSS TTY  STAT START   TIME COMMAND')].concat(us.map(u => { const r = U.rss(st, h, u); return L((/ceph/.test(u) ? 'ceph' : /rabbit/.test(u) ? 'rabbitmq' : /nova|neutron|cinder|glance/.test(u) ? 'nova' : /mariadb/.test(u) ? 'mysql' : 'root').padEnd(8) + String(U.pid(h.nombre + u + h.svcs[u].desde)).padStart(8) + '  1.2 ' + (r / t * 100).toFixed(1).padStart(4) + ' ' + String(Math.round((r + 1.2) * 1048576)).padStart(8) + ' ' + String(Math.round(r * 1048576)).padStart(8) + ' ?    Ssl  Sep11 102:44 /usr/bin/' + U.binario(u), r / t > 0.2 ? 'rojo' : 'out'); }));
 } });
-U.cmd('ip', { ayuda: 'direcciones de red (ip a)', grupo: 'Red', fn: ctx => {
+U.cmd('ip', { ayuda: T('direcciones de red (ip a)', 'network addresses (ip a)'), grupo: T('Red', 'Network'), fn: ctx => {
   const h = ctx.h;
   if (ctx.args.indexOf('-br') >= 0) return [L('lo               UNKNOWN        127.0.0.1/8 ::1/128'), L('eno1             UP             ' + h.ip + '/16')];
   return [L('1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000'), L('    inet 127.0.0.1/8 scope host lo'),
     L('2: eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9000 qdisc mq state UP group default qlen 1000'), L('    link/ether 3c:ec:ef:' + U.hex(h.nombre, 6).match(/../g).join(':') + ' brd ff:ff:ff:ff:ff:ff'), L('    inet ' + h.ip + '/16 brd 10.10.255.255 scope global eno1')];
 } });
-U.cmd('ping', { ayuda: 'comprueba si otro equipo responde', grupo: 'Red', fn: ctx => {
+U.cmd('ping', { ayuda: T('comprueba si otro equipo responde', 'check whether another host responds'), grupo: T('Red', 'Network'), fn: ctx => {
   const dest = (ctx.args.filter(x => x[0] !== '-' && !/^\d+$/.test(x)).pop() || '').replace(/\.retail\.local$/, '');
   if (!dest) return [L('ping: usage error: Destination address required', 'err')];
   const h = ctx.st.hosts[dest];
@@ -811,7 +846,7 @@ U.cmd('ping', { ayuda: 'comprueba si otro equipo responde', grupo: 'Red', fn: ct
   for (let i = 1; i <= 3; i++) out.push(L('64 bytes from ' + dest + ' (' + h.ip + '): icmp_seq=' + i + ' ttl=64 time=0.' + (180 + i * 23) + ' ms'));
   return out.concat([L(''), L('--- ' + dest + ' ping statistics ---'), L('3 packets transmitted, 3 received, 0% packet loss, time 2003ms'), L('rtt min/avg/max/mdev = 0.203/0.226/0.249/0.019 ms')]);
 } });
-U.cmd('sleep', { ayuda: 'deja pasar el tiempo (sleep 300 = 5 min)', fn: ctx => {
+U.cmd('sleep', { ayuda: T('deja pasar el tiempo (sleep 300 = 5 min)', 'let time pass (sleep 300 = 5 min)'), fn: ctx => {
   const m = /^(\d+)(s|m)?$/.exec(ctx.args[0] || '');
   if (!m) return [L('sleep: missing operand', 'err')];
   const seg = parseInt(m[1], 10) * (m[2] === 'm' ? 60 : 1);
@@ -845,7 +880,7 @@ function statusBloque(st, h, u) {
   out.push(L(''));
   return out.concat(U.journalLineas(h, u, 8));
 }
-U.cmd('systemctl', { ayuda: 'servicios: status, restart, enable --now...', grupo: 'Servicios', fn: ctx => {
+U.cmd('systemctl', { ayuda: T('servicios: status, restart, enable --now...', 'services: status, restart, enable --now...'), grupo: T('Servicios', 'Services'), fn: ctx => {
   const st = ctx.st, h = ctx.h;
   const a = ctx.args.filter(x => ['--no-pager', '-l', '--full', '-q', '--quiet'].indexOf(x) < 0);
   const verbo = a[0] && a[0][0] !== '-' ? a[0] : (a.indexOf('--failed') >= 0 ? '--failed' : 'list-units');
@@ -881,7 +916,7 @@ U.cmd('systemctl', { ayuda: 'servicios: status, restart, enable --now...', grupo
   if (!nombres.length) return [L('Too few arguments.', 'err')];
   const deneg = U.sinRoot(ctx, nombres.map(n => 'Failed to ' + verbo + ' ' + n.replace(/\.service$/, '') + '.service: Access denied'));
   if (deneg) return deneg;
-  if (verbo === 'mask' || verbo === 'unmask') return [L('(mask/unmask no hacen falta en ningún escenario: usa disable/enable)', 'dim')];
+  if (verbo === 'mask' || verbo === 'unmask') return [L(T('(mask/unmask no hacen falta en ningún escenario: usa disable/enable)', '(mask/unmask are not needed in any scenario: use disable/enable)'), 'dim')];
   const out = [];
   nombres.forEach(n => {
     const u = U.unidad(h, n);
@@ -909,7 +944,7 @@ U.cmd('systemctl', { ayuda: 'servicios: status, restart, enable --now...', grupo
   return out;
 } });
 
-U.cmd('journalctl', { ayuda: 'log de un servicio (journalctl -u X -n 30)', grupo: 'Servicios', fn: ctx => {
+U.cmd('journalctl', { ayuda: T('log de un servicio (journalctl -u X -n 30)', 'log of a service (journalctl -u X -n 30)'), grupo: T('Servicios', 'Services'), fn: ctx => {
   const st = ctx.st, h = ctx.h, a = ctx.args;
   const vac = a.find(x => /^--vacuum-(size|time)=/.test(x));
   if (vac) {
@@ -937,20 +972,20 @@ U.cmd('journalctl', { ayuda: 'log de un servicio (journalctl -u X -n 30)', grupo
     if (!un) return [L('-- No entries --')];
     return U.journalLineas(h, un, n);
   }
-  if (a.indexOf('-k') >= 0 || a.indexOf('--dmesg') >= 0) return (h.dmesg.length ? h.dmesg : ['(sin mensajes del kernel desde el arranque)']).map(t => L(t, /error|fail/i.test(t) ? 'rojo' : 'out'));
+  if (a.indexOf('-k') >= 0 || a.indexOf('--dmesg') >= 0) return (h.dmesg.length ? h.dmesg : [T('(sin mensajes del kernel desde el arranque)', '(no kernel messages since boot)')]).map(t => L(t, /error|fail/i.test(t) ? 'rojo' : 'out'));
   const soloErr = a.some((x, i) => (x === '-p' && /^(err|3|crit|2|0|1)/.test(a[i + 1] || '')) || /^--priority=(err|3)/.test(x));
   let lin = U.syslog(st, h, 400);
   if (soloErr) lin = lin.filter(t => /(Failed|failed|ERROR|error|Aborted|Input\/output|enospc|killed|repeated)/.test(t));
   return lin.slice(-n).map(t => L(t, /(Failed|failed|ERROR|error|Aborted|Input\/output|enospc|killed)/.test(t) ? 'rojo' : 'out'));
 } });
-U.cmd('dmesg', { ayuda: 'mensajes del kernel: discos, memoria', fn: ctx => {
+U.cmd('dmesg', { ayuda: T('mensajes del kernel: discos, memoria', 'kernel messages: disks, memory'), fn: ctx => {
   const d = U.sinRoot(ctx, ['dmesg: read kernel buffer failed: Operation not permitted']); if (d) return d;
   const h = ctx.h, base = ['[    0.000000] Linux version ' + h.kernel + ' (buildd@lcy02-amd64-051) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0)', '[    2.412233] EXT4-fs (dm-0): mounted filesystem with ordered data mode. Quota mode: none.', '[    4.101922] bond0: (slave eno1): Enslaving as an active interface with an up link'];
   return base.concat(h.dmesg).map(t => L(t, /(error|I\/O|fail|critical)/i.test(t) ? 'rojo' : 'out'));
 } });
 
 // reloj: chrony y timedatectl --------------------------------------------------
-U.cmd('timedatectl', { ayuda: 'estado de la hora y de NTP', fn: ctx => {
+U.cmd('timedatectl', { ayuda: T('estado de la hora y de NTP', 'time and NTP status'), fn: ctx => {
   const h = ctx.h, act = !!(h.svcs.chrony && h.svcs.chrony.estado === 'active'), sync = act && Math.abs(h.ntp.offset) < 0.05;
   return [L('               Local time: ' + U.larga(ctx.st.reloj)), L('           Universal time: ' + U.larga(ctx.st.reloj)), L('                 RTC time: ' + U.larga(ctx.st.reloj).replace(/^\w+ /, '').replace(' UTC', '')), L('                Time zone: Etc/UTC (UTC, +0000)'),
     L('System clock synchronized: ' + (sync ? 'yes' : 'no'), sync ? 'verde' : 'rojo'), L('              NTP service: ' + (act ? 'active' : 'inactive'), act ? 'out' : 'rojo'), L('          RTC in local TZ: no')];
@@ -970,14 +1005,14 @@ U.cmd('chronyc', { ayuda: 'NTP: chronyc tracking / sources / makestep', fn: ctx 
 // reinicio y paquetes -----------------------------------------------------------
 function reboot(ctx) {
   const h = ctx.h;
-  if (h.nombre === 'bastion') return [L('(el bastión no se reinicia en el simulador: es tu puesto)', 'dim')];
+  if (h.nombre === 'bastion') return [L(T('(el bastión no se reinicia en el simulador: es tu puesto)', '(the bastion does not reboot in the simulator: it is your workstation)'), 'dim')];
   const d = U.sinRoot(ctx, ['Failed to set wall message, ignoring: Interactive authentication required.', 'Failed to reboot system via logind: Interactive authentication required.']); if (d) return d;
   P.reiniciar(ctx.st, h);
   return { lineas: [], minutos: 1 };
 }
-U.cmd('reboot', { ayuda: 'reinicia el equipo', grupo: 'Servicios', fn: reboot });
-U.cmd('shutdown', { fn: ctx => ctx.args.indexOf('-r') >= 0 ? reboot(ctx) : [L('(apagar un nodo no está en ningún guion: nadie bajaría al CPD a encenderlo)', 'dim')] });
-U.cmd('poweroff', { fn: () => [L('(apagar un nodo no está en ningún guion: nadie bajaría al CPD a encenderlo)', 'dim')] });
+U.cmd('reboot', { ayuda: T('reinicia el equipo', 'reboot the host'), grupo: T('Servicios', 'Services'), fn: reboot });
+U.cmd('shutdown', { fn: ctx => ctx.args.indexOf('-r') >= 0 ? reboot(ctx) : [L(T('(apagar un nodo no está en ningún guion: nadie bajaría al CPD a encenderlo)', '(powering off a node is not in any script: nobody would go down to the datacenter to turn it back on)'), 'dim')] });
+U.cmd('poweroff', { fn: () => [L(T('(apagar un nodo no está en ningún guion: nadie bajaría al CPD a encenderlo)', '(powering off a node is not in any script: nobody would go down to the datacenter to turn it back on)'), 'dim')] });
 function apt(ctx) {
   const h = ctx.h, a = ctx.args, sub = a.find(x => x[0] !== '-') || '';
   const kd = h.kernelDisponible, vk = kd ? kd.replace('-generic', '').replace(/^5\.15\.0-/, '5.15.0.') : '';
@@ -985,7 +1020,7 @@ function apt(ctx) {
   const novaPend = h.extra.novaInstalada === '29.2.0';
   const NOVA = ['nova-api', 'nova-common', 'python3-nova'].map(p => L(p + '/jammy-updates 3:29.2.1-0ubuntu1~cloud0 all [upgradable from: 3:29.2.0-0ubuntu1~cloud0]', 'verde'));
   if (sub === 'changelog') {
-    if (a.indexOf('nova-api') < 0 && a.indexOf('nova-common') < 0) return [L('(en el simulador: apt changelog nova-api)', 'dim')];
+    if (a.indexOf('nova-api') < 0 && a.indexOf('nova-common') < 0) return [L(T('(en el simulador: apt changelog nova-api)', '(in the simulator: apt changelog nova-api)'), 'dim')];
     return U.ls(['nova (3:29.2.1-0ubuntu1~cloud0) jammy-caracal; urgency=medium', '', '  * New stable point release for OpenStack Caracal.', '  * d/p/fix-servers-detail-port-leak.patch: Fix memory leak in nova-api', '    when listing servers with many ports; objects were cached per request', '    and never released (LP: #2071234).', '', ' -- Ubuntu OpenStack <openstack@ubuntu.com>  Thu, 10 Sep 2026 11:02:33 +0000', '', 'nova (3:29.2.0-0ubuntu1~cloud0) jammy-caracal; urgency=medium', '  * New stable point release for OpenStack Caracal.']);
   }
   if (sub === 'list') {
@@ -1009,10 +1044,10 @@ function apt(ctx) {
     ctx.ses.pendiente = { prompt: 'Do you want to continue? [Y/n] ', responder: (st, ses, r) => (r === '' || /^y(es)?$/i.test(r)) ? { lineas: instalar(), minutos: 2 } : { lineas: [L('Abort.')] } };
     return { lineas: cab, minutos: 0 };
   }
-  if (sub === 'install' || sub === 'remove' || sub === 'purge') return [L('(el simulador no instala paquetes sueltos: el software de la plataforma se despliega con Ansible)', 'dim')];
+  if (sub === 'install' || sub === 'remove' || sub === 'purge') return [L(T('(el simulador no instala paquetes sueltos: el software de la plataforma se despliega con Ansible)', '(the simulator does not install individual packages: platform software is deployed with Ansible)'), 'dim')];
   return [L('apt 2.4.12 (amd64)'), L('Usage: apt [options] command')];
 }
-U.cmd('apt', { ayuda: 'paquetes: update / list --upgradable / upgrade', grupo: 'Servicios', fn: apt });
+U.cmd('apt', { ayuda: T('paquetes: update / list --upgradable / upgrade', 'packages: update / list --upgradable / upgrade'), grupo: T('Servicios', 'Services'), fn: apt });
 U.cmd('apt-get', { fn: apt });
 
 // ------------------------------------------------------------------ Tab

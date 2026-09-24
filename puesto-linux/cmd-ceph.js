@@ -6,7 +6,7 @@
 // los números solos, con el tiempo que tardaría un clúster real.
 (function (P) {
 'use strict';
-const U = P.u, L = U.L;
+const U = P.u, L = U.L, T = P.T;
 
 const CEPH = ['ceph01', 'ceph02', 'ceph03'];
 const OBJ = 812430, COPIAS = OBJ * 3, PGS = 481, PG_OSD = 160, OBJ_OSD = COPIAS / 9, CAP = 1.75;
@@ -149,7 +149,7 @@ function ejemplosPg(st, downIn, d) {
 }
 P.pendientesSalud = st => {
   const s = P.saludCeph(st);
-  return s.estado === 'HEALTH_OK' ? [] : ['Ceph sigue en ' + s.estado + ': ' + s.checks.map(c => c.res).join(' · ')];
+  return s.estado === 'HEALTH_OK' ? [] : [T('Ceph sigue en ', 'Ceph is still in ') + s.estado + ': ' + s.checks.map(c => c.res).join(' · ')];
 };
 P.cephCrashMon = (st, host, min) => {
   const cuando = U.iso(min) + '.' + String(512093 + Math.abs(min) * 17).slice(0, 6) + 'Z';
@@ -162,11 +162,11 @@ P.cephCrash = (st, osd, min, tipo) => {
 
 P.detectores.push((st, add) => {
   const s = P.saludCeph(st);
-  if (s.estado !== 'HEALTH_OK') add(s.estado === 'HEALTH_ERR' ? 'CephHealthError' : 'CephHealthWarning', s.estado === 'HEALTH_ERR' ? 'critical' : 'warning', null, 'Ceph en ' + s.estado + ': ' + s.checks.map(x => x.code).join(', '), 'CephHealth');
+  if (s.estado !== 'HEALTH_OK') add(s.estado === 'HEALTH_ERR' ? 'CephHealthError' : 'CephHealthWarning', s.estado === 'HEALTH_ERR' ? 'critical' : 'warning', null, T('Ceph en ', 'Ceph in ') + s.estado + ': ' + s.checks.map(x => x.code).join(', '), 'CephHealth');
   const usos = U.usos(st);
   st.ceph.osds.forEach(o => {
     if (o.in && !U.osdUp(st, o)) add('CephOSDDown', 'critical', o.host, 'osd.' + o.id + ' down', 'CephOSDDown|' + o.id);
-    if (o.in && U.osdUp(st, o) && usos[o.id] >= st.ceph.nearfull * 100) add('CephOSDNearFull', 'warning', o.host, 'osd.' + o.id + ' al ' + usos[o.id].toFixed(1) + ' %', 'CephOSDNearFull|' + o.id);
+    if (o.in && U.osdUp(st, o) && usos[o.id] >= st.ceph.nearfull * 100) add('CephOSDNearFull', 'warning', o.host, 'osd.' + o.id + T(' al ', ' at ') + usos[o.id].toFixed(1) + ' %', 'CephOSDNearFull|' + o.id);
   });
 });
 // Cada reinicio queda apuntado con el estado de noout en ese momento.
@@ -397,8 +397,8 @@ const idOsd = x => { const m = /^(?:osd\.)?(\d+)$/.exec(String(x || '')); return
 function adminSocket(ctx, a) {
   const st = ctx.st, h = ctx.h, ent = a[0] || '', m = /^mon\.(ceph0\d)$/.exec(ent);
   const d = U.sinRoot(ctx, ['admin_socket: exception getting command descriptions: [Errno 13] Permission denied']); if (d) return d;
-  if (!m || m[1] !== h.nombre || h.svcs['ceph-mon@' + h.nombre].estado !== 'active') return [L('admin_socket: exception getting command descriptions: [Errno 2] No such file or directory', 'err'), L('(el socket es del demonio local: se usa en su nodo y con el demonio en marcha, p. ej. sudo ceph daemon mon.' + h.nombre + ' mon_status en ' + h.nombre + ')', 'dim')];
-  if (a[1] !== 'mon_status' && a[1] !== 'quorum_status') return [L('(en el simulador: sudo ceph daemon mon.' + h.nombre + ' mon_status)', 'dim')];
+  if (!m || m[1] !== h.nombre || h.svcs['ceph-mon@' + h.nombre].estado !== 'active') return [L('admin_socket: exception getting command descriptions: [Errno 2] No such file or directory', 'err'), L(T('(el socket es del demonio local: se usa en su nodo y con el demonio en marcha, p. ej. sudo ceph daemon mon.' + h.nombre + ' mon_status en ' + h.nombre + ')', '(the socket belongs to the local daemon: use it on that node with the daemon running, e.g. sudo ceph daemon mon.' + h.nombre + ' mon_status on ' + h.nombre + ')'), 'dim')];
+  if (a[1] !== 'mon_status' && a[1] !== 'quorum_status') return [L(T('(en el simulador: sudo ceph daemon mon.' + h.nombre + ' mon_status)', '(in the simulator: sudo ceph daemon mon.' + h.nombre + ' mon_status)'), 'dim')];
   const vivos = CEPH.filter(n => st.hosts[n].up && st.hosts[n].svcs['ceph-mon@' + n].estado === 'active');
   const hay = vivos.length >= 2, rango = CEPH.indexOf(h.nombre);
   const estado = !hay ? 'probing' : vivos[0] === h.nombre ? 'leader' : 'peon';
@@ -414,9 +414,9 @@ function cephCmd(ctx) {
   // el clúster no tenga quórum. Es la forma de mirar cuando ceph -s se cuelga.
   if (s0 === 'daemon') return adminSocket(ctx, a.slice(1));
   const saludErr = P.saludCeph(st);
-  if (saludErr.sinQuorum) return { lineas: [L('[errno 110] RADOS timed out (error connecting to the cluster)', 'err'), L('(sin quórum de monitores: dos de los tres mon están caídos)', 'dim')], minutos: 5 };
+  if (saludErr.sinQuorum) return { lineas: [L('[errno 110] RADOS timed out (error connecting to the cluster)', 'err'), L(T('(sin quórum de monitores: dos de los tres mon están caídos)', '(no monitor quorum: two of the three mons are down)'), 'dim')], minutos: 5 };
   if (s0 === '-s' || s0 === 'status') return status(st);
-  if (s0 === '-w' || s0 === '--watch') return [L('(ceph -w se queda escuchando; en el simulador usa ceph -s y deja pasar el tiempo con sleep)', 'dim')].concat(status(st));
+  if (s0 === '-w' || s0 === '--watch') return [L(T('(ceph -w se queda escuchando; en el simulador usa ceph -s y deja pasar el tiempo con sleep)', '(ceph -w keeps listening; in the simulator use ceph -s and let time pass with sleep)'), 'dim')].concat(status(st));
   if (s0 === 'health') return s1 === 'detail' ? detalle(st) : [L(saludErr.estado === 'HEALTH_OK' ? 'HEALTH_OK' : saludErr.estado + ' ' + saludErr.checks.map(x => x.res).join('; '), saludErr.estado === 'HEALTH_OK' ? 'verde' : 'ambar')];
   if (s0 === 'df') return cephDf(st);
   if (s0 === 'versions') return U.ls(['{', '    "mon": { "ceph version 18.2.4 (e7ad5345525c7aa95470c26863873b581076945d) reef (stable)": 3 },', '    "mgr": { "ceph version 18.2.4 (e7ad5345525c7aa95470c26863873b581076945d) reef (stable)": 3 },', '    "osd": { "ceph version 18.2.4 (e7ad5345525c7aa95470c26863873b581076945d) reef (stable)": ' + c.osds.filter(o => U.osdUp(st, o)).length + ' }', '}']);
@@ -480,7 +480,7 @@ function cephCmd(ctx) {
     if (s1 === 'mode') { c.balancer.modo = a[2] || 'upmap'; return []; }
     return [L('Invalid command: balancer ' + s1, 'err')];
   }
-  if (s0 !== 'osd') return [L('no valid command found; 10 closest matches:', 'err'), L('Error EINVAL: invalid command', 'err'), L('(prueba: ceph -s · ceph health detail · ceph osd tree · ceph osd df · ceph df · ceph crash ls · ceph balancer status)', 'dim')];
+  if (s0 !== 'osd') return [L('no valid command found; 10 closest matches:', 'err'), L('Error EINVAL: invalid command', 'err'), L(T('(prueba: ceph -s · ceph health detail · ceph osd tree · ceph osd df · ceph df · ceph crash ls · ceph balancer status)', '(try: ceph -s · ceph health detail · ceph osd tree · ceph osd df · ceph df · ceph crash ls · ceph balancer status)'), 'dim')];
 
   // ceph osd ...
   if (s1 === 'tree') return arbol(st);
@@ -545,10 +545,10 @@ function cephCmd(ctx) {
     else c.backfillfull = r;
     return [];
   }
-  if (s1 === 'purge' || s1 === 'destroy' || s1 === 'rm') return [L('(la retirada definitiva del OSD la hace hardware al sustituir el disco; no forma parte de ningún escenario)', 'dim')];
-  return [L('Invalid command: osd ' + s1, 'err'), L('(prueba: ceph osd tree · ceph osd df · ceph osd out/in N · ceph osd set/unset noout · ceph osd metadata N)', 'dim')];
+  if (s1 === 'purge' || s1 === 'destroy' || s1 === 'rm') return [L(T('(la retirada definitiva del OSD la hace hardware al sustituir el disco; no forma parte de ningún escenario)', '(permanently removing the OSD is done by the hardware team when they replace the disk; it is not part of any scenario)'), 'dim')];
+  return [L('Invalid command: osd ' + s1, 'err'), L(T('(prueba: ceph osd tree · ceph osd df · ceph osd out/in N · ceph osd set/unset noout · ceph osd metadata N)', '(try: ceph osd tree · ceph osd df · ceph osd out/in N · ceph osd set/unset noout · ceph osd metadata N)'), 'dim')];
 }
-U.cmd('ceph', { ayuda: 'clúster Ceph: -s, health detail, osd tree, osd df, df...', grupo: 'Ceph', donde: ['bastion', 'ceph'], fuera: '(el cliente de Ceph está en el bastión y en los nodos ceph0X)', fn: cephCmd,
+U.cmd('ceph', { ayuda: T('clúster Ceph: -s, health detail, osd tree, osd df, df...', 'Ceph cluster: -s, health detail, osd tree, osd df, df...'), grupo: 'Ceph', donde: ['bastion', 'ceph'], fuera: T('(el cliente de Ceph está en el bastión y en los nodos ceph0X)', '(the Ceph client is on the bastion and the ceph0X nodes)'), fn: cephCmd,
   completar: (st, ses, pal) => {
     const [a, b] = pal;
     if (!a) return ['-s', 'status', 'health', 'osd', 'df', 'crash', 'balancer', 'pg', 'mon', 'config', 'versions', 'daemon'];
@@ -568,7 +568,7 @@ U.cmd('ceph', { ayuda: 'clúster Ceph: -s, health detail, osd tree, osd df, df..
   } });
 
 // ------------------------------------------------------------------ discos físicos
-U.cmd('ceph-volume', { ayuda: 'qué disco físico hay detrás de cada OSD', grupo: 'Ceph', donde: ['ceph'], fn: ctx => {
+U.cmd('ceph-volume', { ayuda: T('qué disco físico hay detrás de cada OSD', 'which physical disk backs each OSD'), grupo: 'Ceph', donde: ['ceph'], fn: ctx => {
   const d = U.sinRoot(ctx, ['--> RuntimeError: Unable to proceed with non-existing device: must be run as root']); if (d) return d;
   if (ctx.args[0] !== 'lvm' || ctx.args[1] !== 'list') return [L('usage: ceph-volume lvm list', 'err')];
   const out = [];
@@ -588,7 +588,7 @@ U.cmd('ceph-volume', { ayuda: 'qué disco físico hay detrás de cada OSD', grup
   return out;
 } });
 function discosHost(st, h) { return [{ dev: '/dev/sda', osd: null }].concat(st.ceph.osds.filter(o => o.host === h.nombre).map(o => ({ dev: o.dev, osd: o }))); }
-U.cmd('lsblk', { ayuda: 'discos y particiones', donde: ['ceph', 'ctl', 'cmp', 'mon', 'bastion'], fn: ctx => {
+U.cmd('lsblk', { ayuda: T('discos y particiones', 'disks and partitions'), donde: ['ceph', 'ctl', 'cmp', 'mon', 'bastion'], fn: ctx => {
   const h = ctx.h, out = [L('NAME                                              MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS'), L('sda                                                 8:0    0 447.1G  0 disk'), L('├─sda1                                              8:1    0   1.1G  0 part /boot/efi'), L('└─sda2                                              8:2    0   446G  0 part'), L('  └─vg0-root                                      253:0    0    48G  0 lvm  /')];
   if (h.rol === 'ceph') discosHost(ctx.st, h).slice(1).forEach((d, i) => {
     out.push(L(d.dev.replace('/dev/', '').padEnd(52) + '8:' + (16 * (i + 1)) + '   0   1.7T  0 disk'));
@@ -596,7 +596,7 @@ U.cmd('lsblk', { ayuda: 'discos y particiones', donde: ['ceph', 'ctl', 'cmp', 'm
   });
   return out;
 } });
-U.cmd('smartctl', { ayuda: 'salud física de un disco (smartctl -a /dev/sdb)', grupo: 'Ceph', donde: ['ceph'], fn: ctx => {
+U.cmd('smartctl', { ayuda: T('salud física de un disco (smartctl -a /dev/sdb)', 'physical health of a disk (smartctl -a /dev/sdb)'), grupo: 'Ceph', donde: ['ceph'], fn: ctx => {
   const dev = ctx.args.filter(x => x[0] !== '-').pop();
   if (!dev) return [L('smartctl 7.2 2020-12-30 r5155 [x86_64-linux-' + ctx.h.kernel + '] (local build)'), L('ERROR: smartctl requires a device name as the final command-line argument.', 'err')];
   const d = U.sinRoot(ctx, ['smartctl 7.2 2020-12-30 r5155 [x86_64-linux-' + ctx.h.kernel + '] (local build)', 'Smartctl open device: ' + dev + ' failed: Permission denied']); if (d) return d;

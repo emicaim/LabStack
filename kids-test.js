@@ -1,6 +1,6 @@
 // Recorre el modo Kids de principio a fin: acierto, error y pantalla final.
 const fs=require('fs');
-const src=fs.readFileSync('F:/IngLab/Taller visual de infraestructura didáctico/Laboratorio.dc.html','utf8');
+const src=fs.readFileSync(require('path').join(__dirname, 'Laboratorio.dc.html'),'utf8');
 const code=src.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/)[1];
 class DCLogic{ constructor(){this.props={}} setState(p){Object.assign(this.state, typeof p==='function'?p(this.state):p)} }
 global.localStorage={getItem:()=>null,setItem(){},removeItem(){}};
@@ -8,8 +8,8 @@ global.window={location:{hash:'',search:'',pathname:'/'},addEventListener(){}};
 global.document={addEventListener(){},createElement:()=>({style:{},click(){}}),head:{appendChild(){}},body:{appendChild(){},removeChild(){}},querySelector:()=>null,querySelectorAll:()=>[]};
 
 // cargar el contenido externo igual que hacen las <script> de la página
-['piezas','capas','textos','retos','kids','tickets'].forEach(function(n){
-  const code=fs.readFileSync('F:/IngLab/Taller visual de infraestructura didáctico/contenido/'+n+'.js','utf8');
+['piezas','capas','textos','retos','kids','tickets','eventos','comandos'].forEach(function(n){
+  const code=fs.readFileSync(require('path').join(__dirname, 'contenido', n+'.js'),'utf8');
   new Function('window', code)(global.window);
 });
 global.React={createElement:()=>({}),Fragment:'F'};

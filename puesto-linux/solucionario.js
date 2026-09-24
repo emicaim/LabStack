@@ -6,10 +6,11 @@
 (function () {
 'use strict';
 const P = window.PUESTO, U = P.u;
+const T = P.T;
 const $ = s => document.querySelector(s);
 const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const TIPOS = { incidente: 'Incidente', peticion: 'Petición', cambio: 'Cambio' };
-const FASES = { diag: 'Diagnóstico', arreglo: 'Arreglo', comprobar: 'Comprobación', '': 'Paso' };
+const TIPOS = { incidente: T('Incidente', 'Incident'), peticion: T('Petición', 'Request'), cambio: T('Cambio', 'Change') };
+const FASES = { diag: T('Diagnóstico', 'Diagnosis'), arreglo: T('Arreglo', 'Fix'), comprobar: T('Comprobación', 'Verification'), '': T('Paso', 'Step') };
 const MAX = 40;
 
 // Ejecuta el guion y devuelve la salida de cada paso.
@@ -30,14 +31,14 @@ function ticket(e) {
   const pasos = s.pasos.map((x, i) => {
     const o = sal[i], extra = Math.max(0, o.lineas.length - MAX);
     const cuerpo = o.lineas.length
-      ? o.lineas.slice(0, MAX).map(l => `<div class="ln ${l.c}">${h(l.t) || '&nbsp;'}</div>`).join('') + (extra ? `<div class="ln dim">… ${extra} líneas más</div>` : '')
-      : '<div class="ln dim">(no devuelve nada: en Linux, el silencio suele significar que ha ido bien)</div>';
+      ? o.lineas.slice(0, MAX).map(l => `<div class="ln ${l.c}">${h(l.t) || '&nbsp;'}</div>`).join('') + (extra ? `<div class="ln dim">${T(`… ${extra} líneas más`, `… ${extra} more lines`)}</div>` : '')
+      : `<div class="ln dim">${T('(no devuelve nada: en Linux, el silencio suele significar que ha ido bien)', '(no output: in Linux, silence usually means it worked)')}</div>`;
     return `<li class="paso f-${x[1] || 'mov'}">
       <span class="paso-n">${i + 1}</span>
       <div class="paso-c">
         <div class="paso-cab"><span class="fase">${FASES[x[1]]}</span><code><span class="paso-host">${h(o.prompt)}</span>${h(o.cmd)}</code></div>
         <p>${h(x[2])}</p>
-        ${x[1] ? `<details class="salida"><summary>Ver lo que devuelve</summary><div class="salida-t">${cuerpo}</div></details>` : ''}
+        ${x[1] ? `<details class="salida"><summary>${T('Ver lo que devuelve', 'Show the output')}</summary><div class="salida-t">${cuerpo}</div></details>` : ''}
       </div>
     </li>`;
   }).join('');
@@ -45,48 +46,48 @@ function ticket(e) {
   return `<details class="card sol" id="${e.id}">
     <summary>
       <span class="tk-id">${e.id}</span><span class="chip t-${e.tipo}">${TIPOS[e.tipo]}</span><span class="chip p-${p.p}">${p.p}</span>
-      <span class="sol-t">${h(e.asunto)}</span><span class="sol-n">${e.area} · ${s.pasos.length} pasos</span>
+      <span class="sol-t">${h(e.asunto)}</span><span class="sol-n">${e.area} · ${T(`${s.pasos.length} pasos`, `${s.pasos.length} steps`)}</span>
     </summary>
     <div class="sol-cuerpo">
       <div class="sol-dos">
-        <div><h4>El síntoma</h4>${e.cuerpo.map(x => '<p>' + h(x) + '</p>').join('')}</div>
-        <div><h4>Qué pasaba</h4><p>${h(e.causa)}</p></div>
+        <div><h4>${T('El síntoma', 'The symptom')}</h4>${e.cuerpo.map(x => '<p>' + h(x) + '</p>').join('')}</div>
+        <div><h4>${T('Qué pasaba', 'What was going on')}</h4><p>${h(e.causa)}</p></div>
       </div>
-      <h4>Cómo se resuelve <span class="sol-leyenda">diagnóstico → arreglo (${nPasos}) → comprobación</span></h4>
+      <h4>${T('Cómo se resuelve', 'How to solve it')} <span class="sol-leyenda">${T(`diagnóstico → arreglo (${nPasos}) → comprobación`, `diagnosis → fix (${nPasos}) → verification`)}</span></h4>
       <ol class="pasos">${pasos}</ol>
       <div class="sol-dos">
-        <div><h4>Lo que no lo arregla</h4><ul class="trampas">${(e.trampas || []).map(t => `<li><code>${h(t.cmds.filter(c => !/^(ssh|exit|cd|source|sleep)\b/.test(c)).join(' · '))}</code><span>${h(t.porque.charAt(0).toUpperCase() + t.porque.slice(1))}.</span></li>`).join('')}</ul></div>
-        <div><h4>Buenas prácticas que se valoran</h4><ul class="valoran">${e.practicas.map(x => '<li>' + h(x.t) + '</li>').join('')}</ul></div>
+        <div><h4>${T('Lo que no lo arregla', 'What does not fix it')}</h4><ul class="trampas">${(e.trampas || []).map(t => `<li><code>${h(t.cmds.filter(c => !/^(ssh|exit|cd|source|sleep)\b/.test(c)).join(' · '))}</code><span>${h(t.porque.charAt(0).toUpperCase() + t.porque.slice(1))}.</span></li>`).join('')}</ul></div>
+        <div><h4>${T('Buenas prácticas que se valoran', 'Good practices that earn credit')}</h4><ul class="valoran">${e.practicas.map(x => '<li>' + h(x.t) + '</li>').join('')}</ul></div>
       </div>
-      <div class="sol-leccion"><h4>Lo que te llevas</h4><p>${h(e.leccion)}</p></div>
+      <div class="sol-leccion"><h4>${T('Lo que te llevas', 'The takeaway')}</h4><p>${h(e.leccion)}</p></div>
       <div class="sol-pie">
         <span>${(s.terminos || []).map(t => { const g = P.glosario.find(x => x.id === t); return `<a class="termino" href="#g-${t}">${h(g.t)}</a>`; }).join('')}</span>
-        <a class="btn" href="./index.html#${e.id}">Practicarlo →</a>
+        <a class="btn" href="./index.html#${e.id}">${T('Practicarlo →', 'Practice it →')}</a>
       </div>
     </div>
   </details>`;
 }
 function glosario() {
-  return P.glosario.slice().sort((a, b) => a.t.localeCompare(b.t, 'es')).map(g => `<div class="gl" id="g-${g.id}" data-txt="${h((g.t + ' ' + g.d).toLowerCase())}">
+  return P.glosario.slice().sort((a, b) => a.t.localeCompare(b.t, P.idioma)).map(g => `<div class="gl" id="g-${g.id}" data-txt="${h((g.t + ' ' + g.d).toLowerCase())}">
     <b>${h(g.t)}</b><p>${h(g.d)}</p>
-    ${usos[g.id] ? `<span class="gl-usos">Aparece en ${usos[g.id].map(id => `<a href="#${id}">${id}</a>`).join(' · ')}</span>` : ''}
+    ${usos[g.id] ? `<span class="gl-usos">${T('Aparece en', 'Appears in')} ${usos[g.id].map(id => `<a href="#${id}">${id}</a>`).join(' · ')}</span>` : ''}
   </div>`).join('');
 }
 
 $('#vista').innerHTML = `<div class="cola-wrap sol-wrap">
   <section class="sol-hero">
-    <span class="oferta-tag">📘 Solucionario</span>
-    <h1>Cómo se resuelve cada ticket</h1>
-    <p>Paso a paso, con lo que te dice cada comando y la salida real que verás en la terminal. Úsalo <b>después</b> de intentarlo: el oficio se aprende buscando, y cada ticket admite más de un camino. Este es uno bueno.</p>
-    <nav class="sol-nav"><a href="#tickets">Tickets (${P.escenarios.length})</a><a href="#glosario">Glosario (${P.glosario.length})</a><button data-act="todos">Abrir todos</button><button data-act="imprimir">Imprimir</button></nav>
+    <span class="oferta-tag">📘 ${T('Solucionario', 'Answer book')}</span>
+    <h1>${T('Cómo se resuelve cada ticket', 'How each ticket is solved')}</h1>
+    <p>${T('Paso a paso, con lo que te dice cada comando y la salida real que verás en la terminal. Úsalo <b>después</b> de intentarlo: el oficio se aprende buscando, y cada ticket admite más de un camino. Este es uno bueno.', 'Step by step, with what each command tells you and the real output you will see in the terminal. Use it <b>after</b> you have tried: the craft is learned by searching, and every ticket has more than one path. This is a good one.')}</p>
+    <nav class="sol-nav"><a href="#tickets">Tickets (${P.escenarios.length})</a><a href="#glosario">${T('Glosario', 'Glossary')} (${P.glosario.length})</a><button data-act="todos">${T('Abrir todos', 'Expand all')}</button><button data-act="imprimir">${T('Imprimir', 'Print')}</button></nav>
   </section>
   <section id="tickets">
-    <div class="cola-cab"><h2>Tickets</h2><span>de nivel 1 a nivel 3</span></div>
+    <div class="cola-cab"><h2>Tickets</h2><span>${T('de nivel 1 a nivel 3', 'from level 1 to level 3')}</span></div>
     <div class="lista">${P.escenarios.map(ticket).join('')}</div>
   </section>
   <section id="glosario" style="margin-top:34px">
-    <div class="cola-cab"><h2>Glosario</h2><span>${P.glosario.length} términos</span></div>
-    <input id="buscar" class="buscar" type="search" placeholder="Buscar un término: noout, cuota, idempotencia…" aria-label="Buscar en el glosario">
+    <div class="cola-cab"><h2>${T('Glosario', 'Glossary')}</h2><span>${T(`${P.glosario.length} términos`, `${P.glosario.length} terms`)}</span></div>
+    <input id="buscar" class="buscar" type="search" placeholder="${T('Buscar un término: noout, cuota, idempotencia…', 'Search for a term: noout, quota, idempotence…')}" aria-label="${T('Buscar en el glosario', 'Search the glossary')}">
     <div class="glosario">${glosario()}</div>
   </section>
 </div>`;
@@ -109,7 +110,7 @@ const abrirTodos = v => document.querySelectorAll('details').forEach(d => { d.op
 window.addEventListener('beforeprint', () => abrirTodos(true));
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-act]'); if (!b) return;
-  if (b.dataset.act === 'todos') { const abrir = !document.querySelector('details.sol[open]'); document.querySelectorAll('details.sol').forEach(d => { d.open = abrir; }); b.textContent = abrir ? 'Cerrar todos' : 'Abrir todos'; }
+  if (b.dataset.act === 'todos') { const abrir = !document.querySelector('details.sol[open]'); document.querySelectorAll('details.sol').forEach(d => { d.open = abrir; }); b.textContent = abrir ? T('Cerrar todos', 'Collapse all') : T('Abrir todos', 'Expand all'); }
   if (b.dataset.act === 'imprimir') window.print();
   if (b.dataset.act === 'tema') { const o = document.body.classList.toggle('oscuro'); try { localStorage.setItem('puesto-tema', o ? 'oscuro' : 'claro'); } catch (e) { /* nada */ } }
 });

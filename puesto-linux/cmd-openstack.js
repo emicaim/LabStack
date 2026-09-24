@@ -5,7 +5,7 @@
 // aparece o desaparece según lo que arregles, no según un guion.
 (function (P) {
 'use strict';
-const U = P.u, L = U.L;
+const U = P.u, L = U.L, T = P.T;
 
 const FLAVORS = {
   'm1.small': { id: '1', vcpu: 1, ram: 2048, disk: 20 }, 'm1.medium': { id: '2', vcpu: 2, ram: 4096, disk: 40 },
@@ -51,14 +51,14 @@ P.alCrear.push(st => {
       analitica: { cuota: { instances: 30, cores: 200, ram: 524288, gigabytes: 4000, volumes: 40, snapshots: 40 }, vol: { gigabytes: 2600, volumes: 12, snapshots: 0 } },
     },
     sgs: {
-      'sg-pos-backend': sg('sg-pos-backend', 'tpv-tiendas', 'Backend TPV (gestionado por Terraform)', [
+      'sg-pos-backend': sg('sg-pos-backend', 'tpv-tiendas', T('Backend TPV (gestionado por Terraform)', 'POS backend (managed by Terraform)'), [
         { dir: 'egress', eth: 'IPv4', proto: null, puerto: null, remoto: '0.0.0.0/0' },
         { dir: 'egress', eth: 'IPv6', proto: null, puerto: null, remoto: '::/0' },
         { dir: 'ingress', eth: 'IPv4', proto: 'tcp', puerto: 443, remoto: '0.0.0.0/0', tf: 'https_public' },
         { dir: 'ingress', eth: 'IPv4', proto: 'tcp', puerto: 22, remoto: '10.20.0.0/16', tf: 'ssh_admin' },
         { dir: 'ingress', eth: 'IPv4', proto: 'tcp', puerto: 8443, remoto: '10.30.0.0/16', tf: 'api_internal' },
       ]),
-      'sg-web-tienda': sg('sg-web-tienda', 'tienda-online', 'Frontales de la tienda online', [
+      'sg-web-tienda': sg('sg-web-tienda', 'tienda-online', T('Frontales de la tienda online', 'Online store frontends'), [
         { dir: 'egress', eth: 'IPv4', proto: null, puerto: null, remoto: '0.0.0.0/0' },
         { dir: 'ingress', eth: 'IPv4', proto: 'tcp', puerto: 443, remoto: '0.0.0.0/0' },
         { dir: 'ingress', eth: 'IPv4', proto: 'tcp', puerto: 22, remoto: '10.20.0.0/16' },
@@ -259,25 +259,25 @@ P.reglas.push((st, h, u) => ((u === 'rabbitmq-server' || u === 'mariadb') && h.d
 P.certCaducado = st => { const c = st.hosts.ctl01.extra.cert; return !!c && c.cargado <= st.reloj; };
 P.galeraVivos = st => CTLS.filter(n => st.hosts[n].up && st.hosts[n].svcs.mariadb.estado === 'active' && !st.hosts[n].extra.splitBrain);
 P.galeraTamano = (st, h) => h.extra.splitBrain ? 1 : P.galeraVivos(st).length;
-P.ficheros.push((st, h) => h.rol === 'ctl' && h.extra.cert ? { '/etc/haproxy/certs/api.pem': { lineas: () => ['-----BEGIN CERTIFICATE-----', 'MIIF3zCCA8egAwIBAgIUQ' + U.hex('crt' + h.extra.cert.fichero, 40), '(…)', '-----END CERTIFICATE-----', '(para leerlo: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)'] } } : {});
+P.ficheros.push((st, h) => h.rol === 'ctl' && h.extra.cert ? { '/etc/haproxy/certs/api.pem': { lineas: () => ['-----BEGIN CERTIFICATE-----', 'MIIF3zCCA8egAwIBAgIUQ' + U.hex('crt' + h.extra.cert.fichero, 40), '(…)', '-----END CERTIFICATE-----', T('(para leerlo: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)', '(to read it: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)')] } } : {});
 P.detectores.push((st, add) => {
-  COMPUTES.forEach(n => { const h = st.hosts[n]; if (h.up && h.provisionado && st.os.nodos[n] && !U.novaUp(st, n)) add('OpenStackNovaComputeDown', 'critical', n, 'nova-compute de ' + n + ' está down: el scheduler no le manda VMs', 'NovaCompute|' + n); });
-  CTLS.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['rabbitmq-server'].estado !== 'active') add('RabbitMQNodeDown', 'critical', n, 'rabbit@' + n + ' fuera del clúster de RabbitMQ', 'Rabbit|' + n); });
-  CTLS.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['cinder-volume'].estado !== 'active') add('CinderVolumeServiceDown', 'warning', n, 'cinder-volume de ' + n + '@rbd-1 down: sus volúmenes no se pueden crear, borrar ni ampliar', 'Cinder|' + n); });
-  CTLS.forEach(n => { const h = st.hosts[n]; if (!h.up) return; const p = U.ramUsada(st, h) / U.ramTotal(h) * 100; if (p >= 80) add('NodeMemoryHighUtilization', p >= 90 ? 'critical' : 'warning', n, 'memoria al ' + Math.round(p) + ' %', 'Mem|' + n); });
-  COMPUTES.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['neutron-openvswitch-agent'] && st.os.nodos[n] && !U.ovsOk(st, n)) add('NeutronOVSAgentDown', 'critical', n, 'agente de Open vSwitch de ' + n + ' caído: sus VMs se quedan sin red', 'OVS|' + n); });
+  COMPUTES.forEach(n => { const h = st.hosts[n]; if (h.up && h.provisionado && st.os.nodos[n] && !U.novaUp(st, n)) add('OpenStackNovaComputeDown', 'critical', n, T('nova-compute de ' + n + ' está down: el scheduler no le manda VMs', 'nova-compute on ' + n + ' is down: the scheduler is not sending it VMs'), 'NovaCompute|' + n); });
+  CTLS.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['rabbitmq-server'].estado !== 'active') add('RabbitMQNodeDown', 'critical', n, T('rabbit@' + n + ' fuera del clúster de RabbitMQ', 'rabbit@' + n + ' is out of the RabbitMQ cluster'), 'Rabbit|' + n); });
+  CTLS.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['cinder-volume'].estado !== 'active') add('CinderVolumeServiceDown', 'warning', n, T('cinder-volume de ' + n + '@rbd-1 down: sus volúmenes no se pueden crear, borrar ni ampliar', 'cinder-volume on ' + n + '@rbd-1 down: its volumes cannot be created, deleted or extended'), 'Cinder|' + n); });
+  CTLS.forEach(n => { const h = st.hosts[n]; if (!h.up) return; const p = U.ramUsada(st, h) / U.ramTotal(h) * 100; if (p >= 80) add('NodeMemoryHighUtilization', p >= 90 ? 'critical' : 'warning', n, T('memoria al ' + Math.round(p) + ' %', 'memory at ' + Math.round(p) + ' %'), 'Mem|' + n); });
+  COMPUTES.forEach(n => { const h = st.hosts[n]; if (h.up && h.svcs['neutron-openvswitch-agent'] && st.os.nodos[n] && !U.ovsOk(st, n)) add('NeutronOVSAgentDown', 'critical', n, T('agente de Open vSwitch de ' + n + ' caído: sus VMs se quedan sin red', 'Open vSwitch agent on ' + n + ' is down: its VMs lose networking'), 'OVS|' + n); });
   // La VIP de la API la sirve HAProxy en ctl01 (keepalived).
-  if (P.certCaducado(st)) add('SSLCertExpired', 'critical', null, 'https://api.retail.local:5000 presenta un certificado caducado (sonda blackbox)', 'SSLCert|api');
+  if (P.certCaducado(st)) add('SSLCertExpired', 'critical', null, T('https://api.retail.local:5000 presenta un certificado caducado (sonda blackbox)', 'https://api.retail.local:5000 presents an expired certificate (blackbox probe)'), 'SSLCert|api');
   CTLS.forEach(n => {
     const h = st.hosts[n];
     if (!h.up || h.svcs.mariadb.estado !== 'active') return;
     const t = P.galeraTamano(st, h);
-    if (t < 3) add('GaleraClusterSizeLow', 'critical', n, 'wsrep_cluster_size = ' + t + ' (esperado 3)', 'Galera|' + n);
+    if (t < 3) add('GaleraClusterSizeLow', 'critical', n, 'wsrep_cluster_size = ' + t + T(' (esperado 3)', ' (expected 3)'), 'Galera|' + n);
   });
   // Sonda blackbox desde fuera: el 22 no debería contestar en ninguna IP pública.
   st.os.servidores.filter(s => s.ipPublica).forEach(s => {
     const abierto = Object.values(st.os.sgs).some(g => g.proyecto === s.proyecto && g.reglas.some(r => r.dir === 'ingress' && r.puerto === 22 && r.remoto === '0.0.0.0/0'));
-    if (abierto) add('PublicSSHExposed', 'critical', null, s.ipPublica + ':22 (' + s.nombre + ') responde desde internet (sonda blackbox externa)', 'PublicSSH|' + s.ipPublica);
+    if (abierto) add('PublicSSHExposed', 'critical', null, s.ipPublica + ':22 (' + s.nombre + T(') responde desde internet (sonda blackbox externa)', ') answers from the internet (external blackbox probe)'), 'PublicSSH|' + s.ipPublica);
   });
 });
 
@@ -344,13 +344,13 @@ const ahora = st => U.iso(st.reloj) + '.000000';
 
 function osCmd(ctx) {
   const st = ctx.st, ses = ctx.ses, a = ctx.args;
-  if (!a.length || a[0] === '--help' || a[0] === 'help') return U.ls(['usage: openstack [--version] [-v | -q] [--os-cloud <cloud-config-name>] <command> ...', '', 'Comandos útiles en este puesto:', '  server list --all-projects · server show X · server create · compute service list', '  hypervisor list [--long] · network agent list · volume service list', '  quota show --usage P · quota set --gigabytes N P · project list · flavor list', '  security group list · security group rule list SG · security group rule delete ID'], 'dim');
-  if (!ses.env.OS_AUTH_URL) return [L('Missing value auth-url required for auth plugin password', 'err'), L('(el cliente no sabe a qué nube hablar: carga las credenciales con source ~/admin-openrc)', 'dim')];
+  if (!a.length || a[0] === '--help' || a[0] === 'help') return U.ls(['usage: openstack [--version] [-v | -q] [--os-cloud <cloud-config-name>] <command> ...', '', T('Comandos útiles en este puesto:', 'Useful commands on this desk:'), '  server list --all-projects · server show X · server create · compute service list', '  hypervisor list [--long] · network agent list · volume service list', '  quota show --usage P · quota set --gigabytes N P · project list · flavor list', '  security group list · security group rule list SG · security group rule delete ID'], 'dim');
+  if (!ses.env.OS_AUTH_URL) return [L('Missing value auth-url required for auth plugin password', 'err'), L(T('(el cliente no sabe a qué nube hablar: carga las credenciales con source ~/admin-openrc)', '(the client does not know which cloud to talk to: load the credentials with source ~/admin-openrc)'), 'dim')];
   if (P.certCaducado(st)) return errorSSL;
   const { o, pos } = opciones(a);
   // Ámbito: el proyecto en el que actúas. Por defecto, el de las credenciales.
   const ambito = o['--os-project-name'] || ses.env.OS_PROJECT_NAME || 'admin';
-  if (!st.os.proyectos[ambito]) return [L('The request you have made requires authentication. (HTTP 401)', 'err'), L('(el proyecto ' + ambito + ' no existe)', 'dim')];
+  if (!st.os.proyectos[ambito]) return [L('The request you have made requires authentication. (HTTP 401)', 'err'), L(T('(el proyecto ' + ambito + ' no existe)', '(project ' + ambito + ' does not exist)'), 'dim')];
   const empieza = p => pos.join(' ').indexOf(p) === 0;
   // RabbitMQ caído en un controlador: 1 de cada 3 llamadas a nova acaba en 500.
   const rabbitCaido = CTLS.some(n => st.hosts[n].up && st.hosts[n].svcs['rabbitmq-server'].estado !== 'active');
@@ -377,7 +377,7 @@ function osCmd(ctx) {
     if (o['--project'] && !st.os.proyectos[o['--project']]) return [L("No project with a name or ID of '" + o['--project'] + "' exists.", 'err')];
     const crear = () => { st.os.usuarios[n] = { id: U.hex('user' + n, 32), email: o['--email'] || null, proyecto: o['--project'] || null }; return U.ls(U.campos([['default_project_id', o['--project'] ? U.hex('proj' + o['--project'], 32) : ''], ['domain_id', 'default'], ['email', o['--email'] || ''], ['enabled', 'True'], ['id', st.os.usuarios[n].id], ['name', n], ['password_expires_at', 'None']])); };
     if (o['--password']) { st.hechos.passwordEnLinea = true; return crear(); }
-    if (!o['--password-prompt']) return [L('(sin contraseña el usuario no podrá entrar: usa --password-prompt)', 'dim')].concat(crear());
+    if (!o['--password-prompt']) return [L(T('(sin contraseña el usuario no podrá entrar: usa --password-prompt)', '(without a password the user cannot log in: use --password-prompt)'), 'dim')].concat(crear());
     ses.pendiente = { prompt: 'User Password:', oculto: true, responder: (s1, ses1, p1) => {
       ses1.pendiente = { prompt: 'Repeat User Password:', oculto: true, responder: (s2, ses2, p2) => p1 && p1 === p2 ? { lineas: crear() } : { lineas: [L('Passwords do not match.', 'err')] } };
       return { lineas: [], minutos: 0 };
@@ -415,7 +415,7 @@ function osCmd(ctx) {
   }
   if (empieza('volume set')) {
     const v = volumen(pos[2]); if (!v) return [L("No volume with a name or ID of '" + (pos[2] || '') + "' exists.", 'err')];
-    const e = o['--state']; if (!e) return [L('(en el simulador: openstack volume set --state error <volumen>)', 'dim')];
+    const e = o['--state']; if (!e) return [L(T('(en el simulador: openstack volume set --state error <volumen>)', '(in the simulator: openstack volume set --state error <volume>)'), 'dim')];
     if (['available', 'error', 'in-use', 'deleting', 'error_deleting'].indexOf(e) < 0) return [L("Failed to set volume state: Invalid status '" + e + "'", 'err')];
     v.estado = e; v.desde = st.reloj; st.hechos.resetEstado = (st.hechos.resetEstado || []).concat([{ vol: v.nombre, estado: e, min: st.reloj }]);
     return [];
@@ -436,14 +436,14 @@ function osCmd(ctx) {
     const host = pos[3], bin = pos[4];
     if (!host || bin !== 'nova-compute') return [L('usage: openstack compute service set [--enable | --disable] [--disable-reason <reason>] <host> <service>', 'err')];
     if (!st.os.nodos[host]) return [L('Compute service nova-compute of host ' + host + ' failed to set.', 'err')];
-    if (o['--disable']) { st.os.deshabilitados[host] = o['--disable-reason'] || 'sin motivo'; st.hechos.deshabilitado = (st.hechos.deshabilitado || []).concat([{ host, min: st.reloj }]); }
+    if (o['--disable']) { st.os.deshabilitados[host] = o['--disable-reason'] || T('sin motivo', 'no reason'); st.hechos.deshabilitado = (st.hechos.deshabilitado || []).concat([{ host, min: st.reloj }]); }
     else if (o['--enable']) delete st.os.deshabilitados[host];
-    else return [L('(indica --enable o --disable)', 'dim')];
+    else return [L(T('(indica --enable o --disable)', '(pass --enable or --disable)'), 'dim')];
     return [];
   }
   if (empieza('server migrate')) {
     const s = servidor(st, pos[2]); if (!s) return [L("No server with a name or ID of '" + (pos[2] || '') + "' exists.", 'err')];
-    if (!o['--live-migration'] && !o['--live']) return [L('(en este puesto las migraciones son en vivo: openstack server migrate --live-migration ' + s.nombre + ')', 'dim')];
+    if (!o['--live-migration'] && !o['--live']) return [L(T('(en este puesto las migraciones son en vivo: openstack server migrate --live-migration ' + s.nombre + ')', '(on this desk migrations are live: openstack server migrate --live-migration ' + s.nombre + ')'), 'dim')];
     if (s.estado !== 'ACTIVE') return [L("Cannot 'os-migrateLive' instance " + s.id + ' while it is in vm_state ' + s.estado.toLowerCase() + ' (HTTP 409)', 'err')];
     if (!P.migrar(st, s)) return [L('No valid host was found. There are not enough hosts available. (HTTP 400)', 'err')];
     return o['--wait'] ? [L('Progress: 100'), L('Complete')] : [];
@@ -466,7 +466,7 @@ function osCmd(ctx) {
     if (o['--project']) lista = st.os.servidores.filter(s => s.proyecto === o['--project']);
     if (o['--host']) lista = lista.filter(s => s.host === o['--host']);
     if (o['--status']) lista = lista.filter(s => s.estado === String(o['--status']).toUpperCase());
-    if (!lista.length) return todos || o['--project'] || o['--host'] || ambito !== 'admin' ? [] : [L('(el proyecto admin no tiene VMs propias; las de los clientes se ven con --all-projects)', 'dim')];
+    if (!lista.length) return todos || o['--project'] || o['--host'] || ambito !== 'admin' ? [] : [L(T('(el proyecto admin no tiene VMs propias; las de los clientes se ven con --all-projects)', '(the admin project has no VMs of its own; customer VMs show up with --all-projects)'), 'dim')];
     const filas = lista.map(s => [s.id, s.nombre, s.estado, s.red + '=' + s.ip + (s.ipPublica ? ', ' + s.ipPublica : ''), s.imagen, s.flavor]);
     return rojoSi(U.tabla(['ID', 'Name', 'Status', 'Networks', 'Image', 'Flavor'], filas), /\| (ERROR|SHUTOFF) /);
   }
@@ -494,7 +494,7 @@ function osCmd(ctx) {
     const campos = [['OS-EXT-SRV-ATTR:host', s.host || 'None'], ['OS-EXT-STS:vm_state', s.estado === 'ACTIVE' ? 'active' : s.estado === 'ERROR' ? 'error' : 'building'], ['adminPass', U.hex('pw' + s.id, 12)], ['created', U.iso(st.reloj) + 'Z'], ['flavor', fl + ' (' + f.id + ')'], ['id', s.id], ['image', im + ' (' + U.uuid('img' + im) + ')'], ['name', nombre], ['status', s.estado]];
     const out = rojoSi(U.campos(campos), /ERROR/);
     if (s.estado === 'ERROR') out.push(L('Error creating server: ' + nombre, 'err'), L('Error creating server', 'err'));
-    else if (s.estado === 'BUILD') out.push(L('(la VM se está construyendo: mira cómo acaba con openstack server show ' + nombre + ')', 'dim'));
+    else if (s.estado === 'BUILD') out.push(L(T('(la VM se está construyendo: mira cómo acaba con openstack server show ' + nombre + ')', '(the VM is building: see how it ends with openstack server show ' + nombre + ')'), 'dim'));
     return out;
   }
   if (empieza('server delete')) {
@@ -561,7 +561,7 @@ function osCmd(ctx) {
   if (empieza('security group list')) return U.ls(U.tabla(['ID', 'Name', 'Description', 'Project', 'Tags'], Object.values(st.os.sgs).map(g => [g.id, g.nombre, g.desc, U.hex('proj' + g.proyecto, 32), '[]'])));
   if (empieza('security group rule list')) {
     const g = st.os.sgs[pos[4]] || Object.values(st.os.sgs).find(x => x.id === pos[4]);
-    if (!g) return pos[4] ? [L("No SecurityGroup found for " + pos[4], 'err')] : [L('(indica el grupo: openstack security group rule list sg-pos-backend)', 'dim')];
+    if (!g) return pos[4] ? [L("No SecurityGroup found for " + pos[4], 'err')] : [L(T('(indica el grupo: openstack security group rule list sg-pos-backend)', '(name the group: openstack security group rule list sg-pos-backend)'), 'dim')];
     return rojoSi(U.tabla(['ID', 'IP Protocol', 'Ethertype', 'IP Range', 'Port Range', 'Direction', 'Remote Security Group'], g.reglas.map(r => [r.id, r.proto || 'None', r.eth, r.remoto, r.puerto ? r.puerto + ':' + r.puerto : '', r.dir, 'None'])), /0\.0\.0\.0\/0 +\| 22:22/);
   }
   if (empieza('security group rule delete')) {
@@ -596,7 +596,7 @@ const ARBOL = {
   network: ['agent', 'list'], 'network agent': ['list'], volume: ['service', 'list', 'show', 'set', 'delete'], 'volume service': ['list'], quota: ['show', 'set'],
   project: ['list', 'create', 'show'], flavor: ['list'], image: ['list'], security: ['group'], 'security group': ['list', 'rule'], 'security group rule': ['list', 'delete', 'create'], token: ['issue'],
 };
-U.cmd('openstack', { ayuda: 'API de OpenStack (antes: source ~/admin-openrc)', grupo: 'OpenStack', donde: ['bastion'], fuera: '(el cliente de OpenStack está en el bastión: vuelve con exit)', fn: osCmd,
+U.cmd('openstack', { ayuda: T('API de OpenStack (antes: source ~/admin-openrc)', 'OpenStack API (first: source ~/admin-openrc)'), grupo: 'OpenStack', donde: ['bastion'], fuera: T('(el cliente de OpenStack está en el bastión: vuelve con exit)', '(the OpenStack client is on the bastion: go back with exit)'), fn: osCmd,
   completar: (st, ses, pal) => {
     const k = pal.filter(x => x[0] !== '-').join(' ');
     if (ARBOL[k]) return ARBOL[k];
@@ -615,7 +615,7 @@ U.cmd('openstack', { ayuda: 'API de OpenStack (antes: source ~/admin-openrc)', g
   } });
 
 // nova-manage: celdas ----------------------------------------------------------
-U.cmd('nova-manage', { ayuda: 'celdas de nova: cell_v2 discover_hosts / list_hosts', grupo: 'OpenStack', donde: ['ctl'], fuera: '(nova-manage se ejecuta en un controlador: ssh ctl01)', fn: ctx => {
+U.cmd('nova-manage', { ayuda: T('celdas de nova: cell_v2 discover_hosts / list_hosts', 'nova cells: cell_v2 discover_hosts / list_hosts'), grupo: 'OpenStack', donde: ['ctl'], fuera: T('(nova-manage se ejecuta en un controlador: ssh ctl01)', '(nova-manage runs on a controller: ssh ctl01)'), fn: ctx => {
   const st = ctx.st, a = ctx.args;
   const d = U.sinRoot(ctx, ['An error has occurred:', 'Traceback (most recent call last):', '  File "/usr/lib/python3/dist-packages/nova/cmd/manage.py", line 3380, in main', "PermissionError: [Errno 13] Permission denied: '/etc/nova/nova.conf'"]); if (d) return d;
   if (a[0] !== 'cell_v2') return [L('usage: nova-manage [-h] {api_db,cell_v2,db,placement,version} ...', 'err')];
@@ -636,63 +636,63 @@ U.cmd('nova-manage', { ayuda: 'celdas de nova: cell_v2 discover_hosts / list_hos
 }, completar: (st, ses, pal) => !pal.length ? ['cell_v2'] : pal.length === 1 ? ['discover_hosts', 'list_hosts', 'list_cells'] : ['--verbose'] });
 
 // Open vSwitch en el hipervisor ------------------------------------------------
-U.cmd('ovs-vsctl', { ayuda: 'puentes de Open vSwitch (ovs-vsctl show)', grupo: 'OpenStack', donde: ['cmp'], provisionado: true, fn: ctx => {
+U.cmd('ovs-vsctl', { ayuda: T('puentes de Open vSwitch (ovs-vsctl show)', 'Open vSwitch bridges (ovs-vsctl show)'), grupo: 'OpenStack', donde: ['cmp'], provisionado: true, fn: ctx => {
   const st = ctx.st, h = ctx.h;
   const d = U.sinRoot(ctx, ['ovs-vsctl: unix:/var/run/openvswitch/db.sock: database connection failed (Permission denied)']); if (d) return d;
   if (h.svcs['openvswitch-switch'].estado !== 'active') return [L('ovs-vsctl: unix:/var/run/openvswitch/db.sock: database connection failed (No such file or directory)', 'err')];
-  if (ctx.args[0] !== 'show') return [L('(en el simulador: sudo ovs-vsctl show)', 'dim')];
+  if (ctx.args[0] !== 'show') return [L(T('(en el simulador: sudo ovs-vsctl show)', '(in the simulator: sudo ovs-vsctl show)'), 'dim')];
   const agente = h.svcs['neutron-openvswitch-agent'].estado === 'active';
   const out = [L(U.uuid('ovs' + h.nombre)), L('    Manager "ptcp:6640:127.0.0.1"'), L('        is_connected: ' + agente, agente ? 'out' : 'rojo'), L('    Bridge br-int'), L('        Controller "tcp:127.0.0.1:6633"'), L('            is_connected: ' + agente, agente ? 'out' : 'rojo'), L('        fail_mode: secure'), L('        Port patch-tun'), L('            Interface patch-tun'), L('                type: patch')];
   st.os.servidores.filter(s => s.host === h.nombre && s.estado === 'ACTIVE').forEach(s => { const t = 'tap' + s.id.slice(0, 11); out.push(L('        Port ' + t)); out.push(L('            Interface ' + t)); });
   return out.concat([L('    Bridge br-tun'), L('        Port patch-int'), L('            Interface patch-int'), L('                type: patch'), L('    ovs_version: "2.17.9"')]);
 } });
 // libvirt en el hipervisor -------------------------------------------------------
-U.cmd('virsh', { ayuda: 'VMs que corren en este hipervisor (virsh list --all)', grupo: 'OpenStack', donde: ['cmp'], provisionado: true, fn: ctx => {
+U.cmd('virsh', { ayuda: T('VMs que corren en este hipervisor (virsh list --all)', 'VMs running on this hypervisor (virsh list --all)'), grupo: 'OpenStack', donde: ['cmp'], provisionado: true, fn: ctx => {
   const st = ctx.st, h = ctx.h;
   if (!h.svcs.libvirtd || h.svcs.libvirtd.estado !== 'active') return [L('error: failed to connect to the hypervisor', 'err'), L("error: Failed to connect socket to '/var/run/libvirt/libvirt-sock': No such file or directory", 'err')];
-  if (ctx.args[0] !== 'list') return [L('(en el simulador: virsh list --all)', 'dim')];
+  if (ctx.args[0] !== 'list') return [L(T('(en el simulador: virsh list --all)', '(in the simulator: virsh list --all)'), 'dim')];
   const todas = ctx.args.indexOf('--all') >= 0, vms = st.os.servidores.filter(s => s.host === h.nombre && (s.estado === 'ACTIVE' || (todas && s.estado === 'SHUTOFF')));
   return [L(' Id   Name                State'), L('------------------------------------')].concat(vms.map((s, i) => L(' ' + (s.estado === 'ACTIVE' ? String(i + 1) : '-').padEnd(4) + ' ' + s.instancia.padEnd(19) + ' ' + (s.estado === 'ACTIVE' ? 'running' : 'shut off'), s.estado === 'ACTIVE' ? 'out' : 'ambar')));
 } });
-U.cmd('rabbitmqctl', { ayuda: 'estado del clúster de RabbitMQ (cluster_status)', grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
+U.cmd('rabbitmqctl', { ayuda: T('estado del clúster de RabbitMQ (cluster_status)', 'RabbitMQ cluster status (cluster_status)'), grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
   const d = U.sinRoot(ctx, ['Only root or rabbitmq should run rabbitmqctl']); if (d) return d;
   const st = ctx.st, h = ctx.h;
-  if (ctx.args[0] !== 'cluster_status') return [L('(en el simulador: rabbitmqctl cluster_status)', 'dim')];
+  if (ctx.args[0] !== 'cluster_status') return [L(T('(en el simulador: rabbitmqctl cluster_status)', '(in the simulator: rabbitmqctl cluster_status)'), 'dim')];
   if (h.svcs['rabbitmq-server'].estado !== 'active') return [L("Error: unable to perform an operation on node 'rabbit@" + h.nombre + "'. Please see diagnostics information and suggestions below.", 'err'), L(''), L('Most common reasons for this are:', 'err'), L(''), L(' * Target node is unreachable (e.g. due to hostname resolution, TCP connection or firewall issues)', 'err'), L(' * CLI tool fails to authenticate with the server (e.g. due to CLI tool\'s Erlang cookie not matching that of the server)', 'err'), L(' * Target node is not running', 'err')];
   const vivos = CTLS.filter(n => st.hosts[n].up && st.hosts[n].svcs['rabbitmq-server'].estado === 'active');
   return [L('Cluster status of node rabbit@' + h.nombre + ' ...'), L('Basics'), L(''), L('Cluster name: rabbit@ctl01.retail.local'), L(''), L('Disk Nodes'), L('')].concat(CTLS.map(n => L('rabbit@' + n)))
     .concat([L(''), L('Running Nodes'), L('')]).concat(vivos.map(n => L('rabbit@' + n, 'verde')))
-    .concat(vivos.length < 3 ? [L(''), L('(' + CTLS.filter(n => vivos.indexOf(n) < 0).map(n => 'rabbit@' + n).join(', ') + ' está en Disk Nodes pero no en Running Nodes)', 'dim')] : [])
+    .concat(vivos.length < 3 ? [L(''), L('(' + CTLS.filter(n => vivos.indexOf(n) < 0).map(n => 'rabbit@' + n).join(', ') + T(' está en Disk Nodes pero no en Running Nodes)', (CTLS.length - vivos.length > 1 ? ' are' : ' is') + ' in Disk Nodes but not in Running Nodes)'), 'dim')] : [])
     .concat([L(''), L('Versions'), L('')]).concat(vivos.map(n => L('rabbit@' + n + ': RabbitMQ 3.12.1 on Erlang 25.3.2.8'))).concat([L(''), L('Alarms'), L(''), L('(none)'), L(''), L('Network Partitions'), L(''), L('(none)')]);
 }, completar: () => ['cluster_status'] });
 // Galera ---------------------------------------------------------------------
-U.cmd('mysql', { ayuda: 'estado de Galera (sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")', grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
+U.cmd('mysql', { ayuda: T('estado de Galera (sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")', 'Galera status (sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")'), grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
   const st = ctx.st, h = ctx.h;
-  if (!ctx.sudo) return [L("ERROR 1698 (28000): Access denied for user 'admin'@'localhost'", 'err'), L('(MariaDB autentica a root por el socket local: sudo mysql)', 'dim')];
+  if (!ctx.sudo) return [L("ERROR 1698 (28000): Access denied for user 'admin'@'localhost'", 'err'), L(T('(MariaDB autentica a root por el socket local: sudo mysql)', '(MariaDB authenticates root through the local socket: sudo mysql)'), 'dim')];
   if (h.svcs.mariadb.estado !== 'active') return [L("ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)", 'err')];
   const q = ctx.args.join(' '), m = /LIKE\s+'([^']+)'/i.exec(q);
-  if (!/SHOW\s+STATUS/i.test(q) || !m) return [L('(en el simulador: sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")', 'dim')];
+  if (!/SHOW\s+STATUS/i.test(q) || !m) return [L(T('(en el simulador: sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")', '(in the simulator: sudo mysql -e "SHOW STATUS LIKE \'wsrep_%\'")'), 'dim')];
   const t = P.galeraTamano(st, h), miembros = h.extra.splitBrain ? [h.nombre] : P.galeraVivos(st);
   const vars = [['wsrep_cluster_size', t], ['wsrep_cluster_status', 'Primary'], ['wsrep_connected', 'ON'], ['wsrep_incoming_addresses', miembros.map(n => st.hosts[n].ip + ':3306').join(',')], ['wsrep_local_state_comment', 'Synced'], ['wsrep_ready', 'ON']];
   const re = new RegExp('^' + m[1].replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*').replace(/_/g, '.') + '$', 'i');
   return U.tabla(['Variable_name', 'Value'], vars.filter(v => re.test(v[0]))).map(l => L(l, /cluster_size\s+\| [12] /.test(l) ? 'rojo' : 'out'));
 } });
-U.cmd('galera_new_cluster', { ayuda: 'arranca un clúster Galera NUEVO (sólo si todo el clúster está parado)', grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
+U.cmd('galera_new_cluster', { ayuda: T('arranca un clúster Galera NUEVO (sólo si todo el clúster está parado)', 'bootstraps a NEW Galera cluster (only if the whole cluster is stopped)'), grupo: 'OpenStack', donde: ['ctl'], fn: ctx => {
   const st = ctx.st, h = ctx.h;
   const d = U.sinRoot(ctx, ['Failed to start mariadb.service: Access denied']); if (d) return d;
-  if (h.svcs.mariadb.estado === 'active') return [L('(mariadb ya está en marcha en ' + h.nombre + ')', 'dim')];
+  if (h.svcs.mariadb.estado === 'active') return [L(T('(mariadb ya está en marcha en ' + h.nombre + ')', '(mariadb is already running on ' + h.nombre + ')'), 'dim')];
   const otros = P.galeraVivos(st).filter(n => n !== h.nombre);
   if (P.arrancar(st, h, 'mariadb')) return [L('Job for mariadb.service failed because the control process exited with error code.', 'err')];
   U.logSvc(h, 'mariadb', st.reloj, 'mariadbd[' + U.pid(h.nombre + 'nc') + ']', '[Note] WSREP: Starting new cluster (bootstrap): wsrep_cluster_address=gcomm://');
   if (otros.length) { h.extra.splitBrain = true; st.hechos.splitBrain = true; U.logSvc(h, 'mariadb', st.reloj, 'mariadbd[' + U.pid(h.nombre + 'nc') + ']', '[Warning] WSREP: this node formed a new Primary Component of 1 member while ' + otros.join(', ') + ' are still running'); }
   return [];
 } });
-U.cmd('nova', { ayuda: 'cliente antiguo de nova (host-evacuate-live)', grupo: 'OpenStack', donde: ['bastion'], fuera: '(el cliente de OpenStack está en el bastión)', fn: ctx => {
+U.cmd('nova', { ayuda: T('cliente antiguo de nova (host-evacuate-live)', 'legacy nova client (host-evacuate-live)'), grupo: 'OpenStack', donde: ['bastion'], fuera: T('(el cliente de OpenStack está en el bastión)', '(the OpenStack client is on the bastion)'), fn: ctx => {
   const st = ctx.st;
   if (!ctx.ses.env.OS_AUTH_URL) return [L('ERROR (CommandError): You must provide a user name/id (via --os-username, --os-user-id, env[OS_USERNAME] or env[OS_USER_ID]) or an auth token (via --os-token).', 'err')];
   if (P.certCaducado(st)) return errorSSL;
   const aviso = L('nova CLI is deprecated and will be removed in a future release', 'ambar');
-  if (ctx.args[0] !== 'host-evacuate-live') return [aviso, L('(en el simulador: nova host-evacuate-live <hipervisor>)', 'dim')];
+  if (ctx.args[0] !== 'host-evacuate-live') return [aviso, L(T('(en el simulador: nova host-evacuate-live <hipervisor>)', '(in the simulator: nova host-evacuate-live <hypervisor>)'), 'dim')];
   const host = ctx.args.filter(x => x[0] !== '-').pop();
   if (!st.os.nodos[host]) return [aviso, L('ERROR (NotFound): No hypervisor matching \'' + (host || '') + '\' could be found.', 'err')];
   const vms = st.os.servidores.filter(s => s.host === host && s.estado === 'ACTIVE');
@@ -700,11 +700,11 @@ U.cmd('nova', { ayuda: 'cliente antiguo de nova (host-evacuate-live)', grupo: 'O
   return [aviso].concat(U.tabla(['Server UUID', 'Live Migration Accepted', 'Error Message'], filas).map(t => L(t, /False/.test(t) ? 'rojo' : 'out')));
 } });
 // TLS de la API --------------------------------------------------------------
-U.cmd('openssl', { ayuda: 'certificados: x509 -in F -noout -dates / s_client -connect H:P', grupo: 'Red', fn: ctx => {
+U.cmd('openssl', { ayuda: T('certificados: x509 -in F -noout -dates / s_client -connect H:P', 'certificates: x509 -in F -noout -dates / s_client -connect H:P'), grupo: 'Red', fn: ctx => {
   const st = ctx.st, a = ctx.args;
   if (a[0] === 'x509') {
     const f = a[a.indexOf('-in') + 1];
-    if (a.indexOf('-in') < 0 || !f) return [L('(en el simulador: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)', 'dim')];
+    if (a.indexOf('-in') < 0 || !f) return [L(T('(en el simulador: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)', '(in the simulator: openssl x509 -in /etc/haproxy/certs/api.pem -noout -dates)'), 'dim')];
     const fs = P.vfs(st, ctx.h), p = U.ruta(ctx.ses.cwd, f, ctx.ses);
     if (!fs.f[p]) return [L("Could not open file or uri for loading certificate from " + f, 'err'), L('No such file or directory', 'err')];
     if (!ctx.h.extra.cert || p !== '/etc/haproxy/certs/api.pem') return [L('Could not read certificate from ' + f, 'err')];
@@ -713,19 +713,19 @@ U.cmd('openssl', { ayuda: 'certificados: x509 -in F -noout -dates / s_client -co
     if (a.indexOf('-subject') >= 0 || a.indexOf('-text') >= 0) out.push(L('subject=CN = api.retail.local'));
     if (a.indexOf('-dates') >= 0 || a.indexOf('-startdate') >= 0 || a.indexOf('-text') >= 0) out.push(L('notBefore=' + opensslFecha(v - 525600)));
     if (a.indexOf('-dates') >= 0 || a.indexOf('-enddate') >= 0 || a.indexOf('-text') >= 0) out.push(L('notAfter=' + opensslFecha(v), cad ? 'rojo' : 'verde'));
-    return out.length ? out : [L('(añade -dates para ver la validez)', 'dim')];
+    return out.length ? out : [L(T('(añade -dates para ver la validez)', '(add -dates to see the validity period)'), 'dim')];
   }
   if (a[0] === 's_client') {
     const dest = a[a.indexOf('-connect') + 1] || '';
-    if (!/^(api\.retail\.local|vip-api|10\.10\.1\.10):(5000|8774|9696|8776|9292)$/.test(dest)) return [L('(en el simulador: openssl s_client -connect api.retail.local:5000)', 'dim')];
+    if (!/^(api\.retail\.local|vip-api|10\.10\.1\.10):(5000|8774|9696|8776|9292)$/.test(dest)) return [L(T('(en el simulador: openssl s_client -connect api.retail.local:5000)', '(in the simulator: openssl s_client -connect api.retail.local:5000)'), 'dim')];
     const c = st.hosts.ctl01.extra.cert.cargado, cad = c <= st.reloj;
     return [L('CONNECTED(00000003)'), L('depth=1 CN = Retail Internal CA'), L('verify return:1'), L('depth=0 CN = api.retail.local'), cad ? L('verify error:num=10:certificate has expired', 'rojo') : L('verify return:1'), L('notAfter=' + opensslFecha(c), cad ? 'rojo' : 'out'), L('---'), L('Certificate chain'), L(' 0 s:CN = api.retail.local'), L('   i:CN = Retail Internal CA'), L('---'), L('SSL handshake has read 3412 bytes and written 392 bytes'), L('Verify return code: ' + (cad ? '10 (certificate has expired)' : '0 (ok)'), cad ? 'rojo' : 'verde'), L('---'), L('DONE')];
   }
-  return [L('(en el simulador: openssl x509 … o openssl s_client …)', 'dim')];
+  return [L(T('(en el simulador: openssl x509 … o openssl s_client …)', '(in the simulator: openssl x509 … or openssl s_client …)'), 'dim')];
 } });
-U.cmd('curl', { ayuda: 'pregunta a un servicio HTTP (curl -I https://api.retail.local:5000)', grupo: 'Red', fn: ctx => {
+U.cmd('curl', { ayuda: T('pregunta a un servicio HTTP (curl -I https://api.retail.local:5000)', 'queries an HTTP service (curl -I https://api.retail.local:5000)'), grupo: 'Red', fn: ctx => {
   const url = ctx.args.filter(x => x[0] !== '-').pop() || '';
-  if (!/^https?:\/\/(api\.retail\.local|vip-api|10\.10\.1\.10)(:\d+)?/.test(url)) return [L('(el simulador sólo sabe hacer curl a la API: curl -I https://api.retail.local:5000)', 'dim')];
+  if (!/^https?:\/\/(api\.retail\.local|vip-api|10\.10\.1\.10)(:\d+)?/.test(url)) return [L(T('(el simulador sólo sabe hacer curl a la API: curl -I https://api.retail.local:5000)', '(the simulator can only curl the API: curl -I https://api.retail.local:5000)'), 'dim')];
   if (P.certCaducado(ctx.st) && ctx.args.indexOf('-k') < 0 && ctx.args.indexOf('--insecure') < 0) return [L('curl: (60) SSL certificate problem: certificate has expired', 'err'), L('More details here: https://curl.se/docs/sslcerts.html', 'err')];
   return [L('HTTP/1.1 300 Multiple Choices'), L('content-type: application/json'), L('vary: X-Auth-Token'), L('x-openstack-request-id: req-' + U.uuid('curl' + ctx.st.reloj))];
 } });

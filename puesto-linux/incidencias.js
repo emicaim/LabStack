@@ -15,7 +15,7 @@
 // genera a partir de las averías.
 (function (P) {
 'use strict';
-const U = P.u, L = U.L;
+const U = P.u, L = U.L, T = P.T;
 P.FORMATO_INCIDENCIA = 'puesto-incidencia/1';
 const MAX_AVERIAS = 12;
 
@@ -36,13 +36,13 @@ function areaDe(lista) {
   if (lista.some(esCeph)) a.push('Ceph');
   if (lista.some(x => /^(ctl|cmp)/.test(x.nodo || '') || ['volumen-atascado', 'vm-borrada', 'certificado-caducado', 'fuga-memoria', 'regla-a-mano'].indexOf(x.tipo) >= 0)) a.push('OpenStack');
   if (lista.some(x => ['disco-lleno', 'reloj-desfasado'].indexOf(x.tipo) >= 0)) a.push('Linux');
-  return a.join(' · ') || 'Plataforma';
+  return a.join(' · ') || T('Plataforma', 'Platform');
 }
 // Dónde hay que mirar, sin decir qué: la segunda pista.
 function sitios(lista) {
   const s = [];
   rompen(lista).forEach(a => {
-    const t = a.nodo ? a.nodo : a.tipo === 'disco-muerto' ? 'el clúster Ceph (y el nodo del osd.' + a.osd + ')' : CEPH.indexOf(a.tipo) >= 0 ? 'el clúster Ceph' : a.tipo === 'certificado-caducado' ? 'la API (los controladores)' : a.tipo === 'fuga-memoria' ? 'los controladores' : a.tipo === 'regla-a-mano' ? 'los grupos de seguridad y Terraform' : 'OpenStack';
+    const t = a.nodo ? a.nodo : a.tipo === 'disco-muerto' ? T('el clúster Ceph (y el nodo del osd.' + a.osd + ')', 'the Ceph cluster (and the node of osd.' + a.osd + ')') : CEPH.indexOf(a.tipo) >= 0 ? T('el clúster Ceph', 'the Ceph cluster') : a.tipo === 'certificado-caducado' ? T('la API (los controladores)', 'the API (the controllers)') : a.tipo === 'fuga-memoria' ? T('los controladores', 'the controllers') : a.tipo === 'regla-a-mano' ? T('los grupos de seguridad y Terraform', 'the security groups and Terraform') : 'OpenStack';
     if (s.indexOf(t) < 0) s.push(t);
   });
   return s;
@@ -52,9 +52,9 @@ const PRACTICAS = () => {
   const MIRAR = /amtool|ceph (-s|status|health|osd (tree|df))|systemctl status|journalctl|\bdf\b|\bdu\b|openstack .*(list|show)|\bfree\b|\btop\b|ps aux|dmesg|timedatectl|chronyc tracking/;
   const TOCAR = /systemctl (start|restart|enable|reset-failed)|truncate|\brm\b|ansible-playbook|terraform apply|ceph osd (out|in|unset|set)|ceph balancer on|ceph config (set|rm)|volume (set|delete)|server create|chronyc makestep/;
   return [
-    { t: 'Miraste antes de tocar: alertas, estado o logs antes del primer cambio', ok: st => antes(st, MIRAR, TOCAR) },
-    { t: 'Comprobaste que estaba arreglado después del último cambio', ok: st => despues(st, MIRAR, TOCAR) },
-    { t: 'No reiniciaste nodos enteros para arreglarlo', ok: st => !st.hechos.reinicios.length },
+    { t: T('Miraste antes de tocar: alertas, estado o logs antes del primer cambio', 'You looked before touching: alerts, status or logs before the first change'), ok: st => antes(st, MIRAR, TOCAR) },
+    { t: T('Comprobaste que estaba arreglado después del último cambio', 'You verified it was fixed after the last change'), ok: st => despues(st, MIRAR, TOCAR) },
+    { t: T('No reiniciaste nodos enteros para arreglarlo', 'You did not reboot whole nodes to fix it'), ok: st => !st.hechos.reinicios.length },
   ];
 };
 
@@ -66,12 +66,12 @@ function construir(d) {
     id: d.id || ('EXT-' + U.hex(d.asunto + JSON.stringify(lista), 4).toUpperCase()),
     clave: 'importada', importada: true, autor: d.autor || '', fuente: d,
     tipo: d.tipo || 'incidente', nivel: d.nivel || 2, area: d.area || areaDe(lista), funciones: d.funciones || funcionesDe(lista),
-    impacto: d.impacto, urgencia: d.urgencia, de: d.de || 'Incidencia importada', asunto: d.asunto, cuerpo: d.cuerpo,
+    impacto: d.impacto, urgencia: d.urgencia, de: d.de || T('Incidencia importada', 'Imported incident'), asunto: d.asunto, cuerpo: d.cuerpo,
     inicio: -hace, abierto: -(d.abiertoHace != null ? d.abiertoHace : Math.min(hace, 10)),
     averias: lista, trampas: [], practicas: PRACTICAS(),
-    causa: d.causa || 'Varias cosas a la vez: ' + rompen(lista).map(a => P.averias[a.tipo].titulo.toLowerCase() + (a.nodo ? ' (' + (a.servicio ? a.servicio + ' en ' : '') + a.nodo + ')' : a.osd != null ? ' (osd.' + a.osd + ')' : '')).join('; ') + '.',
-    solucion: d.solucion || 'Arreglar cada avería de abajo arriba: primero lo que otros necesitan (servicios base, discos, flags), luego lo que depende de ello y al final los recursos. Y comprobar al terminar.',
-    leccion: d.leccion || 'Cuando fallan varias cosas a la vez, el orden importa: lo que otros necesitan va primero. Y una alerta que desaparece no es un arreglo comprobado: se mira el estado al terminar.',
+    causa: d.causa || T('Varias cosas a la vez: ', 'Several things at once: ') + rompen(lista).map(a => P.averias[a.tipo].titulo.toLowerCase() + (a.nodo ? ' (' + (a.servicio ? a.servicio + T(' en ', ' on ') : '') + a.nodo + ')' : a.osd != null ? ' (osd.' + a.osd + ')' : '')).join('; ') + '.',
+    solucion: d.solucion || T('Arreglar cada avería de abajo arriba: primero lo que otros necesitan (servicios base, discos, flags), luego lo que depende de ello y al final los recursos. Y comprobar al terminar.', 'Fix each fault from the bottom up: first what others need (base services, disks, flags), then what depends on it, and resources last. And verify when you finish.'),
+    leccion: d.leccion || T('Cuando fallan varias cosas a la vez, el orden importa: lo que otros necesitan va primero. Y una alerta que desaparece no es un arreglo comprobado: se mira el estado al terminar.', 'When several things fail at once, order matters: what others need comes first. And an alert that goes away is not a verified fix: check the state when you finish.'),
   };
   // La solución de referencia: mirar, arreglar cada avería en orden, comprobar.
   e.guion = st => ['amtool alert'].concat(P.arregloAverias(st, e.averias), ['amtool alert']);
@@ -80,9 +80,9 @@ function construir(d) {
   else {
     const st = P.preparar(e), sol = P.arregloAverias(st, lista).filter(c => !/^(exit|cd|sleep)\b/.test(c));
     e.pistas = [
-      'Empieza por lo que ven las alertas: amtool alert. Si Ceph está implicado, ceph -s y ceph health detail.',
-      'Hay que mirar en: ' + sitios(lista).join(', ') + '. Antes de arreglar, averigua qué necesita cada cosa para funcionar: lo que otros necesitan va primero.',
-      'Una solución, en orden: ' + sol.join(' · '),
+      T('Empieza por lo que ven las alertas: amtool alert. Si Ceph está implicado, ceph -s y ceph health detail.', 'Start with what the alerts see: amtool alert. If Ceph is involved, ceph -s and ceph health detail.'),
+      T('Hay que mirar en: ' + sitios(lista).join(', ') + '. Antes de arreglar, averigua qué necesita cada cosa para funcionar: lo que otros necesitan va primero.', 'Places to look: ' + sitios(lista).join(', ') + '. Before fixing, find out what each thing needs in order to work: what others need comes first.'),
+      T('Una solución, en orden: ', 'One solution, in order: ') + sol.join(' · '),
     ];
   }
   return e;
@@ -93,39 +93,39 @@ P.cargarIncidencia = function (entrada) {
   const errores = [], avisos = [];
   let d = entrada;
   if (typeof entrada === 'string') {
-    if (entrada.length > 200000) return { ok: false, errores: ['El fichero es demasiado grande para ser una incidencia'], avisos };
-    try { d = JSON.parse(entrada); } catch (e) { return { ok: false, errores: ['No es un JSON válido: ' + e.message], avisos }; }
+    if (entrada.length > 200000) return { ok: false, errores: [T('El fichero es demasiado grande para ser una incidencia', 'The file is too large to be an incident')], avisos };
+    try { d = JSON.parse(entrada); } catch (e) { return { ok: false, errores: [T('No es un JSON válido: ', 'Not valid JSON: ') + e.message], avisos }; }
   }
-  if (!d || typeof d !== 'object' || Array.isArray(d)) return { ok: false, errores: ['El fichero tiene que contener un objeto { … }'], avisos };
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return { ok: false, errores: [T('El fichero tiene que contener un objeto { … }', 'The file must contain an object { … }')], avisos };
 
   // 1. estructura
-  if (d.formato !== P.FORMATO_INCIDENCIA) errores.push('formato: tiene que ser "' + P.FORMATO_INCIDENCIA + '"' + (d.formato ? ' (pone "' + d.formato + '")' : ''));
+  if (d.formato !== P.FORMATO_INCIDENCIA) errores.push(T('formato: tiene que ser "', 'formato: must be "') + P.FORMATO_INCIDENCIA + '"' + (d.formato ? T(' (pone "', ' (found "') + d.formato + '")' : ''));
   const texto = (k, max, obligatorio) => {
     const v = d[k];
-    if (v == null) { if (obligatorio) errores.push(k + ': falta'); return; }
-    if (typeof v !== 'string' || !v.trim()) errores.push(k + ': tiene que ser un texto');
-    else if (v.length > max) errores.push(k + ': demasiado largo (' + v.length + ' caracteres, máximo ' + max + ')');
+    if (v == null) { if (obligatorio) errores.push(k + T(': falta', ': missing')); return; }
+    if (typeof v !== 'string' || !v.trim()) errores.push(k + T(': tiene que ser un texto', ': must be a text'));
+    else if (v.length > max) errores.push(k + T(': demasiado largo (' + v.length + ' caracteres, máximo ' + max + ')', ': too long (' + v.length + ' characters, maximum ' + max + ')'));
   };
   texto('asunto', 160, true); texto('de', 120); texto('area', 60); texto('autor', 80);
   texto('causa', 1500); texto('solucion', 1500); texto('leccion', 1500);
   if (d.id != null) {
-    if (typeof d.id !== 'string' || !/^[A-Z]{2,5}-[0-9A-Z]{2,8}$/.test(d.id)) errores.push('id: con la forma EXT-001 (mayúsculas, guion y números)');
-    else if (P.escenarios.some(e => e.id === d.id)) errores.push('id: ' + d.id + ' ya es un ticket del puesto; usa otro');
+    if (typeof d.id !== 'string' || !/^[A-Z]{2,5}-[0-9A-Z]{2,8}$/.test(d.id)) errores.push(T('id: con la forma EXT-001 (mayúsculas, guion y números)', 'id: in the form EXT-001 (capital letters, hyphen and digits)'));
+    else if (P.escenarios.some(e => e.id === d.id)) errores.push(T('id: ' + d.id + ' ya es un ticket del puesto; usa otro', 'id: ' + d.id + ' is already a built-in ticket; use another one'));
   }
-  if (!Array.isArray(d.cuerpo) || !d.cuerpo.length || d.cuerpo.length > 6 || d.cuerpo.some(x => typeof x !== 'string' || !x.trim() || x.length > 1000)) errores.push('cuerpo: entre 1 y 6 párrafos de texto (máximo 1000 caracteres cada uno)');
-  if (['alto', 'medio', 'bajo'].indexOf(d.impacto) < 0) errores.push('impacto: alto, medio o bajo');
-  if (['alta', 'media', 'baja'].indexOf(d.urgencia) < 0) errores.push('urgencia: alta, media o baja');
-  if (d.tipo != null && ['incidente', 'peticion', 'cambio'].indexOf(d.tipo) < 0) errores.push('tipo: incidente, peticion o cambio');
-  if (d.nivel != null && [1, 2, 3].indexOf(d.nivel) < 0) errores.push('nivel: 1, 2 o 3');
-  ['hace', 'abiertoHace'].forEach(k => { if (d[k] != null && !(Number.isInteger(d[k]) && d[k] >= 0 && d[k] <= 10080)) errores.push(k + ': minutos enteros entre 0 y 10080 (una semana)'); });
-  if (d.hace != null && d.abiertoHace != null && d.abiertoHace > d.hace) errores.push('abiertoHace: el ticket no puede abrirse antes de que empiece la avería');
-  if (d.pistas != null && (!Array.isArray(d.pistas) || d.pistas.length !== 3 || d.pistas.some(x => typeof x !== 'string' || !x.trim() || x.length > 400))) errores.push('pistas: exactamente 3 textos (máximo 400 caracteres cada uno), o ninguna para que se generen');
-  if (d.funciones != null && (!Array.isArray(d.funciones) || d.funciones.some(f => !P.funciones.some(x => x.id === f)))) errores.push('funciones: una lista con ' + P.funciones.map(f => f.id).join(', '));
+  if (!Array.isArray(d.cuerpo) || !d.cuerpo.length || d.cuerpo.length > 6 || d.cuerpo.some(x => typeof x !== 'string' || !x.trim() || x.length > 1000)) errores.push(T('cuerpo: entre 1 y 6 párrafos de texto (máximo 1000 caracteres cada uno)', 'cuerpo: between 1 and 6 paragraphs of text (maximum 1000 characters each)'));
+  if (['alto', 'medio', 'bajo'].indexOf(d.impacto) < 0) errores.push(T('impacto: alto, medio o bajo', 'impacto: alto, medio or bajo'));
+  if (['alta', 'media', 'baja'].indexOf(d.urgencia) < 0) errores.push(T('urgencia: alta, media o baja', 'urgencia: alta, media or baja'));
+  if (d.tipo != null && ['incidente', 'peticion', 'cambio'].indexOf(d.tipo) < 0) errores.push(T('tipo: incidente, peticion o cambio', 'tipo: incidente, peticion or cambio'));
+  if (d.nivel != null && [1, 2, 3].indexOf(d.nivel) < 0) errores.push(T('nivel: 1, 2 o 3', 'nivel: 1, 2 or 3'));
+  ['hace', 'abiertoHace'].forEach(k => { if (d[k] != null && !(Number.isInteger(d[k]) && d[k] >= 0 && d[k] <= 10080)) errores.push(k + T(': minutos enteros entre 0 y 10080 (una semana)', ': whole minutes between 0 and 10080 (one week)')); });
+  if (d.hace != null && d.abiertoHace != null && d.abiertoHace > d.hace) errores.push(T('abiertoHace: el ticket no puede abrirse antes de que empiece la avería', 'abiertoHace: the ticket cannot be opened before the fault starts'));
+  if (d.pistas != null && (!Array.isArray(d.pistas) || d.pistas.length !== 3 || d.pistas.some(x => typeof x !== 'string' || !x.trim() || x.length > 400))) errores.push(T('pistas: exactamente 3 textos (máximo 400 caracteres cada uno), o ninguna para que se generen', 'pistas: exactly 3 texts (maximum 400 characters each), or none to have them generated'));
+  if (d.funciones != null && (!Array.isArray(d.funciones) || d.funciones.some(f => !P.funciones.some(x => x.id === f)))) errores.push(T('funciones: una lista con ', 'funciones: a list of ') + P.funciones.map(f => f.id).join(', '));
   const conocidos = ['formato', 'id', 'tipo', 'asunto', 'de', 'cuerpo', 'impacto', 'urgencia', 'nivel', 'area', 'funciones', 'hace', 'abiertoHace', 'averias', 'pistas', 'causa', 'solucion', 'leccion', 'autor'];
-  Object.keys(d).filter(k => conocidos.indexOf(k) < 0).forEach(k => avisos.push('campo desconocido «' + k + '»: se ignora'));
-  if (!Array.isArray(d.averias) || !d.averias.length) errores.push('averias: hace falta una lista con al menos una avería');
-  else if (d.averias.length > MAX_AVERIAS) errores.push('averias: como mucho ' + MAX_AVERIAS);
-  else if (d.averias.some(a => !a || typeof a !== 'object' || Array.isArray(a) || typeof a.tipo !== 'string')) errores.push('averias: cada una tiene que ser un objeto con su "tipo"');
+  Object.keys(d).filter(k => conocidos.indexOf(k) < 0).forEach(k => avisos.push(T('campo desconocido «' + k + '»: se ignora', "unknown field '" + k + "': ignored")));
+  if (!Array.isArray(d.averias) || !d.averias.length) errores.push(T('averias: hace falta una lista con al menos una avería', 'averias: a list with at least one fault is required'));
+  else if (d.averias.length > MAX_AVERIAS) errores.push(T('averias: como mucho ', 'averias: at most ') + MAX_AVERIAS);
+  else if (d.averias.some(a => !a || typeof a !== 'object' || Array.isArray(a) || typeof a.tipo !== 'string')) errores.push(T('averias: cada una tiene que ser un objeto con su "tipo"', 'averias: each one must be an object with its "tipo"'));
   if (errores.length) return { ok: false, errores, avisos };
 
   // 2. el catálogo
@@ -134,16 +134,16 @@ P.cargarIncidencia = function (entrada) {
 
   // 3. ensayo
   let e;
-  try { e = construir(d); } catch (x) { return { ok: false, errores: ['No se ha podido montar: ' + x.message], avisos }; }
+  try { e = construir(d); } catch (x) { return { ok: false, errores: [T('No se ha podido montar: ', 'Could not be built: ') + x.message], avisos }; }
   const st = P.preparar(e), antes = e.resuelto(st, P), alertas = P.alertasActivas(st).length;
-  if (!antes.length) errores.push('No rompe nada: al aplicarla, la plataforma sigue sana (¿sólo tiene condiciones?)');
-  if (e.tipo === 'incidente' && !alertas) avisos.push('No dispara ninguna alerta: se puede jugar con el ticket delante, pero en guardia nadie la encontraría');
-  if (-e.abierto >= P.prioridad(e).sla / 2) errores.push('abiertoHace: con prioridad ' + P.prioridad(e).p + ' el ticket nacería con más de medio SLA gastado');
+  if (!antes.length) errores.push(T('No rompe nada: al aplicarla, la plataforma sigue sana (¿sólo tiene condiciones?)', 'It breaks nothing: once applied, the platform is still healthy (does it only have conditions?)'));
+  if (e.tipo === 'incidente' && !alertas) avisos.push(T('No dispara ninguna alerta: se puede jugar con el ticket delante, pero en guardia nadie la encontraría', 'It fires no alerts: it can be played with the ticket in front of you, but on call nobody would find it'));
+  if (-e.abierto >= P.prioridad(e).sla / 2) errores.push(T('abiertoHace: con prioridad ' + P.prioridad(e).p + ' el ticket nacería con más de medio SLA gastado', 'abiertoHace: with priority ' + P.prioridad(e).p + ' the ticket would open with more than half its SLA already spent'));
   const ses = P.nuevaSesion(), guion = P.guionDe(e, st), raros = [];
   guion.forEach(c => { const r = P.ejecutar(st, ses, c); if (r.lineas.some(l => /: command not found/.test(l.t))) raros.push(c); P.expulsar(st, ses); });
-  if (raros.length) errores.push('Su solución usa comandos que no existen: ' + raros.join(', '));
+  if (raros.length) errores.push(T('Su solución usa comandos que no existen: ', 'Its solution uses commands that do not exist: ') + raros.join(', '));
   const quedan = e.resuelto(st, P);
-  if (quedan.length && antes.length) errores.push('Su solución de referencia no la resuelve, así que nadie podría cerrarla: ' + quedan.join(' · '));
+  if (quedan.length && antes.length) errores.push(T('Su solución de referencia no la resuelve, así que nadie podría cerrarla: ', 'Its reference solution does not resolve it, so nobody could close it: ') + quedan.join(' · '));
   const ensayo = { averias: rompen(d.averias).length, condiciones: d.averias.length - rompen(d.averias).length, alertas, pendientes: antes.length, comandos: guion.length, minutos: st.reloj };
   return { ok: !errores.length, errores, avisos, escenario: errores.length ? null : e, ensayo };
 };

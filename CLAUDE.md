@@ -321,13 +321,13 @@ The test holds the catalogue to three promises: every fault type, alone, breaks 
 - Every `incidente` needs at least one alert, or Guardia mode (alerts only, no ticket) cannot be played. That rule caught the security ticket, which is why `PublicSSHExposed` (an external blackbox probe) exists.
 - Exactly three `pistas`, progressive, naming only commands the simulator knows.
 
-**Language.** The UI is Spanish only (the posting is Spanish); command output is English, as the real tools print it. Unlike LabStack there is no `{es, en}` layer yet; adding one means wrapping every string in `escenarios.js` and `app.js`.
+**Language.** Spanish and English. `P.idioma` is decided **once per page load** at the top of `motor.js` (`?lang=` in the URL, then `localStorage['puesto-idioma']`, then the browser), and the EN/ES header button calls `P.cambiarIdioma()`, which **reloads**. That is what makes `T(es, en)` (= `P.T`) safe everywhere, including data built at load time: every user-visible string is `T('…', '…')` with the Spanish byte-for-byte as it was. Static HTML text carries its English in `data-en` / `data-en-title`. Never translate what code compares (ids, fault types, `impacto: 'alto'`, fase values, handler names…): displayed enums go through a map at render time. Command output imitates real tools and stays English in both; what the *team* wrote (alert summaries, playbook task names, RUNBOOK, hints) is translated. LabStack's home opens the desk with `?lang=` matching its own language. `ingles-test.js` loads everything in English, walks every string a player can see (data, alerts, pendientes, validator messages, `help`, every file on five nodes, the output of all 20 reference scripts) and fails on anything that looks Spanish; it also resolves the 20 tickets in English. Add a string without its English and it fails.
 
 **Screenshot gotcha.** Headless Chrome on Windows will not lay out narrower than ~490 px whatever `--window-size` says, and then crops the capture. It looks like horizontal overflow and is not. To see a phone width, render the page inside a 375 px `<iframe>`.
 
 ## Tests
 
-`npm test` (or `node test.js`) runs all six suites and prints one line each:
+`npm test` (or `node test.js`) runs all seven suites and prints one line each:
 
 | Suite | Covers |
 |---|---|
@@ -336,6 +336,7 @@ The test holds the catalogue to three promises: every fault type, alone, breaks 
 | `kids-test.js` | both Kids games end to end |
 | `desk-test.js` | 12 tickets, command hints, wrong-host nudge, coherence after resolving |
 | `events-test.js` | correlation, triage, the event to incident bridge |
+| `puesto-linux/ingles-test.js` | the Puesto in English: no Spanish left in anything a player sees, and the 20 tickets resolved the same way |
 | `puesto-linux/puesto-test.js` | the 20 Puesto Linux tickets solved by their reference script, the fault catalogue (each fault alone, chained fixes, an invented combination, the validator), incidents from files (examples, export/re-import round trip, rejections), generated guardias (30 seeds × 3 levels) and chaos, the composer (one control per schema field for all 20 types, every exportable ticket and a level-3 guardia loading and saving as playable, a missing parameter named as such), the answer book aligned with each script, their practices, half-fixes that must not close them, `noout`, `sudo`, openrc, Terraform's folder, Ansible idempotency and `--check`, Tab |
 
 Nothing to install; `package.json` exists only to hold the scripts.
