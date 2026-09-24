@@ -164,6 +164,20 @@ Marcado con ⭐ lo que más recomiendo.
 - ✅ Comprobado tumbando todo el DNS: arranca, se ve igual y no queda ni un error de red.
 - Pendiente si se quiere: **PWA instalable** (service worker + manifest) para que desde GitHub Pages quede offline tras la primera visita.
 
+### ✅ Hecho — Puesto Linux: réplica de un puesto real (`puesto-linux/`)
+- ✅ App aparte, enlazada desde la portada: **12 nodos simulados** (OpenStack + Ceph + bastión + monitorización) con estado que cambia con el tiempo.
+- ✅ **20 tickets** ligados a las cuatro funciones de la oferta: OSD caído, cuota, proyecto con usuario y rol, "No valid host", disco lleno por RabbitMQ en debug, reloj desincronizado, OSD casi lleno, certificado de la API caducado, nodo de Galera caído (y el split-brain como trampa), parche de kernel con `noout`, disco muerto con un `noout` olvidado, puerto 22 abierto fuera de Terraform, alta de un hipervisor, vaciado de un hipervisor con migración en vivo, monitores de Ceph sin quórum (con un fallo latente de tres días), VMs sin red por Open vSwitch caído, restauración de una VM borrada desde la copia nocturna, volumen de Cinder atascado en «deleting», fuga de memoria de nova-api (instalado no es corriendo) y monitor de Ceph con el disco lleno por un nivel de debug olvidado en la configuración central.
+- ✅ Se resuelven **con comandos**; se comprueba el estado, no el camino. Las **buenas prácticas** se deducen del registro de comandos.
+- ✅ ITSM: prioridad por impacto × urgencia, **SLA desde la apertura del ticket**, estados, registro de trabajo e **informe .md** con la cronología.
+- ✅ Modos **Guardia** (sólo alertas) y **Laboratorio libre**.
+- ✅ **Catálogo de averías** (fase 1 del generador): 14 tipos que rompen + 6 condiciones; los 20 tickets reescritos sobre él, sin código propio. Las averías se propagan (sin libvirt cae nova-compute) y el test comprueba que cada una se arregla sola, que encadenar arreglos resuelve cada ticket y que una combinación inventada también se resuelve.
+- ✅ **Incidencias en fichero** (fase 2): formato `puesto-incidencia/1`, importar desde la cola (botón o arrastrar), validador que ensaya la solución antes de aceptar, exportar cualquier ticket como plantilla, catálogo legible en la propia cola y validador por línea de comandos (`npm run validar`).
+- ✅ **Guardia generada y caos** (fase 3): 15 familias de averías coherentes, tres niveles, semilla reproducible, ensayo antes de jugar, descarga como incidencia; caos programado en el laboratorio libre con comprobación y revelado.
+- ✅ **Compositor** (fase 4): `compositor.html`, un formulario sobre el catálogo (cada campo sale del esquema `P.camposAveria`), con ensayo en vivo (alertas, lo que hay que dejar arreglado, pistas, solución de referencia, prioridad y SLA). Parte de cero, de un ticket, de una importada, de una guardia generada o de un fichero; guarda en la cola, abre el ticket en el puesto o descarga el `.json`.
+- ✅ **Solucionario** con la salida real de cada paso (generada por el simulador) y glosario de 59 términos.
+- ✅ `puesto-test.js`: cada guion de referencia resuelve su ticket y cumple sus prácticas; cada arreglo a medias lo deja abierto; determinismo y mecánica.
+- Pendiente si se quiere: versión en inglés; más tickets (migración en frío que falla por cuota, clave SSH comprometida que hay que rotar en la flota, snapshot de Ceph que llena un pool); guardar la sesión a medias; que el profesor cargue sus propios escenarios.
+
 ### Corto plazo (alto valor, bajo esfuerzo)
 
 - ⭐ **Glosario / índice buscable** de términos con enlaces cruzados.

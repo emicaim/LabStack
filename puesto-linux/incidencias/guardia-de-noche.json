@@ -1,0 +1,25 @@
+{
+  "formato": "puesto-incidencia/1",
+  "id": "EXT-001",
+  "autor": "Ejemplo del Puesto",
+  "tipo": "incidente",
+  "asunto": "Noche movida: varias alertas a la vez en OpenStack y Ceph",
+  "de": "Monitorización (Alertmanager)",
+  "cuerpo": [
+    "A las 03:00 han empezado a saltar alertas en varios nodos a la vez. Algunos clientes dicen que sus VMs de cmp01 no responden y el pipeline no consigue crear nada en cmp03.",
+    "No hay ningún cambio programado para esta noche. Ceph está en HEALTH_WARN."
+  ],
+  "impacto": "alto",
+  "urgencia": "alta",
+  "nivel": 3,
+  "hace": 30,
+  "abiertoHace": 10,
+  "averias": [
+    { "tipo": "servicio-parado", "nodo": "cmp03", "servicio": "libvirtd", "hace": 120, "deshabilitado": true },
+    { "tipo": "reloj-desfasado", "nodo": "ceph01", "segundos": 0.4, "hace": 200 },
+    { "tipo": "disco-lleno", "nodo": "ctl01", "fichero": "/var/log/nova/nova-api.log", "mb": 31000 },
+    { "tipo": "flag-ceph", "flag": "norebalance", "hace": 300 },
+    { "tipo": "servicio-caido", "nodo": "cmp01", "servicio": "openvswitch-switch", "motivo": "ovs-lock", "hace": 30 }
+  ],
+  "leccion": "Cinco averías a la vez no son cinco urgencias iguales. Se empieza por lo que tiene clientes sin servicio (las VMs de cmp01 sin red), luego lo que impide trabajar (cmp03 fuera del scheduler) y al final lo que es riesgo pero no corte (un disco al 100 %, un reloj, un flag). Y cada arreglo, de abajo arriba: Open vSwitch antes que el agente, libvirt antes que nova-compute."
+}

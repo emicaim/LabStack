@@ -23,6 +23,40 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno. No requiere instalación
 - **Modo profesor** (contenido en JSON importable/exportable) y **exportar/importar stacks**.
 - Accesibilidad (foco visible, Escape, `prefers-reduced-motion`) y responsive.
 
+## Puesto Linux: réplica de un puesto real
+
+Una segunda app, en **`puesto-linux/index.html`** (también enlazada desde la portada): el día a día de un puesto de *Administrador/a de Sistemas Linux* sobre una plataforma simulada de **12 nodos**: bastión, 3 controladores OpenStack, 4 hipervisores, 3 nodos Ceph y monitorización.
+
+- **20 tickets** repartidos entre las cuatro funciones de la oferta: despliegue y mantenimiento de OpenStack, administración de Ceph, automatización con Ansible y Terraform, y resolución de incidencias.
+- **Se arreglan con comandos reales**, no eligiendo respuestas: `ssh`, `systemctl`, `journalctl`, `ceph`, `openstack`, `nova-manage`, `ansible-playbook`, `terraform`, `amtool`… con `sudo`, tuberías, `&&`, Tab y varias pestañas.
+- La plataforma **cambia con el tiempo**: un OSD caído pasa a *out* a los 10 minutos, un reinicio sin `noout` mueve datos, chrony corrige despacio, un RabbitMQ en *debug* llena el disco.
+- Al cerrar: tiempo frente al **SLA** (prioridad por impacto × urgencia), **buenas prácticas** detectadas en lo que hiciste, causa raíz y un **informe descargable** en Markdown con la cronología.
+- **Guardia generada**: tres niveles (*tranquila*, una avería; *movida*, dos; *infierno*, tres y alguna gorda) combinando al azar 15 familias de averías coherentes. Sin ticket, sólo alertas. Cada guardia sale de una **semilla**: con el mismo número, la misma noche, para repetirla o comparar con un compañero. Toda guardia se ensaya antes de jugarla y al cerrarla se puede descargar como incidencia `.json`. También puede tocar un ticket del puesto al azar, incluidas las incidencias importadas.
+- **Laboratorio libre con caos**: la plataforma sana y un botón que rompe algo al azar en los próximos minutos, sin decir qué. Luego, «¿está todo arreglado?» y «revelar qué era».
+- **Compositor de incidencias** (`puesto-linux/compositor.html`, para el profesor): se eligen averías del catálogo con desplegables (nodo, servicio, OSD, proyecto…), o familias enteras, y se escribe el ticket. A la derecha, el puesto la ensaya mientras escribes: qué alertas verá quien la juegue, qué tendrá que dejar arreglado y si su solución de referencia la cierra. Se guarda en la cola, se prueba en el puesto con un clic o se descarga como `.json` para repartirla.
+- **Catálogo de averías** (`puesto-linux/averias.js`): 14 tipos de avería (servicio caído, disco lleno, reloj desfasado, disco muerto, flag olvidado, certificado caducado…) con los que se construyen todos los tickets. Se combinan y se propagan solas, y cada una trae su arreglo de referencia: es la base para generar incidencias nuevas.
+- **Incidencias propias en fichero**: un profesor o un compañero escribe un `.json` que combina averías del catálogo y lo importa desde la cola (botón o arrastrando el fichero). Antes de aceptarlo, el Puesto lo aplica y **ensaya su solución**: si nadie podría arreglarlo, no entra y dice por qué. Hay dos ejemplos en `puesto-linux/incidencias/`, cualquier ticket del puesto se descarga como plantilla, y se valida también sin navegador: `npm run validar -- mi-incidencia.json` (`npm run catalogo` lista los tipos de avería y sus parámetros).
+- **Solucionario** (`puesto-linux/soluciones.html`): cómo se resuelve cada ticket paso a paso, con la salida real de cada comando, lo que *no* lo arregla, y un glosario de 59 términos. Se puede imprimir.
+
+### Formato de una incidencia
+
+```json
+{
+  "formato": "puesto-incidencia/1",
+  "id": "EXT-001",
+  "asunto": "Noche movida: varias alertas a la vez",
+  "cuerpo": ["Lo que cuenta quien abre el ticket."],
+  "impacto": "alto", "urgencia": "alta",
+  "hace": 30, "abiertoHace": 10,
+  "averias": [
+    { "tipo": "servicio-parado", "nodo": "cmp03", "servicio": "libvirtd", "hace": 120, "deshabilitado": true },
+    { "tipo": "reloj-desfasado", "nodo": "ceph01", "segundos": 0.4, "hace": 200 }
+  ]
+}
+```
+
+Opcionales: `tipo` (incidente, peticion, cambio), `nivel` (1-3), `de`, `area`, `funciones`, `pistas` (exactamente 3), `causa`, `solucion`, `leccion`, `autor`. Lo que falte se genera a partir de las averías.
+
 ## Estructura
 
 | Archivo | Descripción |
@@ -30,7 +64,8 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno. No requiere instalación
 | `Laboratorio.dc.html` | La aplicación (plantilla `<x-dc>` + lógica `class Component`). |
 | `events-test.js` | Recorre la consola de eventos: correlación, triaje del ruido y el puente evento → incidencia. |
 | `desk-test.js` | Recorre el modo Puesto: resuelve los 12 tickets y comprueba que la evidencia sólo aparece en el equipo correcto. |
-| `test.js` + `package.json` | `npm test` lanza las cinco comprobaciones de una vez. No hay nada que instalar. |
+| `test.js` + `package.json` | `npm test` lanza las seis comprobaciones de una vez. No hay nada que instalar. |
+| `puesto-linux/` | **Puesto Linux**, la app de práctica profesional: motor de la plataforma, comandos, escenarios, interfaz y su test. |
 | `content-test.js` | Valida el contenido: `node content-test.js` comprueba referencias entre ficheros, ids repetidos y que ES y EN estén completos. |
 | `vendor/` | React, fuentes (subconjunto latino) y confeti, en local. Es lo que permite abrirla sin internet. |
 | `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids), `tickets.js` y `eventos.js` (Puesto y consola), `comandos.js` (qué te dice cada comando). |
@@ -41,4 +76,16 @@ Abre **`Laboratorio.dc.html`** en un navegador moderno. No requiere instalación
 
 ## Créditos
 
-Powered by **FOKO SOFT** · © 2026 FOKO Games · Uso libre y gratuito ·
+© 2026 **FOKO SOFT**
+
+## Licencia
+
+**MIT + Commons Clause** (ver [`LICENSE`](LICENSE)). En la práctica:
+
+- ✅ Puedes usarlo, copiarlo, modificarlo y compartirlo, gratis, también en clase.
+- ✅ Puedes publicar tus propias versiones, manteniendo el aviso de licencia.
+- ❌ No puedes **venderlo**, ni cobrar por un producto o servicio cuyo valor venga, total o sustancialmente, de este software (incluido alojarlo o dar soporte de pago sobre él).
+
+Para un uso comercial, pregunta: se puede hablar.
+
+Los ficheros de `vendor/` (React, las fuentes Inter y JetBrains Mono, canvas-confetti) conservan sus propias licencias: ver [`vendor/LICENCIAS.md`](vendor/LICENCIAS.md). `support.js` es un runtime generado y no está cubierto por esta licencia.

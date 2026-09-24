@@ -2,7 +2,7 @@
 //
 //   npm test        (o: node test.js)
 //
-// Son cinco y es fácil dejarse alguna al correrlas a mano. Si una falla, se ve
+// Son seis y es fácil dejarse alguna al correrlas a mano. Si una falla, se ve
 // su salida entera y el proceso termina con código distinto de cero, para que
 // sirva también en un gancho de commit o en integración continua.
 const { execFileSync } = require('child_process');
@@ -14,6 +14,7 @@ const SUITES = [
   ['kids-test.js', 'modo Kids: las dos partidas de principio a fin'],
   ['desk-test.js', 'Puesto: los 12 tickets, pistas y coherencia tras resolver'],
   ['events-test.js', 'consola de eventos: correlación, triaje y puente al ticket'],
+  ['puesto-linux/puesto-test.js', 'Puesto Linux: 20 tickets resueltos con comandos, trampas y solucionario'],
 ];
 
 let fallos = 0;
@@ -22,14 +23,14 @@ console.log('LabStack — comprobaciones\n');
 
 for (const [file, desc] of SUITES) {
   const full = path.join(__dirname, file);
-  if (!fs.existsSync(full)) { console.error('  ✕ ' + file.padEnd(17) + 'no existe'); fallos++; continue; }
+  if (!fs.existsSync(full)) { console.error('  ✕ ' + file.padEnd(28) + 'no existe'); fallos++; continue; }
   const t = Date.now();
   try {
     execFileSync(process.execPath, [full], { stdio: 'pipe' });
-    console.log('  ✓ ' + file.padEnd(17) + desc + '  (' + (Date.now() - t) + ' ms)');
+    console.log('  ✓ ' + file.padEnd(28) + desc + '  (' + (Date.now() - t) + ' ms)');
   } catch (e) {
     fallos++;
-    console.error('\n  ✕ ' + file.padEnd(17) + desc);
+    console.error('\n  ✕ ' + file.padEnd(28) + desc);
     const out = ((e.stdout || '') + (e.stderr || '')).toString().trimEnd();
     console.error(out.split('\n').map(l => '      ' + l).join('\n') + '\n');
   }

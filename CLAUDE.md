@@ -266,9 +266,68 @@ Kids, Desk and Events are **not** side attractions: `evalAchievements()` unlocks
 
 `persist()` now also stores `deskSolved`, `evAck` and `evClosed`: twelve tickets are hours of work and losing them to a page reload is not acceptable. Kids progress stays unsaved on purpose — short games, and half a game confuses more than it helps.
 
+## Puesto Linux (`puesto-linux/`) — a separate app
+
+A replica of a real job posting (Linux sysadmin: OpenStack, Ceph, Ansible/Terraform, on-call incidents). Open `puesto-linux/index.html`; LabStack's home links to it and it links back. Same rules as LabStack: double-click, no server, no internet, `<script src>` never `fetch`, fonts from `../vendor/`.
+
+**It is deliberately not a `.dc.html` mode.** The lesson is fixing a platform with real commands against state that changes over time; the template dialect (no ternaries, everything precomputed in `renderVals()`) would fight a stateful shell, and the engine must run in Node for the tests. So: vanilla JS, no React, no build.
+
+| File | Holds |
+|---|---|
+| `motor.js` | State of 12 nodes (services, disks, logs, NTP, kernel), the simulated clock, alerts, the shell (parser, pipes, `&&`, `sudo`, the `ssh` stack) and the Linux commands. Defines the registries the other files hook into. |
+| `cmd-ceph.js` | The Ceph model and `ceph`, `ceph-volume`, `smartctl`, `lsblk`. |
+| `cmd-openstack.js` | VMs, the scheduler, cells, quotas, security groups; `openstack`, `nova-manage`, `virsh`, `rabbitmqctl`. |
+| `cmd-auto.js` | Inventory, playbooks, the Ansible runner, Terraform, `amtool`, and the bastion's files (RUNBOOK, openrc, `~/infra`). |
+| `averias.js` | **The fault catalogue**: 14 fault types plus 6 set-up conditions. Every ticket is built from these; see below. |
+| `incidencias.js` | Loads an incident from a `.json` file (format `puesto-incidencia/1`): structure checks, the catalogue validator, and a **rehearsal**: apply it to a fresh platform, it must break something, and the chained reference fix must resolve it. Missing hints, cause, lesson and practices are generated from the faults. Also `exportarIncidencia` (any fault-only ticket as a template) and `catalogoLegible`. |
+| `guardia.js` | Generated on-call shifts and chaos. `P.familias`: 15 *families* (coherent groups of faults: a huge log **and** the RabbitMQ that cannot start because of it), each with a level 1-3, a lesson and a `crear(rnd)` that picks random parameters. `P.generarGuardia(nivel, semilla)` picks `nivel` families (the first one of that exact level), builds an incident and runs it through `P.cargarIncidencia`; if it is not solvable or has no alert it tries the next combination. `P.provocarCaos(st, semilla, previas)` schedules a random level ≤2 family a few minutes ahead on a running platform (`st.programados`), and `P.pendientesCaos` checks what it broke and what it dragged down. |
+| `compositor.html` + `compositor.js` | The teacher's composer. A form over the catalogue: every field is generated from `P.camposAveria` (in `averias.js`: one `{k, t, …}` per parameter, `t` being `nodo`, `servicio`, `osd`, `proyecto`, `num`…), so a new fault type shows up with no change here. Every edit re-runs `P.cargarIncidencia` (the same loader as Import) plus a preview through `P.construirIncidencia` + `P.preparar`; the draft lives in `puesto-linux-borrador` and «Guardar en la cola» writes to `puesto-linux-importadas`, exactly what the queue reads. |
+| `validar-incidencia.js` + `incidencias/` | The same loader from the command line (`npm run validar -- file.json`, `npm run catalogo`), and two example incidents that the test requires to be accepted. |
+| `escenarios.js` | The 20 tickets, mapped to the four functions of the posting. Each one *declares* its faults; none has code of its own to break things. |
+| `app.js` + `index.html` | The UI: the queue, then the desk (platform + terminal tabs + ITSM ticket). `index.html#INC-4821` opens that ticket directly. |
+| `soluciones.js` + `solucionario.js` + `soluciones.html` | The answer book: per ticket, each step's phase (`diag`/`arreglo`/`comprobar`) and *why*, plus a 59-term glossary. The commands are not repeated there: they come from each scenario's `guion`, and the page runs the guion in the simulator on load to show the **real output** of every step, so it can never drift from the engine. The test fails if `pasos` and `guion` stop matching command by command. |
+| `estilos.css` | Shared by both pages. |
+| `puesto-test.js` | Its suite; part of `npm test`. |
+
+**One source of truth.** Nothing is canned. `ceph -s`, the OSD bars in the panel and the `CephOSDDown` alert all derive from the same state, so a command that fixes something fixes it everywhere. OSD usage is *computed* (`datos × reweight ÷ Σreweight + sesgo`) and interpolated while `rec` runs, which is why `ceph osd out`, a reboot or `ceph balancer on` move the numbers on their own.
+
+**Time.** Every command costs one simulated minute (`help`, `cd`, `ssh`… cost zero); `sleep N` advances `ceil(N/60)`. Ceph marks a down OSD out after `downOut` = 10 min unless `noout` is set; a Ceph node takes 12 min to reboot, the others 4. Those two numbers are what make the maintenance lesson work: reboot without `noout` and data moves. `puesto-test.js` asserts both halves.
+
+**Scheduled events.** A scenario can put `{ min, fn }` in `st.programados` and the clock runs it at that minute (CHG-0224 uses it: a pipeline creates a VM mid-maintenance, which is exactly why the hypervisor must be disabled first). **Hidden answers:** a `pendiente` with `oculto: true` (a password prompt) is echoed empty in the UI and logged as `********` in `st.registro` and the report.
+
+**Registries** (all on `window.PUESTO`): `comandos`, `ficheros`, `reglas` (what prevents a unit from starting, as a `motivos` key), `motivos` (journal lines, result, `limite` for systemd's start limit), `ticks`, `detectores` (alerts), `alCrear/alArrancar/alParar/alApagar/alVolver`, `generadoresLog`. New behaviour hooks in; a command never special-cases a scenario.
+
+**Adding a command:** `U.cmd(name, { fn, donde: [roles or hosts], fuera: 'hint shown elsewhere', ayuda, grupo, completar })`. `fn(ctx)` returns lines `{t, c}`. Class `err` means *failure* (it breaks a `&&` chain); `rojo`/`ambar`/`verde` are colour only, so use `rojo` for red text inside a successful output (journal errors, `df` at 100 %). Privileged actions go through `U.sinRoot(ctx, lines)`, which returns the real denial plus one dim line suggesting `sudo`.
+
+**The fault catalogue** (`averias.js`) is what makes incidents composable. A fault type knows three things: `aplicar(st, a)` breaks, `pendientes(st, a)` says what is still broken, `arreglo(a, st)` is a reference fix in commands. It also declares `params`, an `ejemplo`, `validar` and `toca` (the resources it touches, so the validator rejects two faults on the same unit). `orden` decides the order when fixes are chained: base services, disks and flags first (1), what depends on them next (2), resources last (3). *Conditions* (`condicion: true`: a project near its quota, full hypervisors, a VM a pipeline will create at minute 6, context lines in the Ceph log) set the scene and have neither pendientes nor fix.
+
+Faults **propagate**: `servicio-caido` and `servicio-parado` run the `P.alCaer` hooks at the fault's own time, so stopping libvirtd drags nova-compute down without anyone declaring it, and their fix restarts `P.dependientes` of the unit. A ticket's `resuelto` also calls `P.pendientesUnidades`: **nothing may stay in failed without an explanation** (the only accepted one is an OSD that is out with a dead disk). That is what catches cascades nobody named.
+
+The test holds the catalogue to three promises: every fault type, alone, breaks something and its fix leaves the platform healthy; in every ticket made only of faults, chaining the faults' fixes resolves it with no hand-written script; and an invented combination of five faults validates, alerts, cascades and resolves the same way. A new fault type must pass all three.
+
+**Adding a scenario** (`escenarios.js`) and the rules the test enforces:
+- `averias: [{ tipo, ...params }]` composes it from the catalogue. It is data, not code, which is what will let an incident come from a file. `objetivo(st, P)` exists only for requests and changes (a project, a kernel, a new hypervisor), where nothing is broken and something new is asked for. `resuelto` is derived: faults' pendientes + objetivo, then Ceph healthy, no unexplained failed units and no customer VM left off. It checks **state**, never which commands were typed.
+- `soloPractica: true` on a fault applies it and chains its fix, but does not block closing (INC-4833 uses it: RabbitMQ left in debug is a practice, not a requirement).
+- A fault the catalogue lacks is added **to the catalogue**, with its `ejemplo`, never as ad-hoc code in a ticket.
+- …and with its entry in `P.camposAveria`: the test fails a parameter with no field (only `nota` is exempt). A field with neither `def` nor `opcional` is **required**: `P.validarAverias` reports it as «falta servicio» before running the type's own `validar`, so neither the composer nor an imported file ever shows «undefined».
+
+**Generated guardias are deterministic.** Everything comes from the seed (a mulberry32 PRNG, `P.azar`), so a shift can be replayed or passed to a colleague as a number, and the test pins 30 seeds per level: every one playable, with alerts, of its level, identical when regenerated, and closed by its own script with all its practices. Solved generated shifts are counted per level (`guardias` in the progress store), not per id. A new family must be coherent on its own (its faults make sense together), must validate with any `rnd`, and needs a `leccion`: it is what the closing screen and the chaos reveal show.
+
+**Incidents from a file.** Nothing from the file is ever executed; it is data, validated and then rehearsed. Imported incidents live in `P.importadas` (persisted as their source JSON under `puesto-linux-importadas`, re-validated on every start, so one that stops being valid shows as such instead of vanishing) and `P.escenario(id)` finds them, so they open, score and report like any ticket. They are **not** in `P.escenarios`: they do not count toward the four functions, but *«un ticket del puesto al azar»* in Guardia draws from built-ins and imports alike (only incidents that raise at least one alert). Their generated practices are the generic three (look before touching, check after the last change, no node reboots); their `guion` is `amtool alert` + the chained fixes + `amtool alert`. The rejections the test pins down: broken JSON, wrong `formato`, missing fields, bad enums, an `id` a built-in uses, oversized text, unknown fault, an incident that breaks nothing, one whose fix cannot work (a 32 GB VM to restore into a full cloud) and a P1 born with its SLA half spent. No alert is accepted, with a warning.
+- `practicas` are judged from `st.registro` / `st.hechos`, never asked. They are what separates knowing from guessing.
+- `guion` is a reference solution. **It must resolve the ticket and pass every one of its own practices**, and running it twice must give identical output.
+- `trampas` are half-fixes that must *not* close it (or, with `practicas: [i]`, must fail those practices).
+- `inicio` (when the fault began: the alerts' "since") and `abierto` (when the ticket was logged: the SLA clock) are different. A ticket born with more than half its SLA spent fails the test. It happened once: INC-4847 opened on a red, already-breached bar.
+- Every `incidente` needs at least one alert, or Guardia mode (alerts only, no ticket) cannot be played. That rule caught the security ticket, which is why `PublicSSHExposed` (an external blackbox probe) exists.
+- Exactly three `pistas`, progressive, naming only commands the simulator knows.
+
+**Language.** The UI is Spanish only (the posting is Spanish); command output is English, as the real tools print it. Unlike LabStack there is no `{es, en}` layer yet; adding one means wrapping every string in `escenarios.js` and `app.js`.
+
+**Screenshot gotcha.** Headless Chrome on Windows will not lay out narrower than ~490 px whatever `--window-size` says, and then crops the capture. It looks like horizontal overflow and is not. To see a phone width, render the page inside a 375 px `<iframe>`.
+
 ## Tests
 
-`npm test` (or `node test.js`) runs all five suites and prints one line each:
+`npm test` (or `node test.js`) runs all six suites and prints one line each:
 
 | Suite | Covers |
 |---|---|
@@ -277,6 +336,7 @@ Kids, Desk and Events are **not** side attractions: `evalAchievements()` unlocks
 | `kids-test.js` | both Kids games end to end |
 | `desk-test.js` | 12 tickets, command hints, wrong-host nudge, coherence after resolving |
 | `events-test.js` | correlation, triage, the event to incident bridge |
+| `puesto-linux/puesto-test.js` | the 20 Puesto Linux tickets solved by their reference script, the fault catalogue (each fault alone, chained fixes, an invented combination, the validator), incidents from files (examples, export/re-import round trip, rejections), generated guardias (30 seeds × 3 levels) and chaos, the composer (one control per schema field for all 20 types, every exportable ticket and a level-3 guardia loading and saving as playable, a missing parameter named as such), the answer book aligned with each script, their practices, half-fixes that must not close them, `noout`, `sudo`, openrc, Terraform's folder, Ansible idempotency and `--check`, Tab |
 
 Nothing to install; `package.json` exists only to hold the scripts.
 

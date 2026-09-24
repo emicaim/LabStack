@@ -1,0 +1,28 @@
+{
+  "formato": "puesto-incidencia/1",
+  "id": "EXT-002",
+  "autor": "Ejemplo del Puesto",
+  "tipo": "incidente",
+  "asunto": "Lunes: la API rechaza conexiones y un borrado lleva desde el viernes colgado",
+  "de": "Atención al cliente (tiendas)",
+  "cuerpo": [
+    "Esta mañana ningún pipeline consigue hablar con OpenStack: CERTIFICATE_VERIFY_FAILED. El equipo de analítica, además, dice que el volumen que borraron el viernes sigue apareciendo y les ocupa cuota.",
+    "El fin de semana hubo un corte de red breve entre los controladores y Ceph."
+  ],
+  "impacto": "alto",
+  "urgencia": "alta",
+  "nivel": 3,
+  "hace": 90,
+  "abiertoHace": 20,
+  "averias": [
+    { "tipo": "certificado-caducado", "hace": 90 },
+    { "tipo": "servicio-caido", "nodo": "ctl01", "servicio": "cinder-volume", "motivo": "rados-timeout", "hace": 3900, "efecto": "nadie puede terminar las operaciones de sus volúmenes" },
+    { "tipo": "volumen-atascado", "nombre": "etl-viernes", "proyecto": "analitica", "gb": 250, "nodo": "ctl01", "hace": 3895 },
+    { "tipo": "reloj-desfasado", "nodo": "cmp02", "segundos": 0.2, "hace": 600 }
+  ],
+  "pistas": [
+    "Empieza por lo que para a todos: la API. curl -I https://api.retail.local:5000 y amtool alert.",
+    "Sin API no puedes tocar el volumen: primero el certificado (en ~/infra hay un playbook para eso). Luego, ¿qué cinder-volume lleva ese volumen y está vivo?",
+    "certs.yml para la API; en ctl01, reset-failed y start de cinder-volume; después volume set --state error y volume delete. Y hay un reloj desfasado en cmp02 que las alertas también enseñan."
+  ]
+}

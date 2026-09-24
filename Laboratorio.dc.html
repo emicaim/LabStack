@@ -260,6 +260,15 @@
             </sc-for>
           </div>
 
+          <a href="{{ home.jobHref }}" style="display:flex; align-items:center; gap:14px; margin-top:13px; padding:14px 18px; border-radius:14px; border:1px dashed var(--border-strong); background:var(--panel); color:var(--text); text-decoration:none; font-family:'Inter',sans-serif;" style-hover="border-color:var(--accent); border-style:solid;">
+            <span style="width:40px; height:40px; flex:0 0 auto; border-radius:10px; display:grid; place-items:center; font-size:17px; background:var(--accent-tint);">💼</span>
+            <span style="min-width:0; flex:1 1 auto;">
+              <span style="display:block; font-size:15px; font-weight:700;">{{ home.jobTitle }}</span>
+              <span style="display:block; font-size:12px; color:var(--text-muted); margin-top:2px;">{{ home.jobDesc }}</span>
+            </span>
+            <span style="flex:0 0 auto; font-size:12px; font-weight:600; color:var(--accent); white-space:nowrap;">{{ home.jobCta }} →</span>
+          </a>
+
           <div style="display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; margin-top:30px; padding-top:20px; border-top:1px solid var(--border);">
             <sc-for list="{{ home.stats }}" as="hs" hint-placeholder-count="4">
               <div style="text-align:center;">
@@ -1597,7 +1606,7 @@
       <img src="./fokosoft.png" alt="FOKO SOFT" style="width:18px; height:18px; border-radius:6px; object-fit:cover; flex:0 0 auto;">
       Powered by <b style="color:var(--text); font-weight:700; letter-spacing:0.02em;">FOKO SOFT</b> · v1.0
     </span>
-    <span style="color:var(--text-faint);">© 2026 FOKO Games · Uso libre y gratuito · prohibida la redistribución o extracción del código.</span>
+    <span style="color:var(--text-faint);">© 2026 FOKO SOFT · Uso libre y gratuito · MIT + Commons Clause: se puede copiar y modificar, no vender.</span>
   </footer>
 
   <sc-if value="{{ showAchievements }}" hint-placeholder-val="{{ false }}">
@@ -4430,6 +4439,8 @@ class Component extends DCLogic {
       continueTitle: t.homeContinue,
       continueDesc: placedTotal+' '+(S.lang==='es'?'piezas montadas':'pieces placed')+' · '+t.homeContinueDesc,
       onContinue: ()=>this.setMode('sandbox'),
+      // El Puesto Linux es otra app (puesto-linux/): otro motor, estado propio.
+      jobHref:'./puesto-linux/index.html', jobTitle:t.homeJobT, jobDesc:t.homeJobD, jobCta:t.homeJobCta,
       cards: [
         { icon:'🧱', title:t.cardLearnT, desc:t.cardLearnD, meta:t.cardLearnM, color:'#6366f1', to:'sandbox' },
         { icon:'🎯', title:t.cardPracticeT, desc:t.cardPracticeD, meta:t.cardPracticeM, color:'#f59e0b', to:'mission' },
