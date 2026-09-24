@@ -69,7 +69,7 @@ Opcionales: `tipo` (incidente, peticion, cambio), `nivel` (1-3), `de`, `area`, `
 | `content-test.js` | Valida el contenido: `node content-test.js` comprueba referencias entre ficheros, ids repetidos y que ES y EN estén completos. |
 | `vendor/` | React, fuentes (subconjunto latino) y confeti, en local. Es lo que permite abrirla sin internet. |
 | `contenido/` | **El contenido, editable sin tocar la lógica**: `piezas.js` (tecnologías y fichas), `capas.js` (pedagogía por capa), `textos.js` (interfaz ES/EN), `retos.js` (misiones e incidentes), `kids.js` (modo Kids), `tickets.js` y `eventos.js` (Puesto y consola), `comandos.js` (qué te dice cada comando). |
-| `support.js` | Runtime del formato `.dc.html` (React vía CDN). **Generado — no editar.** |
+| `support.js` | Motor del formato `.dc.html`, generado por Claude Design (carga React desde `vendor/`). **Generado — no editar.** |
 | `fokosoft.png` | Logo. |
 | `ROADMAP.md` | Estado del proyecto y plan de mejoras. |
 | `CLAUDE.md` | Guía técnica de la arquitectura del código. |
@@ -88,4 +88,4 @@ Opcionales: `tipo` (incidente, peticion, cambio), `nivel` (1-3), `de`, `area`, `
 
 Para un uso comercial, pregunta: se puede hablar.
 
-Los ficheros de `vendor/` (React, las fuentes Inter y JetBrains Mono, canvas-confetti) conservan sus propias licencias: ver [`vendor/LICENCIAS.md`](vendor/LICENCIAS.md). `support.js` es un runtime generado y no está cubierto por esta licencia.
+Los ficheros de `vendor/` (React, las fuentes Inter y JetBrains Mono, canvas-confetti) conservan sus propias licencias: ver [`vendor/LICENCIAS.md`](vendor/LICENCIAS.md). `support.js` es el motor que genera Claude Design (Anthropic) al exportar la app y no está cubierto por esta licencia.

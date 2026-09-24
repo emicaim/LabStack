@@ -9,6 +9,8 @@ Los ficheros de esta carpeta **no** están cubiertos por el `LICENSE` del proyec
 | `fonts/inter-*.woff2` | Inter | SIL Open Font License 1.1 | © 2016 The Inter Project Authors |
 | `fonts/jetbrains-mono-*.woff2` | JetBrains Mono | SIL Open Font License 1.1 | © 2020 The JetBrains Mono Project Authors |
 
+Fuera de esta carpeta, **`support.js`** (en la raíz) es el motor que genera **Claude Design** (Anthropic) al exportar `Laboratorio.dc.html`: compila la plantilla a React y la pinta en el navegador. No es obra de FOKO SOFT ni está cubierto por el `LICENSE` del proyecto; se incluye sin modificar para que la app funcione.
+
 Las fuentes son un subconjunto (sólo caracteres latinos) de las originales. El texto completo de la OFL está en [`fonts/OFL.txt`](fonts/OFL.txt).
 
 ---
